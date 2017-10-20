@@ -33,8 +33,8 @@
 
     <scm>
         <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-models-impl.git</conncetion>
-        <developerConnection> scm:svn:https://svn.apache.org/repos/asf/sling/trunk/bundles/extensions/models/impl</developerConnection>
-        <url>https://gitbox.apache.org/repos/asf?p=sling-org-apache-sling-models-impl.git.git</url>
+        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-models-impl.git</developerConnection>
+        <url>https://gitbox.apache.org/repos/asf?p=sling-org-apache-sling-models-impl.git</url>
     </scm>
     <properties>
         <sling.java.version>7</sling.java.version>
