@@ -288,7 +288,7 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer {
             registrationProps.put(PROP_EXPORTER_SERVLET_CLASS, annotatedClass.getName());
             registrationProps.put(PROP_EXPORTER_SERVLET_NAME, exporterAnnotation.name());
 
-            log.info("registering servlet for {}, {}, {}", new Object[]{resourceType, exporterAnnotation.selector(), exporterAnnotation.extensions()});
+            log.debug("registering servlet for {}, {}, {}", new Object[]{resourceType, exporterAnnotation.selector(), exporterAnnotation.extensions()});
 
             ServiceRegistration reg = bundleContext.registerService(Servlet.class.getName(), servlet, registrationProps);
             regs.add(reg);
