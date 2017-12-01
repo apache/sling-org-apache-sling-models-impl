@@ -177,6 +177,7 @@ public class AdapterFactoryTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testSelectExporterByName() throws Exception {
         Result<Object> result = mock(Result.class);
         when(result.wasSuccessful()).thenReturn(true);
@@ -187,6 +188,7 @@ public class AdapterFactoryTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testSelectExporterByType() throws Exception {
         Result<Object> result = mock(Result.class);
         when(result.wasSuccessful()).thenReturn(true);
@@ -197,6 +199,7 @@ public class AdapterFactoryTest {
     }
 
     @Test(expected = MissingExporterException.class)
+    @SuppressWarnings("unchecked")
     public void testSelectExporterByNameAndWrongType() throws Exception {
         Result<Object> result = mock(Result.class);
         when(result.wasSuccessful()).thenReturn(true);
@@ -213,6 +216,7 @@ public class AdapterFactoryTest {
 
         @CheckForNull
         @Override
+        @SuppressWarnings("unchecked")
         public <T> T export(@Nonnull Object o, @Nonnull Class<T> aClass, @Nonnull Map<String, String> map) throws ExportException {
             if (aClass == String.class) {
                 return (T) "Export from first";
@@ -228,6 +232,7 @@ public class AdapterFactoryTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static class SecondStringExporter implements ModelExporter {
         @Override
         public boolean isSupported(@Nonnull Class<?> aClass) {
@@ -251,6 +256,7 @@ public class AdapterFactoryTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static class FirstIntegerExporter implements ModelExporter {
         @Override
         public boolean isSupported(@Nonnull Class<?> aClass) {

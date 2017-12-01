@@ -18,17 +18,20 @@
  */
 package org.apache.sling.models.impl;
 
+import static org.apache.sling.api.scripting.SlingBindings.LOG;
+import static org.apache.sling.api.scripting.SlingBindings.OUT;
+import static org.apache.sling.api.scripting.SlingBindings.READER;
+import static org.apache.sling.api.scripting.SlingBindings.REQUEST;
+import static org.apache.sling.api.scripting.SlingBindings.RESOURCE;
+import static org.apache.sling.api.scripting.SlingBindings.RESPONSE;
+import static org.apache.sling.api.scripting.SlingBindings.SLING;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-import javax.script.ScriptEngineFactory;
 import javax.script.SimpleBindings;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -41,15 +44,11 @@ import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.models.factory.ExportException;
 import org.apache.sling.models.factory.MissingExporterException;
 import org.apache.sling.models.factory.ModelFactory;
-import org.apache.sling.scripting.api.BindingsValuesProvider;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
 import org.apache.sling.scripting.core.ScriptHelper;
-import org.apache.sling.scripting.core.impl.helper.ProtectedBindings;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.sling.api.scripting.SlingBindings.*;
 
 @SuppressWarnings("serial")
 class ExportServlet extends SlingSafeMethodsServlet {

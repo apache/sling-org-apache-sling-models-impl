@@ -16,23 +16,22 @@
  */
 package org.apache.sling.models.impl;
 
+import static org.apache.sling.api.scripting.SlingBindings.LOG;
+import static org.apache.sling.api.scripting.SlingBindings.OUT;
+import static org.apache.sling.api.scripting.SlingBindings.READER;
+import static org.apache.sling.api.scripting.SlingBindings.REQUEST;
+import static org.apache.sling.api.scripting.SlingBindings.RESOURCE;
+import static org.apache.sling.api.scripting.SlingBindings.RESPONSE;
+import static org.apache.sling.api.scripting.SlingBindings.SLING;
+
+import javax.script.SimpleBindings;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
-import org.apache.sling.scripting.api.BindingsValuesProvider;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
-import org.apache.sling.scripting.core.impl.helper.ProtectedBindings;
-
-import javax.script.ScriptEngineFactory;
-import javax.script.SimpleBindings;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.apache.sling.api.scripting.SlingBindings.*;
 
 /**
  * This request wrapper allows to adapt the given resource and request to a Sling Model

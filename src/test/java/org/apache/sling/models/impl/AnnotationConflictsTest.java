@@ -78,6 +78,7 @@ public class AnnotationConflictsTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testSucessfulAdaptations() {
         for (Class<?> clazz : this.getClass().getDeclaredClasses()) {
             if (!clazz.isInterface() && clazz.getSimpleName().startsWith("Successful")) {
@@ -87,6 +88,7 @@ public class AnnotationConflictsTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testFailingAdaptations() {
         for (Class<?> clazz : this.getClass().getDeclaredClasses()) {
             if (!clazz.isInterface() && clazz.getSimpleName().startsWith("Failing")) {

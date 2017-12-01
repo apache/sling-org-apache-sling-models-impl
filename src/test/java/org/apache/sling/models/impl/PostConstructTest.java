@@ -96,7 +96,7 @@ public class PostConstructTest {
 
     @Test(expected = IllegalStateException.class)
     public void testPostConstructMethodWhichReturnsFalseCreateModel() {
-        FalsePostConstuctModel model = factory.createModel(resource, FalsePostConstuctModel.class);
+        factory.createModel(resource, FalsePostConstuctModel.class);
     }
 
     @Test
