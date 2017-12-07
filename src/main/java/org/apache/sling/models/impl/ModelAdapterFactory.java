@@ -41,6 +41,10 @@ import java.util.concurrent.ConcurrentMap;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestEvent;
+import javax.servlet.ServletRequestListener;
+import javax.servlet.ServletRequestWrapper;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -117,7 +121,7 @@ import org.slf4j.LoggerFactory;
             policy = ReferencePolicy.DYNAMIC)
 })
 @SuppressWarnings("deprecation")
-public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFactory {
+public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFactory, ServletRequestListener {
 
     // hard code this value since we always know exactly how many there are
     private static final int VALUE_PREPARERS_COUNT = 2;
@@ -146,6 +150,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     private ReferenceQueue<Object> queue;
 
     private ConcurrentMap<java.lang.ref.Reference<Object>, DisposalCallbackRegistryImpl> disposalCallbacks;
+
+    private ConcurrentHashMap<ServletRequest, DisposalCallbackRegistryImpl> requestDisposalCallbacks;
 
     @Override
     public void run() {
@@ -215,6 +221,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     private ServiceRegistration jobRegistration;
 
     private ServiceRegistration configPrinterRegistration;
+
+    private ServiceRegistration servletRequestListenerRegistration;
 
     // Use threadlocal to count recursive invocations and break recursing if a max. limit is reached (to avoid cyclic dependencies)
     private ThreadLocal<ThreadInvocationCounter> invocationCountThreadLocal;
@@ -576,7 +584,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         MapBackedInvocationHandler handler = new MapBackedInvocationHandler(methods);
 
         DisposalCallbackRegistryImpl registry = new DisposalCallbackRegistryImpl();
-        registerCallbackRegistry(handler, registry);
+        if (adaptable instanceof ServletRequest) {
+            registerRequestCallbackRegistry((ServletRequest) adaptable, registry);
+        } else {
+            registerCallbackRegistry(handler, registry);
+        }
 
         final Map<ValuePreparer, Object> preparedValues = new HashMap<>(VALUE_PREPARERS_COUNT);
 
@@ -597,6 +609,18 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     private void registerCallbackRegistry(Object object, DisposalCallbackRegistryImpl registry) {
         PhantomReference<Object> reference = new PhantomReference<>(object, queue);
         disposalCallbacks.put(reference, registry);
+    }
+
+    private void registerRequestCallbackRegistry(ServletRequest request, DisposalCallbackRegistryImpl registry) {
+        request = unwrapRequest(request);
+        requestDisposalCallbacks.put(request, registry);
+    }
+
+    private static ServletRequest unwrapRequest(ServletRequest request) {
+        while (request instanceof ServletRequestWrapper) {
+            request = ((ServletRequestWrapper) request).getRequest();
+        }
+        return request;
     }
 
     private <ModelType> Result<ModelType> createObject(final Object adaptable, final ModelClass<ModelType> modelClass)
@@ -637,7 +661,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             }
         }
 
-        registerCallbackRegistry(object, registry);
+        if (adaptable instanceof SlingHttpServletRequest) {
+            registerRequestCallbackRegistry((SlingHttpServletRequest) adaptable, registry);
+        } else {
+            registerCallbackRegistry(object, registry);
+        }
 
         InjectCallback callback = new SetFieldCallback(object);
 
@@ -1025,6 +1053,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         BundleContext bundleContext = ctx.getBundleContext();
         this.queue = new ReferenceQueue<>();
         this.disposalCallbacks = new ConcurrentHashMap<>();
+        this.requestDisposalCallbacks = new ConcurrentHashMap<>();
         Hashtable<Object, Object> properties = new Hashtable<>();
         properties.put(Constants.SERVICE_VENDOR, "Apache Software Foundation");
         properties.put(Constants.SERVICE_DESCRIPTION, "Sling Models OSGi Service Disposal Job");
@@ -1046,11 +1075,22 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
         this.configPrinterRegistration = bundleContext.registerService(Object.class.getName(),
                 new ModelConfigurationPrinter(this, bundleContext, adapterImplementations), printerProps);
+
+        Hashtable<Object, Object> listenerProps = new Hashtable<>();
+        listenerProps.put("osgi.http.whiteboard.context.select", "(osgi.http.whiteboard.context.name=*)");
+        listenerProps.put("osgi.http.whiteboard.listener", "true");
+        this.servletRequestListenerRegistration = bundleContext.registerService(ServletRequestListener.class.getName(),
+                this, listenerProps);
+
     }
 
     @Deactivate
     protected void deactivate() {
         this.adapterCache = null;
+        for (final DisposalCallbackRegistryImpl requestRegistries : this.requestDisposalCallbacks.values()) {
+            requestRegistries.onDisposed();
+        }
+        this.requestDisposalCallbacks = null;
         this.clearDisposalCallbackRegistryQueue();
         this.listener.unregisterAll();
         this.adapterImplementations.removeAll();
@@ -1061,6 +1101,10 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         if (configPrinterRegistration != null) {
             configPrinterRegistration.unregister();
             configPrinterRegistration = null;
+        }
+        if (servletRequestListenerRegistration != null) {
+            servletRequestListenerRegistration.unregister();
+            servletRequestListenerRegistration = null;
         }
     }
 
@@ -1256,4 +1300,16 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                 scriptEngineFactory, bindingsValuesProvidersByContext).adaptTo(targetClass);
     }
 
+    @Override
+    public void requestDestroyed(ServletRequestEvent sre) {
+        ServletRequest request = unwrapRequest(sre.getServletRequest());
+        DisposalCallbackRegistryImpl registry = requestDisposalCallbacks.remove(request);
+        if (registry != null) {
+            registry.onDisposed();
+        }
+    }
+
+    @Override
+    public void requestInitialized(ServletRequestEvent sre) {
+    }
 }
