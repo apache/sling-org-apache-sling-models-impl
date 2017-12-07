@@ -49,7 +49,7 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ModelPackageBundleListener implements BundleTrackerCustomizer {
+public class ModelPackageBundleListener implements BundleTrackerCustomizer<ServiceRegistration[]> {
 
     static final String PACKAGE_HEADER = "Sling-Model-Packages";
     static final String CLASSES_HEADER = "Sling-Model-Classes";
@@ -96,12 +96,12 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer {
         this.adapterImplementations = adapterImplementations;
         this.bindingsValuesProvidersByContext = bindingsValuesProvidersByContext;
         this.scriptEngineFactory = scriptEngineFactory;
-        this.bundleTracker = new BundleTracker(bundleContext, Bundle.ACTIVE, this);
+        this.bundleTracker = new BundleTracker<>(bundleContext, Bundle.ACTIVE, this);
         this.bundleTracker.open();
     }
 
     @Override
-    public Object addingBundle(Bundle bundle, BundleEvent event) {
+    public ServiceRegistration[] addingBundle(Bundle bundle, BundleEvent event) {
         List<ServiceRegistration> regs = new ArrayList<>();
 
         Dictionary<?, ?> headers = bundle.getHeaders();
@@ -193,23 +193,21 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer {
     }
 
     @Override
-    public void modifiedBundle(Bundle bundle, BundleEvent event, Object object) {
+    public void modifiedBundle(Bundle bundle, BundleEvent event, ServiceRegistration[] object) {
     }
 
     @Override
-    public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
-        if (object instanceof ServiceRegistration[]) {
-            for (ServiceRegistration reg : (ServiceRegistration[]) object) {
-                ServiceReference ref = reg.getReference();
-                String[] adapterTypeNames = PropertiesUtil.toStringArray(ref.getProperty(AdapterFactory.ADAPTER_CLASSES));
-                if (adapterTypeNames != null) {
-                    String implTypeName = PropertiesUtil.toString(ref.getProperty(PROP_IMPLEMENTATION_CLASS), null);
-                    for (String adapterTypeName : adapterTypeNames) {
-                        adapterImplementations.remove(adapterTypeName, implTypeName);
-                    }
+    public void removedBundle(Bundle bundle, BundleEvent event, ServiceRegistration[] object) {
+        for (ServiceRegistration reg : object) {
+            ServiceReference ref = reg.getReference();
+            String[] adapterTypeNames = PropertiesUtil.toStringArray(ref.getProperty(AdapterFactory.ADAPTER_CLASSES));
+            if (adapterTypeNames != null) {
+                String implTypeName = PropertiesUtil.toString(ref.getProperty(PROP_IMPLEMENTATION_CLASS), null);
+                for (String adapterTypeName : adapterTypeNames) {
+                    adapterImplementations.remove(adapterTypeName, implTypeName);
                 }
-                reg.unregister();
             }
+            reg.unregister();
         }
         adapterImplementations.removeResourceTypeBindings(bundle);
 

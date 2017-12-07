@@ -50,6 +50,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -102,12 +103,17 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(metatype = true, immediate = true,
         label = "Apache Sling Model Adapter Factory")
-@Service(value = ModelFactory.class)
+@Service(value = { ModelFactory.class, ServletRequestListener.class })
+@Properties({
+    @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, value = "true"),
+    @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, value = "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)")
+})
 @References({
     @Reference(
         name = "injector",
@@ -221,8 +227,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     private ServiceRegistration jobRegistration;
 
     private ServiceRegistration configPrinterRegistration;
-
-    private ServiceRegistration servletRequestListenerRegistration;
 
     // Use threadlocal to count recursive invocations and break recursing if a max. limit is reached (to avoid cyclic dependencies)
     private ThreadLocal<ThreadInvocationCounter> invocationCountThreadLocal;
@@ -1054,41 +1058,37 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         this.queue = new ReferenceQueue<>();
         this.disposalCallbacks = new ConcurrentHashMap<>();
         this.requestDisposalCallbacks = new ConcurrentHashMap<>();
-        Hashtable<Object, Object> properties = new Hashtable<>();
+        Hashtable<String, Object> properties = new Hashtable<>();
         properties.put(Constants.SERVICE_VENDOR, "Apache Software Foundation");
         properties.put(Constants.SERVICE_DESCRIPTION, "Sling Models OSGi Service Disposal Job");
         properties.put("scheduler.name", "Sling Models OSGi Service Disposal Job");
         properties.put("scheduler.concurrent", false);
         properties.put("scheduler.period", PropertiesUtil.toLong(props.get(PROP_CLEANUP_JOB_PERIOD), DEFAULT_CLEANUP_JOB_PERIOD));
 
-        this.jobRegistration = bundleContext.registerService(Runnable.class.getName(), this, properties);
+        this.jobRegistration = bundleContext.registerService(Runnable.class, this, properties);
 
         this.scriptEngineFactory = new SlingModelsScriptEngineFactory(bundleContext.getBundle());
         this.listener = new ModelPackageBundleListener(ctx.getBundleContext(), this, this.adapterImplementations, bindingsValuesProvidersByContext, scriptEngineFactory);
 
-        Hashtable<Object, Object> printerProps = new Hashtable<>();
+        Hashtable<String, Object> printerProps = new Hashtable<>();
         printerProps.put(Constants.SERVICE_VENDOR, "Apache Software Foundation");
         printerProps.put(Constants.SERVICE_DESCRIPTION, "Sling Models Configuration Printer");
         printerProps.put("felix.webconsole.label", "slingmodels");
         printerProps.put("felix.webconsole.title", "Sling Models");
         printerProps.put("felix.webconsole.configprinter.modes", "always");
 
-        this.configPrinterRegistration = bundleContext.registerService(Object.class.getName(),
+        this.configPrinterRegistration = bundleContext.registerService(Object.class,
                 new ModelConfigurationPrinter(this, bundleContext, adapterImplementations), printerProps);
-
-        Hashtable<Object, Object> listenerProps = new Hashtable<>();
-        listenerProps.put("osgi.http.whiteboard.context.select", "(osgi.http.whiteboard.context.name=*)");
-        listenerProps.put("osgi.http.whiteboard.listener", "true");
-        this.servletRequestListenerRegistration = bundleContext.registerService(ServletRequestListener.class.getName(),
-                this, listenerProps);
 
     }
 
     @Deactivate
     protected void deactivate() {
         this.adapterCache = null;
-        for (final DisposalCallbackRegistryImpl requestRegistries : this.requestDisposalCallbacks.values()) {
-            requestRegistries.onDisposed();
+        if (this.requestDisposalCallbacks != null) {
+            for (final DisposalCallbackRegistryImpl requestRegistries : this.requestDisposalCallbacks.values()) {
+                requestRegistries.onDisposed();
+            }
         }
         this.requestDisposalCallbacks = null;
         this.clearDisposalCallbackRegistryQueue();
@@ -1101,10 +1101,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         if (configPrinterRegistration != null) {
             configPrinterRegistration.unregister();
             configPrinterRegistration = null;
-        }
-        if (servletRequestListenerRegistration != null) {
-            servletRequestListenerRegistration.unregister();
-            servletRequestListenerRegistration = null;
         }
     }
 
