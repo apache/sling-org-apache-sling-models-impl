@@ -588,11 +588,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         MapBackedInvocationHandler handler = new MapBackedInvocationHandler(methods);
 
         DisposalCallbackRegistryImpl registry = new DisposalCallbackRegistryImpl();
-        if (adaptable instanceof ServletRequest) {
-            registerRequestCallbackRegistry((ServletRequest) adaptable, registry);
-        } else {
-            registerCallbackRegistry(handler, registry);
-        }
 
         final Map<ValuePreparer, Object> preparedValues = new HashMap<>(VALUE_PREPARERS_COUNT);
 
@@ -603,7 +598,16 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                 missingElements.addMissingElementExceptions(new MissingElementException(method.getAnnotatedElement(), t));
             }
         }
-        registry.seal();
+
+        if (!registry.callbacks.isEmpty()) {
+            registry.seal();
+
+            if (adaptable instanceof ServletRequest) {
+                registerRequestCallbackRegistry((ServletRequest) adaptable, registry);
+            } else {
+                registerCallbackRegistry(handler, registry);
+            }
+        }
         if (!missingElements.isEmpty()) {
             return new Result<>(missingElements);
         }
@@ -665,12 +669,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             }
         }
 
-        if (adaptable instanceof SlingHttpServletRequest) {
-            registerRequestCallbackRegistry((SlingHttpServletRequest) adaptable, registry);
-        } else {
-            registerCallbackRegistry(object, registry);
-        }
-
         InjectCallback callback = new SetFieldCallback(object);
 
         InjectableField[] injectableFields = modelClass.getInjectableFields();
@@ -683,7 +681,16 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             }
         }
 
-        registry.seal();
+        if (!registry.callbacks.isEmpty()) {
+            registry.seal();
+
+            if (adaptable instanceof SlingHttpServletRequest) {
+                registerRequestCallbackRegistry((SlingHttpServletRequest) adaptable, registry);
+            } else {
+                registerCallbackRegistry(object, registry);
+            }
+
+        }
         if (!missingElements.isEmpty()) {
             return new Result<>(missingElements);
         }
