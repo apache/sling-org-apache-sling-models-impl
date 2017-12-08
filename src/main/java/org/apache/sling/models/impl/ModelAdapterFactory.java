@@ -41,11 +41,16 @@ import java.util.concurrent.ConcurrentMap;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestEvent;
+import javax.servlet.ServletRequestListener;
+import javax.servlet.ServletRequestWrapper;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -98,12 +103,17 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(metatype = true, immediate = true,
         label = "Apache Sling Model Adapter Factory")
-@Service(value = ModelFactory.class)
+@Service(value = { ModelFactory.class, ServletRequestListener.class })
+@Properties({
+    @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, value = "true"),
+    @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, value = "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)")
+})
 @References({
     @Reference(
         name = "injector",
@@ -117,7 +127,7 @@ import org.slf4j.LoggerFactory;
             policy = ReferencePolicy.DYNAMIC)
 })
 @SuppressWarnings("deprecation")
-public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFactory {
+public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFactory, ServletRequestListener {
 
     // hard code this value since we always know exactly how many there are
     private static final int VALUE_PREPARERS_COUNT = 2;
@@ -146,6 +156,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     private ReferenceQueue<Object> queue;
 
     private ConcurrentMap<java.lang.ref.Reference<Object>, DisposalCallbackRegistryImpl> disposalCallbacks;
+
+    private ConcurrentHashMap<ServletRequest, DisposalCallbackRegistryImpl> requestDisposalCallbacks;
 
     @Override
     public void run() {
@@ -576,7 +588,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         MapBackedInvocationHandler handler = new MapBackedInvocationHandler(methods);
 
         DisposalCallbackRegistryImpl registry = new DisposalCallbackRegistryImpl();
-        registerCallbackRegistry(handler, registry);
+        if (adaptable instanceof ServletRequest) {
+            registerRequestCallbackRegistry((ServletRequest) adaptable, registry);
+        } else {
+            registerCallbackRegistry(handler, registry);
+        }
 
         final Map<ValuePreparer, Object> preparedValues = new HashMap<>(VALUE_PREPARERS_COUNT);
 
@@ -597,6 +613,18 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     private void registerCallbackRegistry(Object object, DisposalCallbackRegistryImpl registry) {
         PhantomReference<Object> reference = new PhantomReference<>(object, queue);
         disposalCallbacks.put(reference, registry);
+    }
+
+    private void registerRequestCallbackRegistry(ServletRequest request, DisposalCallbackRegistryImpl registry) {
+        request = unwrapRequest(request);
+        requestDisposalCallbacks.put(request, registry);
+    }
+
+    private static ServletRequest unwrapRequest(ServletRequest request) {
+        while (request instanceof ServletRequestWrapper) {
+            request = ((ServletRequestWrapper) request).getRequest();
+        }
+        return request;
     }
 
     private <ModelType> Result<ModelType> createObject(final Object adaptable, final ModelClass<ModelType> modelClass)
@@ -637,7 +665,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             }
         }
 
-        registerCallbackRegistry(object, registry);
+        if (adaptable instanceof SlingHttpServletRequest) {
+            registerRequestCallbackRegistry((SlingHttpServletRequest) adaptable, registry);
+        } else {
+            registerCallbackRegistry(object, registry);
+        }
 
         InjectCallback callback = new SetFieldCallback(object);
 
@@ -1025,32 +1057,40 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         BundleContext bundleContext = ctx.getBundleContext();
         this.queue = new ReferenceQueue<>();
         this.disposalCallbacks = new ConcurrentHashMap<>();
-        Hashtable<Object, Object> properties = new Hashtable<>();
+        this.requestDisposalCallbacks = new ConcurrentHashMap<>();
+        Hashtable<String, Object> properties = new Hashtable<>();
         properties.put(Constants.SERVICE_VENDOR, "Apache Software Foundation");
         properties.put(Constants.SERVICE_DESCRIPTION, "Sling Models OSGi Service Disposal Job");
         properties.put("scheduler.name", "Sling Models OSGi Service Disposal Job");
         properties.put("scheduler.concurrent", false);
         properties.put("scheduler.period", PropertiesUtil.toLong(props.get(PROP_CLEANUP_JOB_PERIOD), DEFAULT_CLEANUP_JOB_PERIOD));
 
-        this.jobRegistration = bundleContext.registerService(Runnable.class.getName(), this, properties);
+        this.jobRegistration = bundleContext.registerService(Runnable.class, this, properties);
 
         this.scriptEngineFactory = new SlingModelsScriptEngineFactory(bundleContext.getBundle());
         this.listener = new ModelPackageBundleListener(ctx.getBundleContext(), this, this.adapterImplementations, bindingsValuesProvidersByContext, scriptEngineFactory);
 
-        Hashtable<Object, Object> printerProps = new Hashtable<>();
+        Hashtable<String, Object> printerProps = new Hashtable<>();
         printerProps.put(Constants.SERVICE_VENDOR, "Apache Software Foundation");
         printerProps.put(Constants.SERVICE_DESCRIPTION, "Sling Models Configuration Printer");
         printerProps.put("felix.webconsole.label", "slingmodels");
         printerProps.put("felix.webconsole.title", "Sling Models");
         printerProps.put("felix.webconsole.configprinter.modes", "always");
 
-        this.configPrinterRegistration = bundleContext.registerService(Object.class.getName(),
+        this.configPrinterRegistration = bundleContext.registerService(Object.class,
                 new ModelConfigurationPrinter(this, bundleContext, adapterImplementations), printerProps);
+
     }
 
     @Deactivate
     protected void deactivate() {
         this.adapterCache = null;
+        if (this.requestDisposalCallbacks != null) {
+            for (final DisposalCallbackRegistryImpl requestRegistries : this.requestDisposalCallbacks.values()) {
+                requestRegistries.onDisposed();
+            }
+        }
+        this.requestDisposalCallbacks = null;
         this.clearDisposalCallbackRegistryQueue();
         this.listener.unregisterAll();
         this.adapterImplementations.removeAll();
@@ -1256,4 +1296,16 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                 scriptEngineFactory, bindingsValuesProvidersByContext).adaptTo(targetClass);
     }
 
+    @Override
+    public void requestDestroyed(ServletRequestEvent sre) {
+        ServletRequest request = unwrapRequest(sre.getServletRequest());
+        DisposalCallbackRegistryImpl registry = requestDisposalCallbacks.remove(request);
+        if (registry != null) {
+            registry.onDisposed();
+        }
+    }
+
+    @Override
+    public void requestInitialized(ServletRequestEvent sre) {
+    }
 }

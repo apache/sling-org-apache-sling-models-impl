@@ -55,6 +55,8 @@ import org.osgi.framework.BundleListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 
+import javax.servlet.ServletRequestListener;
+
 @RunWith(MockitoJUnitRunner.class)
 public class OSGiInjectionTest {
     private ModelAdapterFactory factory;
@@ -216,9 +218,9 @@ public class OSGiInjectionTest {
         SetOSGiModel model = factory.getAdapter(res, SetOSGiModel.class);
         assertNull(model);
 
-        verify(bundleContext).registerService(eq(Runnable.class.getName()), eq(factory), any(Dictionary.class));
+        verify(bundleContext).registerService(eq(Runnable.class), eq(factory), any(Dictionary.class));
         verify(bundleContext).addBundleListener(any(BundleListener.class));
-        verify(bundleContext).registerService(eq(Object.class.getName()), any(Object.class), any(Dictionary.class));
+        verify(bundleContext).registerService(eq(Object.class), any(Object.class), any(Dictionary.class));
         verify(bundleContext).getBundles();
         verify(bundleContext).getBundle();
         verifyNoMoreInteractions(res, bundleContext);

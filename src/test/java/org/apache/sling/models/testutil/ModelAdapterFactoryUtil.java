@@ -18,13 +18,17 @@
  */
 package org.apache.sling.models.testutil;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.apache.sling.testing.mock.osgi.MockOsgi;
@@ -33,6 +37,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
 
 /**
  * Helper methods for simulating sling models bundle events
@@ -47,7 +52,6 @@ public final class ModelAdapterFactoryUtil {
     /**
      * Scan classpaths for given package name (and sub packages) to scan for and
      * register all classes with @Model annotation.
-     * @param packageName Java package name
      */
     public static void addModelsForPackage(BundleContext bundleContext, Class... classes) {
         Bundle bundle = new ModelsPackageBundle(classes, Bundle.ACTIVE, bundleContext);
@@ -81,7 +85,7 @@ public final class ModelAdapterFactoryUtil {
 
         @Override
         public Enumeration findEntries(String path, String filePattern, boolean recurse) {
-            Vector<URL> urls = new Vector<URL>(); // NOPMD
+            Vector<URL> urls = new Vector<>(); // NOPMD
             for (int i = 0; i < classes.length; i++) {
                 try {
                     urls.add(new URL("file:/" + classes[i].getName().replace('.', '/') + ".class"));
@@ -198,6 +202,30 @@ public final class ModelAdapterFactoryUtil {
             return 0;
         }
 
+        @Override
+        public File getDataFile(String filename) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <A> A adapt(Class<A> type) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Version getVersion() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int compareTo(Bundle o) {
+            throw new UnsupportedOperationException();
+        }
     }
 
 }
