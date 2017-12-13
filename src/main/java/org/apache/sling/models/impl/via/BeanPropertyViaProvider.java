@@ -16,7 +16,6 @@
  */
 package org.apache.sling.models.impl.via;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -25,6 +24,10 @@ import org.apache.sling.models.annotations.via.BeanProperty;
 import org.apache.sling.models.spi.ViaProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 
 @Component
 @Service
@@ -43,10 +46,15 @@ public class BeanPropertyViaProvider implements ViaProvider {
             return ORIGINAL;
         }
         try {
-            return PropertyUtils.getProperty(original, value);
+            BeanInfo beanInfo = Introspector.getBeanInfo(original.getClass());
+            for (PropertyDescriptor desc : beanInfo.getPropertyDescriptors()) {
+                if (desc.getName().equals(value)) {
+                    return desc.getReadMethod().invoke(original);
+                }
+            }
         } catch (Exception e) {
             log.error("Unable to execution projection " + value, e);
-            return null;
         }
+        return null;
     }
 }
