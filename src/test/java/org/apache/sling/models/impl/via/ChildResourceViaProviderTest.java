@@ -1,7 +1,3 @@
-package org.apache.sling.models.impl.via;
-
-import static org.mockito.Mockito.when;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +14,10 @@ import static org.mockito.Mockito.when;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.sling.models.impl.via;
+
+import static org.mockito.Mockito.when;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.junit.Assert;

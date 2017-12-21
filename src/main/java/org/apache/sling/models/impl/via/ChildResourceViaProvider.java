@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 @Service
 public class ChildResourceViaProvider implements ViaProvider {
 
-    protected final Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(ChildResourceViaProvider.class);
 
     @Override
     public Class<? extends ViaProviderType> getType() {
@@ -54,7 +54,7 @@ public class ChildResourceViaProvider implements ViaProvider {
             }
             Resource child = resource.getChild(value);
             if (child == null) {
-                log.debug("could not obtain child {} of resource {}", value, resource.getPath());
+                log.debug("Could not obtain child {} of resource {}", value, resource.getPath());
                 return null;
             }
             return new ChildResourceRequestWrapper(request, child);
