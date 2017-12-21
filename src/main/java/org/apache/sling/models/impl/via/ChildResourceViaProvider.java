@@ -19,14 +19,20 @@ package org.apache.sling.models.impl.via;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.models.annotations.ViaProviderType;
 import org.apache.sling.models.annotations.via.ChildResource;
 import org.apache.sling.models.spi.ViaProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 @Service
 public class ChildResourceViaProvider implements ViaProvider {
+
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
     public Class<? extends ViaProviderType> getType() {
@@ -40,8 +46,36 @@ public class ChildResourceViaProvider implements ViaProvider {
         }
         if (original instanceof Resource) {
             return ((Resource) original).getChild(value);
+        } else if (original instanceof SlingHttpServletRequest) {
+            final SlingHttpServletRequest request = (SlingHttpServletRequest) original;
+            final Resource resource = request.getResource();
+            if (resource == null) {
+                return null;
+            }
+            Resource child = resource.getChild(value);
+            if (child == null) {
+                log.debug("could not obtain child {} of resource {}", value, resource.getPath());
+                return null;
+            }
+            return new ChildResourceRequestWrapper(request, child);
         } else {
+            log.warn("Received unexpected adaptable of type {}.", original.getClass().getName());
             return null;
+        }
+    }
+
+    private class ChildResourceRequestWrapper extends SlingHttpServletRequestWrapper {
+
+        private final Resource resource;
+
+        private ChildResourceRequestWrapper(SlingHttpServletRequest request, Resource resource) {
+            super(request);
+            this.resource = resource;
+        }
+
+        @Override
+        public Resource getResource() {
+            return resource;
         }
     }
 }
