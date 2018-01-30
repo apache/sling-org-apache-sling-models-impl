@@ -53,6 +53,9 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("serial")
 class ExportServlet extends SlingSafeMethodsServlet {
 
+    private static final String APPLICATION_JSON = "application/json";
+    private static final String UTF_8 = "UTF-8";
+
     private final Logger logger;
 
     private final String exporterName;
@@ -84,6 +87,14 @@ class ExportServlet extends SlingSafeMethodsServlet {
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
+        String contentType = request.getResponseContentType();
+        response.setContentType(contentType);
+
+        // workaround for SLING-7344
+        if (APPLICATION_JSON.equals(contentType)) {
+            response.setCharacterEncoding(UTF_8);
+        }
+
         Map<String, String> options = createOptionMap(request);
 
         ScriptHelper scriptHelper = new ScriptHelper(bundleContext, null, request, response);
@@ -106,9 +117,7 @@ class ExportServlet extends SlingSafeMethodsServlet {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-            response.setContentType(request.getResponseContentType());
             response.getWriter().write(exported);
-
         } finally {
             scriptHelper.cleanup();
         }
