@@ -132,6 +132,10 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     // hard code this value since we always know exactly how many there are
     private static final int VALUE_PREPARERS_COUNT = 2;
 
+    private static final String REQUEST_MARKER_ATTRIBUTE = ModelAdapterFactory.class.getName() + ".RealRequest";
+
+    private static final Object REQUEST_MARKER_VALUE = new Object();
+
     private static class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry {
 
         private List<DisposalCallback> callbacks = new ArrayList<>();
@@ -684,7 +688,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         if (!registry.callbacks.isEmpty()) {
             registry.seal();
 
-            if (adaptable instanceof SlingHttpServletRequest) {
+            if (adaptable instanceof SlingHttpServletRequest &&
+                    ((SlingHttpServletRequest) adaptable).getAttribute(REQUEST_MARKER_ATTRIBUTE) == REQUEST_MARKER_VALUE) {
                 registerRequestCallbackRegistry((SlingHttpServletRequest) adaptable, registry);
             } else {
                 registerCallbackRegistry(object, registry);
@@ -1314,5 +1319,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     @Override
     public void requestInitialized(ServletRequestEvent sre) {
+        sre.getServletRequest().setAttribute(REQUEST_MARKER_ATTRIBUTE, REQUEST_MARKER_VALUE);
     }
 }

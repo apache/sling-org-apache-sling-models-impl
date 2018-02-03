@@ -27,7 +27,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -38,7 +40,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletRequestEvent;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
@@ -74,12 +78,49 @@ public class RequestDisposalTest {
         factory.bindInjector(new DisposedInjector(), new ServicePropertiesMap(0, 0));
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(TestModel.class);
 
-        callback = new TestDisposalCallback();
+        final Map<String, Object> attributes = new HashMap<>();
 
+        doAnswer(new Answer<Void>() {
+
+            @Override
+            public Void answer(InvocationOnMock invocation) {
+                attributes.put((String) invocation.getArguments()[0], invocation.getArguments()[1]);
+                return null;
+            }
+        }).when(request).setAttribute(any(String.class), any());
+
+        when(request.getAttribute(any(String.class))).then(new Answer<Object>() {
+
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                return attributes.get(invocation.getArguments()[0]);
+            }
+        });
+
+        callback = new TestDisposalCallback();
     }
 
     @Test
-    public void test() {
+    public void testWithInitializedRequest() {
+        // destroy a wrapper of the root request
+        SlingHttpServletRequest destroyedRequest = new SlingHttpServletRequestWrapper(request);
+        factory.requestInitialized(new ServletRequestEvent(servletContext, destroyedRequest));
+
+        // but adapt from a wrapper of a wrapper of that wrapper
+        SlingHttpServletRequest adaptableRequest = new SlingHttpServletRequestWrapper(new SlingHttpServletRequestWrapper(destroyedRequest));
+
+        TestModel model = factory.getAdapter(adaptableRequest, TestModel.class);
+        assertEquals("teststring", model.testString);
+
+        assertFalse(callback.isDisposed());
+
+        factory.requestDestroyed(new ServletRequestEvent(servletContext, destroyedRequest));
+
+        assertTrue(callback.isDisposed());
+    }
+
+    @Test
+    public void testWithUnitializedRequest() {
         // destroy a wrapper of the root request
         SlingHttpServletRequest destroyedRequest = new SlingHttpServletRequestWrapper(request);
 
@@ -93,7 +134,7 @@ public class RequestDisposalTest {
 
         factory.requestDestroyed(new ServletRequestEvent(servletContext, destroyedRequest));
 
-        assertTrue(callback.isDisposed());
+        assertFalse(callback.isDisposed());
     }
 
     @Model(adaptables = SlingHttpServletRequest.class)
