@@ -606,8 +606,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         if (!registry.callbacks.isEmpty()) {
             registry.seal();
 
-            if (adaptable instanceof ServletRequest) {
-                registerRequestCallbackRegistry((ServletRequest) adaptable, registry);
+            if (adaptable instanceof SlingHttpServletRequest &&
+                    ((SlingHttpServletRequest) adaptable).getAttribute(REQUEST_MARKER_ATTRIBUTE) == REQUEST_MARKER_VALUE) {
+                registerRequestCallbackRegistry((SlingHttpServletRequest) adaptable, registry);
             } else {
                 registerCallbackRegistry(handler, registry);
             }
