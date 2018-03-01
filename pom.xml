@@ -27,7 +27,7 @@
     </parent>
     <artifactId>org.apache.sling.models.impl</artifactId>
     <packaging>bundle</packaging>
-    <version>1.4.7-SNAPSHOT</version>
+    <version>1.4.8</version>
     <name>Apache Sling Models Implementation</name>
     <description>Apache Sling Models Implementation</description>
 
@@ -35,7 +35,7 @@
         <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-models-impl.git</connection>
         <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-models-impl.git</developerConnection>
         <url>https://gitbox.apache.org/repos/asf?p=sling-org-apache-sling-models-impl.git</url>
-      <tag>HEAD</tag>
+      <tag>org.apache.sling.models.impl-1.4.8</tag>
   </scm>
     <properties>
         <sling.java.version>7</sling.java.version>
