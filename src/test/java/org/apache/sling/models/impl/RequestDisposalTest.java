@@ -41,8 +41,10 @@ import javax.servlet.ServletRequestEvent;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
@@ -66,7 +68,7 @@ public class RequestDisposalTest {
 
     private ModelAdapterFactory factory;
 
-    private TestDisposalCallback callback;
+    private Set<TestDisposalCallback> callbacks;
 
     @Before
     public void setup() {
@@ -96,8 +98,7 @@ public class RequestDisposalTest {
                 return attributes.get(invocation.getArguments()[0]);
             }
         });
-
-        callback = new TestDisposalCallback();
+        callbacks = new HashSet<>();
     }
 
     @Test
@@ -112,11 +113,33 @@ public class RequestDisposalTest {
         TestModel model = factory.getAdapter(adaptableRequest, TestModel.class);
         assertEquals("teststring", model.testString);
 
-        assertFalse(callback.isDisposed());
+        assertNoneDisposed();
 
         factory.requestDestroyed(new ServletRequestEvent(servletContext, destroyedRequest));
 
-        assertTrue(callback.isDisposed());
+        assertAllDisposed();
+    }
+
+    @Test
+    public void testTwoInstancesWithInitializedRequest() {
+        // destroy a wrapper of the root request
+        SlingHttpServletRequest destroyedRequest = new SlingHttpServletRequestWrapper(request);
+        factory.requestInitialized(new ServletRequestEvent(servletContext, destroyedRequest));
+
+        // but adapt from a wrapper of a wrapper of that wrapper
+        SlingHttpServletRequest adaptableRequest = new SlingHttpServletRequestWrapper(new SlingHttpServletRequestWrapper(destroyedRequest));
+
+        TestModel model = factory.getAdapter(adaptableRequest, TestModel.class);
+        assertEquals("teststring", model.testString);
+
+        TestModel model2 = factory.getAdapter(adaptableRequest, TestModel.class);
+        assertEquals("teststring", model2.testString);
+
+        assertNoneDisposed();
+
+        factory.requestDestroyed(new ServletRequestEvent(servletContext, destroyedRequest));
+
+        assertAllDisposed();
     }
 
     @Test
@@ -130,11 +153,23 @@ public class RequestDisposalTest {
         TestModel model = factory.getAdapter(adaptableRequest, TestModel.class);
         assertEquals("teststring", model.testString);
 
-        assertFalse(callback.isDisposed());
+        assertNoneDisposed();
 
         factory.requestDestroyed(new ServletRequestEvent(servletContext, destroyedRequest));
 
-        assertFalse(callback.isDisposed());
+        assertNoneDisposed();
+    }
+
+    private void assertNoneDisposed() {
+        for (TestDisposalCallback callback : callbacks) {
+            assertFalse(callback.isDisposed());
+        }
+    }
+
+    private void assertAllDisposed() {
+        for (TestDisposalCallback callback : callbacks) {
+            assertTrue(callback.isDisposed());
+        }
     }
 
     @Model(adaptables = SlingHttpServletRequest.class)
@@ -155,6 +190,8 @@ public class RequestDisposalTest {
         @CheckForNull
         @Override
         public Object getValue(@Nonnull Object o, String s, @Nonnull Type type, @Nonnull AnnotatedElement annotatedElement, @Nonnull DisposalCallbackRegistry disposalCallbackRegistry) {
+            TestDisposalCallback callback = new TestDisposalCallback();
+            callbacks.add(callback);
             disposalCallbackRegistry.addDisposalCallback(callback);
             return "teststring";
         }
