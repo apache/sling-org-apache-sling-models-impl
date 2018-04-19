@@ -58,6 +58,12 @@
                       !org.apache.sling.scripting.core.impl.helper,
                       *
                     </Import-Package>
+                    <Provide-Capability>
+                      osgi.service;objectClass=java.lang.Runnable,
+                      osgi.service;objectClass=javax.servlet.Servlet,
+                      osgi.service;objectClass=org.apache.sling.api.adapter.AdapterFactory,
+                      osgi.service;objectClass=org.apache.sling.models.factory.ModelFactory
+                    </Provide-Capability>
                   </instructions>
                 </configuration>
             </plugin>
