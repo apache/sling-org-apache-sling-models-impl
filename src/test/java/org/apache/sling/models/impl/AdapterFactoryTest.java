@@ -42,6 +42,8 @@ import org.apache.sling.models.testmodels.classes.ConstructorWithExceptionModel;
 import org.apache.sling.models.testmodels.classes.DefaultStringModel;
 import org.apache.sling.models.testmodels.classes.InvalidModelWithMissingAnnotation;
 import org.apache.sling.models.testmodels.classes.ResourceModelWithRequiredField;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,9 +52,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AdapterFactoryTest {
@@ -210,14 +209,14 @@ public class AdapterFactoryTest {
 
     private static class FirstStringExporter implements ModelExporter {
         @Override
-        public boolean isSupported(@Nonnull Class<?> aClass) {
+        public boolean isSupported(@NotNull Class<?> aClass) {
             return aClass == String.class;
         }
 
-        @CheckForNull
+        @Nullable
         @Override
         @SuppressWarnings("unchecked")
-        public <T> T export(@Nonnull Object o, @Nonnull Class<T> aClass, @Nonnull Map<String, String> map) throws ExportException {
+        public <T> T export(@NotNull Object o, @NotNull Class<T> aClass, @NotNull Map<String, String> map) throws ExportException {
             if (aClass == String.class) {
                 return (T) "Export from first";
             } else {
@@ -225,7 +224,7 @@ public class AdapterFactoryTest {
             }
         }
 
-        @Nonnull
+        @NotNull
         @Override
         public String getName() {
             return "first";
@@ -235,13 +234,13 @@ public class AdapterFactoryTest {
     @SuppressWarnings("unchecked")
     private static class SecondStringExporter implements ModelExporter {
         @Override
-        public boolean isSupported(@Nonnull Class<?> aClass) {
+        public boolean isSupported(@NotNull Class<?> aClass) {
             return aClass == String.class;
         }
 
-        @CheckForNull
+        @Nullable
         @Override
-        public <T> T export(@Nonnull Object o, @Nonnull Class<T> aClass, @Nonnull Map<String, String> map) throws ExportException {
+        public <T> T export(@NotNull Object o, @NotNull Class<T> aClass, @NotNull Map<String, String> map) throws ExportException {
             if (aClass == String.class) {
                 return (T) "Export from second";
             } else {
@@ -249,7 +248,7 @@ public class AdapterFactoryTest {
             }
         }
 
-        @Nonnull
+        @NotNull
         @Override
         public String getName() {
             return "second";
@@ -259,13 +258,13 @@ public class AdapterFactoryTest {
     @SuppressWarnings("unchecked")
     private static class FirstIntegerExporter implements ModelExporter {
         @Override
-        public boolean isSupported(@Nonnull Class<?> aClass) {
+        public boolean isSupported(@NotNull Class<?> aClass) {
             return aClass == Integer.class;
         }
 
-        @CheckForNull
+        @Nullable
         @Override
-        public <T> T export(@Nonnull Object o, @Nonnull Class<T> aClass, @Nonnull Map<String, String> map) throws ExportException {
+        public <T> T export(@NotNull Object o, @NotNull Class<T> aClass, @NotNull Map<String, String> map) throws ExportException {
             if (aClass == Integer.class) {
                 return (T) Integer.valueOf(42);
             } else {
@@ -273,7 +272,7 @@ public class AdapterFactoryTest {
             }
         }
 
-        @Nonnull
+        @NotNull
         @Override
         public String getName() {
             return "first";

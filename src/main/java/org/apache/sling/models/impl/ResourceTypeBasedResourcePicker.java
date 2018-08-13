@@ -19,8 +19,6 @@ package org.apache.sling.models.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
@@ -28,6 +26,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.spi.ImplementationPicker;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 
 @Component
@@ -36,7 +35,7 @@ import org.osgi.framework.Constants;
 public class ResourceTypeBasedResourcePicker implements ImplementationPicker {
 
     @Override
-    public Class<?> pick(@Nonnull Class<?> adapterType, @Nonnull Class<?>[] implementationsTypes, @Nonnull Object adaptable) {
+    public Class<?> pick(@NotNull Class<?> adapterType, @NotNull Class<?>[] implementationsTypes, @NotNull Object adaptable) {
         final Resource resource = findResource(adaptable);
         if (resource == null) {
             return null;

@@ -19,7 +19,6 @@ package org.apache.sling.models.impl.injectors;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 
-import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,6 +39,7 @@ import org.apache.sling.models.spi.Injector;
 import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 
 /**
@@ -55,16 +55,16 @@ public final class SlingObjectInjector implements Injector, StaticInjectAnnotati
     /**
      * Injector name
      */
-    public static final @Nonnull String NAME = "sling-object";
+    public static final @NotNull String NAME = "sling-object";
 
     @Override
-    public @Nonnull String getName() {
+    public @NotNull String getName() {
         return NAME;
     }
 
     @Override
-    public Object getValue(final @Nonnull Object adaptable, final String name, final @Nonnull Type type, final @Nonnull AnnotatedElement element,
-            final @Nonnull DisposalCallbackRegistry callbackRegistry) {
+    public Object getValue(final @NotNull Object adaptable, final String name, final @NotNull Type type, final @NotNull AnnotatedElement element,
+            final @NotNull DisposalCallbackRegistry callbackRegistry) {
 
         // only class types are supported
         if (!(type instanceof Class<?>)) {

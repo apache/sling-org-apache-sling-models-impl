@@ -26,8 +26,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -43,6 +41,7 @@ import org.apache.sling.models.spi.Injector;
 import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -61,7 +60,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
     private BundleContext bundleContext;
 
     @Override
-    public @Nonnull String getName() {
+    public @NotNull String getName() {
         return "osgi-services";
     }
 
@@ -71,8 +70,8 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
     }
 
     @Override
-    public Object getValue(@Nonnull Object adaptable, String name, @Nonnull Type type, @Nonnull AnnotatedElement element,
-            @Nonnull DisposalCallbackRegistry callbackRegistry) {
+    public Object getValue(@NotNull Object adaptable, String name, @NotNull Type type, @NotNull AnnotatedElement element,
+            @NotNull DisposalCallbackRegistry callbackRegistry) {
         OSGiService annotation = element.getAnnotation(OSGiService.class);
         String filterString = null;
         if (annotation != null) {

@@ -38,8 +38,6 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestEvent;
@@ -99,6 +97,8 @@ import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFac
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -141,7 +141,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         private List<DisposalCallback> callbacks = new ArrayList<>();
 
         @Override
-        public void addDisposalCallback(@Nonnull DisposalCallback callback) {
+        public void addDisposalCallback(@NotNull DisposalCallback callback) {
             callbacks.add(callback);
         }
 
@@ -190,25 +190,25 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     @Property(label = "Cleanup Job Period", description = "Period at which OSGi service references from ThreadLocals will be cleaned up.", longValue = DEFAULT_CLEANUP_JOB_PERIOD)
     private static final String PROP_CLEANUP_JOB_PERIOD = "cleanup.job.period";
 
-    private final @Nonnull ConcurrentMap<String, RankedServices<Injector>> injectors = new ConcurrentHashMap<>();
-    private final @Nonnull RankedServices<Injector> sortedInjectors = new RankedServices<>();
-    private final @Nonnull ConcurrentMap<Class<? extends ViaProviderType>, ViaProvider> viaProviders = new ConcurrentHashMap<>();
+    private final @NotNull ConcurrentMap<String, RankedServices<Injector>> injectors = new ConcurrentHashMap<>();
+    private final @NotNull RankedServices<Injector> sortedInjectors = new RankedServices<>();
+    private final @NotNull ConcurrentMap<Class<? extends ViaProviderType>, ViaProvider> viaProviders = new ConcurrentHashMap<>();
 
     @Reference(name = "injectAnnotationProcessorFactory", referenceInterface = InjectAnnotationProcessorFactory.class,
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    private final @Nonnull RankedServices<InjectAnnotationProcessorFactory> injectAnnotationProcessorFactories = new RankedServices<>();
+    private final @NotNull RankedServices<InjectAnnotationProcessorFactory> injectAnnotationProcessorFactories = new RankedServices<>();
 
     @Reference(name = "injectAnnotationProcessorFactory2", referenceInterface = InjectAnnotationProcessorFactory2.class,
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    private final @Nonnull RankedServices<InjectAnnotationProcessorFactory2> injectAnnotationProcessorFactories2 = new RankedServices<>();
+    private final @NotNull RankedServices<InjectAnnotationProcessorFactory2> injectAnnotationProcessorFactories2 = new RankedServices<>();
 
     @Reference(name = "staticInjectAnnotationProcessorFactory", referenceInterface = StaticInjectAnnotationProcessorFactory.class,
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    private final @Nonnull RankedServices<StaticInjectAnnotationProcessorFactory> staticInjectAnnotationProcessorFactories = new RankedServices<>();
+    private final @NotNull RankedServices<StaticInjectAnnotationProcessorFactory> staticInjectAnnotationProcessorFactories = new RankedServices<>();
 
     @Reference(name = "implementationPicker", referenceInterface = ImplementationPicker.class,
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    private final @Nonnull RankedServices<ImplementationPicker> implementationPickers = new RankedServices<>();
+    private final @NotNull RankedServices<ImplementationPicker> implementationPickers = new RankedServices<>();
 
     // bind the service with the highest priority (if a new one comes in this service gets restarted)
     @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY, policyOption=ReferencePolicyOption.GREEDY)
@@ -216,7 +216,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     @Reference(name = "modelExporter", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
             referenceInterface = ModelExporter.class)
-    private final @Nonnull RankedServices<ModelExporter> modelExporters = new RankedServices<>();
+    private final @NotNull RankedServices<ModelExporter> modelExporters = new RankedServices<>();
 
     @Reference
     private BindingsValuesProvidersByContext bindingsValuesProvidersByContext;
@@ -256,7 +256,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @Override
-    public @Nonnull <ModelType> ModelType createModel(@Nonnull Object adaptable, @Nonnull Class<ModelType> type) throws MissingElementsException,
+    public @NotNull <ModelType> ModelType createModel(@NotNull Object adaptable, @NotNull Class<ModelType> type) throws MissingElementsException,
             InvalidAdaptableException, ValidationException, InvalidModelException {
         Result<ModelType> result = internalCreateModel(adaptable, type);
         if (!result.wasSuccessful()) {
@@ -266,7 +266,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @Override
-    public boolean canCreateFromAdaptable(@Nonnull Object adaptable, @Nonnull Class<?> modelClass) throws ModelClassException {
+    public boolean canCreateFromAdaptable(@NotNull Object adaptable, @NotNull Class<?> modelClass) throws ModelClassException {
         return internalCanCreateFromAdaptable(adaptable, modelClass);
     }
 
@@ -288,7 +288,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     @Override
     @Deprecated
-    public boolean isModelClass(@Nonnull Object adaptable, @Nonnull Class<?> requestedType) {
+    public boolean isModelClass(@NotNull Object adaptable, @NotNull Class<?> requestedType) {
         try {
             getImplementationTypeForAdapterType(requestedType, adaptable);
         } catch (ModelClassException e) {
@@ -299,7 +299,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @Override
-    public boolean isModelClass(@Nonnull Class<?> type) {
+    public boolean isModelClass(@NotNull Class<?> type) {
         return this.adapterImplementations.isModelClass(type);
     }
 
@@ -476,10 +476,10 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     private
-    @CheckForNull
+    @Nullable
     RuntimeException injectElement(final InjectableElement element, final Object adaptable,
-                                   final @Nonnull DisposalCallbackRegistry registry, final InjectCallback callback,
-                                   final @Nonnull Map<ValuePreparer, Object> preparedValues) {
+                                   final @NotNull DisposalCallbackRegistry registry, final InjectCallback callback,
+                                   final @NotNull Map<ValuePreparer, Object> preparedValues) {
 
         InjectAnnotationProcessor annotationProcessor = null;
         String source = element.getSource();
@@ -743,7 +743,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     private <ModelType> Result<ModelType> newInstanceWithConstructorInjection(final ModelClassConstructor<ModelType> constructor, final Object adaptable,
-            final ModelClass<ModelType> modelClass, final DisposalCallbackRegistry registry, final @Nonnull Map<ValuePreparer, Object> preparedValues)
+            final ModelClass<ModelType> modelClass, final DisposalCallbackRegistry registry, final @NotNull Map<ValuePreparer, Object> preparedValues)
             throws InstantiationException, InvocationTargetException, IllegalAccessException {
         ConstructorParameter[] parameters = constructor.getConstructorParameters();
 
@@ -981,7 +981,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
      * @param isWithinCollection
      * @return a Result either encapsulating an exception or the adapted value
      */
-    private @CheckForNull Result<Object> adapt(final Object value, final Class<?> type, boolean isWithinCollection) {
+    private @Nullable Result<Object> adapt(final Object value, final Class<?> type, boolean isWithinCollection) {
         Object adaptedValue = null;
         final String messageSuffix = isWithinCollection ? " in collection" : "";
         if (isModelClass(type) && canCreateFromAdaptable(value, type)) {
@@ -1201,37 +1201,37 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         viaProviders.remove(type, viaProvider);
     }
 
-    @Nonnull Collection<Injector> getInjectors() {
+    @NotNull Collection<Injector> getInjectors() {
         return sortedInjectors.get();
     }
 
-    @Nonnull Collection<InjectAnnotationProcessorFactory> getInjectAnnotationProcessorFactories() {
+    @NotNull Collection<InjectAnnotationProcessorFactory> getInjectAnnotationProcessorFactories() {
         return injectAnnotationProcessorFactories.get();
     }
 
-    @Nonnull Collection<InjectAnnotationProcessorFactory2> getInjectAnnotationProcessorFactories2() {
+    @NotNull Collection<InjectAnnotationProcessorFactory2> getInjectAnnotationProcessorFactories2() {
         return injectAnnotationProcessorFactories2.get();
     }
 
-    @Nonnull Collection<StaticInjectAnnotationProcessorFactory> getStaticInjectAnnotationProcessorFactories() {
+    @NotNull Collection<StaticInjectAnnotationProcessorFactory> getStaticInjectAnnotationProcessorFactories() {
         return staticInjectAnnotationProcessorFactories.get();
     }
 
-    @Nonnull ImplementationPicker[] getImplementationPickers() {
+    @NotNull ImplementationPicker[] getImplementationPickers() {
         return adapterImplementations.getImplementationPickers();
     }
 
-    @Nonnull Map<Class<? extends ViaProviderType>, ViaProvider> getViaProviders() {
+    @NotNull Map<Class<? extends ViaProviderType>, ViaProvider> getViaProviders() {
         return viaProviders;
     }
 
     @Override
-    public boolean isModelAvailableForRequest(@Nonnull SlingHttpServletRequest request) {
+    public boolean isModelAvailableForRequest(@NotNull SlingHttpServletRequest request) {
         return adapterImplementations.getModelClassForRequest(request) != null;
     }
 
     @Override
-    public boolean isModelAvailableForResource(@Nonnull Resource resource) {
+    public boolean isModelAvailableForResource(@NotNull Resource resource) {
         return adapterImplementations.getModelClassForResource(resource) != null;
     }
 
@@ -1304,7 +1304,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @Override
-    public <T> T getModelFromWrappedRequest(@Nonnull SlingHttpServletRequest request, @Nonnull Resource resource, @Nonnull Class<T> targetClass) {
+    public <T> T getModelFromWrappedRequest(@NotNull SlingHttpServletRequest request, @NotNull Resource resource, @NotNull Class<T> targetClass) {
         return new ResourceOverridingRequestWrapper(request, resource, adapterManager,
                 scriptEngineFactory, bindingsValuesProvidersByContext).adaptTo(targetClass);
     }

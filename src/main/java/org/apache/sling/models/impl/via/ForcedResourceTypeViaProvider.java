@@ -16,14 +16,13 @@
  */
 package org.apache.sling.models.impl.via;
 
-import javax.annotation.Nonnull;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.ViaProviderType;
 import org.apache.sling.models.annotations.via.ForcedResourceType;
+import org.jetbrains.annotations.NotNull;
 
 @Component
 @Service
@@ -34,12 +33,12 @@ public class ForcedResourceTypeViaProvider extends AbstractResourceTypeViaProvid
     }
 
     @Override
-    protected String getResourceType(@Nonnull Resource resource, @Nonnull String value) {
+    protected String getResourceType(@NotNull Resource resource, @NotNull String value) {
         return value;
     }
 
     @Override
-    protected boolean handle(@Nonnull String value) {
+    protected boolean handle(@NotNull String value) {
         return StringUtils.isNotBlank(value);
     }
 }
