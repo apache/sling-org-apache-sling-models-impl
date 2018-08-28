@@ -595,11 +595,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
         final Map<ValuePreparer, Object> preparedValues = new HashMap<>(VALUE_PREPARERS_COUNT);
 
-        MissingElementsException missingElements = new MissingElementsException("Could not create all mandatory methods for interface of model " + modelClass);
+        List<MissingElementException> missingElements = new ArrayList<>();
         for (InjectableMethod method : injectableMethods) {
             RuntimeException t = injectElement(method, adaptable, registry, callback, preparedValues);
             if (t != null) {
-                missingElements.addMissingElementExceptions(new MissingElementException(method.getAnnotatedElement(), t));
+                missingElements.add(new MissingElementException(method.getAnnotatedElement(), t));
             }
         }
 
@@ -614,7 +614,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             }
         }
         if (!missingElements.isEmpty()) {
-            return new Result<>(missingElements);
+            MissingElementsException missingElementsException = new MissingElementsException("Could not create all mandatory methods for interface of model " + modelClass);
+            for (MissingElementException me : missingElements) {
+                missingElementsException.addMissingElementExceptions(me);
+            }
+            return new Result<>(missingElementsException);
         }
         return new Result<InvocationHandler>(handler);
     }
@@ -677,12 +681,12 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         InjectCallback callback = new SetFieldCallback(object);
 
         InjectableField[] injectableFields = modelClass.getInjectableFields();
-        MissingElementsException missingElements = new MissingElementsException("Could not inject all required fields into " + modelClass.getType());
+        List<MissingElementException> missingElements = new ArrayList<>();
 
         for (InjectableField field : injectableFields) {
             RuntimeException t = injectElement(field, adaptable, registry, callback, preparedValues);
             if (t != null) {
-                missingElements.addMissingElementExceptions(new MissingElementException(field.getAnnotatedElement(), t));
+                missingElements.add(new MissingElementException(field.getAnnotatedElement(), t));
             }
         }
 
@@ -698,7 +702,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
         }
         if (!missingElements.isEmpty()) {
-            return new Result<>(missingElements);
+            MissingElementsException missingElementsException = new MissingElementsException("Could not inject all required fields into " + modelClass.getType());
+            for (MissingElementException me : missingElements) {
+                missingElementsException.addMissingElementExceptions(me);
+            }
+            return new Result<>(missingElementsException);
         }
         try {
             object = invokePostConstruct(object);
@@ -750,15 +758,19 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         List<Object> paramValues = new ArrayList<>(Arrays.asList(new Object[parameters.length]));
         InjectCallback callback = new SetConstructorParameterCallback(paramValues);
 
-        MissingElementsException missingElements = new MissingElementsException("Required constructor parameters were not able to be injected on model " + modelClass.getType());
+        List<MissingElementException> missingElements = new ArrayList<>();
         for (int i = 0; i < parameters.length; i++) {
             RuntimeException t = injectElement(parameters[i], adaptable, registry, callback, preparedValues);
             if (t != null) {
-                missingElements.addMissingElementExceptions(new MissingElementException(parameters[i].getAnnotatedElement(), t));
+                missingElements.add(new MissingElementException(parameters[i].getAnnotatedElement(), t));
             }
         }
         if (!missingElements.isEmpty()) {
-            return new Result<>(missingElements);
+            MissingElementsException missingElementsException = new MissingElementsException("Required constructor parameters were not able to be injected on model " + modelClass.getType());
+            for (MissingElementException me : missingElements) {
+                missingElementsException.addMissingElementExceptions(me);
+            }
+            return new Result<>(missingElementsException);
         }
         return new Result<>(constructor.getConstructor().newInstance(paramValues.toArray(new Object[paramValues.size()])));
     }
