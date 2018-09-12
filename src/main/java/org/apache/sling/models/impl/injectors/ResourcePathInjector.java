@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
@@ -74,6 +75,12 @@ public class ResourcePathInjector extends AbstractInjector implements Injector, 
             ValueMap map = getValueMap(adaptable);
             if (map != null) {
                 resourcePaths = map.get(name, String[].class);
+            }
+            // try the request params
+            SlingHttpServletRequest request = null;
+            if (adaptable instanceof SlingHttpServletRequest) {
+                request = (SlingHttpServletRequest) adaptable;
+                resourcePaths = new String[]{request.getParameter(name)};
             }
         }
         if (ArrayUtils.isEmpty(resourcePaths)) {
