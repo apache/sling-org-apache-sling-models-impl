@@ -18,6 +18,7 @@ package org.apache.sling.models.impl;
 
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -235,7 +236,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     // Use threadlocal to count recursive invocations and break recursing if a max. limit is reached (to avoid cyclic dependencies)
     private ThreadLocal<ThreadInvocationCounter> invocationCountThreadLocal;
 
-    private Map<Object, Map<Class, Object>> adapterCache;
+    private Map<Object, Map<Class, WeakReference<Object>>> adapterCache;
 
     private SlingModelsScriptEngineFactory scriptEngineFactory;
 
@@ -348,11 +349,14 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             Model modelAnnotation = modelClass.getModelAnnotation();
 
             if (modelAnnotation.cache()) {
-                Map<Class, Object> adaptableCache = adapterCache.get(adaptable);
+                Map<Class, WeakReference<Object>> adaptableCache = adapterCache.get(adaptable);
                 if (adaptableCache != null) {
-                    ModelType cachedObject = (ModelType) adaptableCache.get(requestedType);
-                    if (cachedObject != null) {
-                        return new Result<>(cachedObject);
+                    WeakReference<Object> cachedReference = adaptableCache.get(requestedType);
+                    if (cachedReference != null) {
+                        ModelType cachedObject = (ModelType) cachedReference.get();
+                        if (cachedObject != null) {
+                            return new Result<>(cachedObject);
+                        }
                     }
                 }
             }
@@ -377,12 +381,12 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                         ModelType model = (ModelType) Proxy.newProxyInstance(modelClass.getType().getClassLoader(), new Class<?>[] { modelClass.getType() }, handlerResult.getValue());
 
                         if (modelAnnotation.cache()) {
-                            Map<Class, Object> adaptableCache = adapterCache.get(adaptable);
+                            Map<Class, WeakReference<Object>> adaptableCache = adapterCache.get(adaptable);
                             if (adaptableCache == null) {
                                 adaptableCache = new ConcurrentHashMap<>(INNER_CACHE_INITIAL_CAPACITY);
                                 adapterCache.put(adaptable, adaptableCache);
                             }
-                            adaptableCache.put(requestedType, model);
+                            adaptableCache.put(requestedType, new WeakReference(model));
                         }
 
                         result = new Result<>(model);
@@ -394,12 +398,12 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                         result = createObject(adaptable, modelClass);
 
                         if (result.wasSuccessful() && modelAnnotation.cache()) {
-                            Map<Class, Object> adaptableCache = adapterCache.get(adaptable);
+                            Map<Class, WeakReference<Object>> adaptableCache = adapterCache.get(adaptable);
                             if (adaptableCache == null) {
                                 adaptableCache = new ConcurrentHashMap<>(INNER_CACHE_INITIAL_CAPACITY);
                                 adapterCache.put(adaptable, adaptableCache);
                             }
-                            adaptableCache.put(requestedType, result.getValue());
+                            adaptableCache.put(requestedType, new WeakReference(result.getValue()));
                         }
                     } catch (Exception e) {
                         String msg = String.format("Unable to create model %s", modelClass.getType());
@@ -1065,7 +1069,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             }
         };
 
-        this.adapterCache = Collections.synchronizedMap(new WeakHashMap<Object, Map<Class, Object>>());
+        this.adapterCache = Collections.synchronizedMap(new WeakHashMap<Object, Map<Class, WeakReference<Object>>>());
 
         BundleContext bundleContext = ctx.getBundleContext();
         this.queue = new ReferenceQueue<>();
