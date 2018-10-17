@@ -35,6 +35,7 @@ import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequestEvent;
