@@ -21,8 +21,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.ViaProviderType;
 import org.apache.sling.models.annotations.via.ResourceSuperType;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 @Component
 @Service
@@ -34,12 +33,12 @@ public class ResourceSuperTypeViaProvider extends AbstractResourceTypeViaProvide
     }
 
     @Override
-    protected String getResourceType(@Nonnull Resource resource, @Nonnull String value) {
+    protected String getResourceType(@NotNull Resource resource, @NotNull String value) {
         return resource.getResourceResolver().getParentResourceType(resource);
     }
 
     @Override
-    protected boolean handle(@Nonnull String value) {
+    protected boolean handle(@NotNull String value) {
         return true;
     }
 }

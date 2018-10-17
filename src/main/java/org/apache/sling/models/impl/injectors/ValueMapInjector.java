@@ -24,8 +24,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +40,7 @@ import org.apache.sling.models.spi.ValuePreparer;
 import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,13 +54,13 @@ public class ValueMapInjector extends AbstractInjector implements Injector, Inje
     private static final Logger log = LoggerFactory.getLogger(ValueMapInjector.class);
 
     @Override
-    public @Nonnull String getName() {
+    public @NotNull String getName() {
         return "valuemap";
     }
 
     @Override
-    public Object getValue(@Nonnull Object adaptable, String name, @Nonnull Type type, @Nonnull AnnotatedElement element,
-            @Nonnull DisposalCallbackRegistry callbackRegistry) {
+    public Object getValue(@NotNull Object adaptable, String name, @NotNull Type type, @NotNull AnnotatedElement element,
+            @NotNull DisposalCallbackRegistry callbackRegistry) {
         if (adaptable == ObjectUtils.NULL) {
             return null;
         }

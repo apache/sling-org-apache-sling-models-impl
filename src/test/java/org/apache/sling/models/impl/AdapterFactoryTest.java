@@ -18,12 +18,12 @@ package org.apache.sling.models.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -38,10 +38,13 @@ import org.apache.sling.models.factory.MissingExporterException;
 import org.apache.sling.models.factory.ModelClassException;
 import org.apache.sling.models.impl.injectors.SelfInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
+import org.apache.sling.models.testmodels.classes.CachedModelWithSelfReference;
 import org.apache.sling.models.testmodels.classes.ConstructorWithExceptionModel;
 import org.apache.sling.models.testmodels.classes.DefaultStringModel;
 import org.apache.sling.models.testmodels.classes.InvalidModelWithMissingAnnotation;
 import org.apache.sling.models.testmodels.classes.ResourceModelWithRequiredField;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,9 +53,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AdapterFactoryTest {
@@ -83,7 +83,7 @@ public class AdapterFactoryTest {
         factory.bindModelExporter(new SecondStringExporter(), new ServicePropertiesMap(3, 1));
         factory.bindModelExporter(new FirstIntegerExporter(), new ServicePropertiesMap(4, 2));
         
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(DefaultStringModel.class, ConstructorWithExceptionModel.class, NestedModel.class, NestedModelWithInvalidAdaptable.class, NestedModelWithInvalidAdaptable2.class, ResourceModelWithRequiredField.class) ;
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(DefaultStringModel.class, ConstructorWithExceptionModel.class, NestedModel.class, NestedModelWithInvalidAdaptable.class, NestedModelWithInvalidAdaptable2.class, ResourceModelWithRequiredField.class, CachedModelWithSelfReference.class) ;
     }
 
     @Test
@@ -210,14 +210,14 @@ public class AdapterFactoryTest {
 
     private static class FirstStringExporter implements ModelExporter {
         @Override
-        public boolean isSupported(@Nonnull Class<?> aClass) {
+        public boolean isSupported(@NotNull Class<?> aClass) {
             return aClass == String.class;
         }
 
-        @CheckForNull
+        @Nullable
         @Override
         @SuppressWarnings("unchecked")
-        public <T> T export(@Nonnull Object o, @Nonnull Class<T> aClass, @Nonnull Map<String, String> map) throws ExportException {
+        public <T> T export(@NotNull Object o, @NotNull Class<T> aClass, @NotNull Map<String, String> map) throws ExportException {
             if (aClass == String.class) {
                 return (T) "Export from first";
             } else {
@@ -225,7 +225,7 @@ public class AdapterFactoryTest {
             }
         }
 
-        @Nonnull
+        @NotNull
         @Override
         public String getName() {
             return "first";
@@ -235,13 +235,13 @@ public class AdapterFactoryTest {
     @SuppressWarnings("unchecked")
     private static class SecondStringExporter implements ModelExporter {
         @Override
-        public boolean isSupported(@Nonnull Class<?> aClass) {
+        public boolean isSupported(@NotNull Class<?> aClass) {
             return aClass == String.class;
         }
 
-        @CheckForNull
+        @Nullable
         @Override
-        public <T> T export(@Nonnull Object o, @Nonnull Class<T> aClass, @Nonnull Map<String, String> map) throws ExportException {
+        public <T> T export(@NotNull Object o, @NotNull Class<T> aClass, @NotNull Map<String, String> map) throws ExportException {
             if (aClass == String.class) {
                 return (T) "Export from second";
             } else {
@@ -249,7 +249,7 @@ public class AdapterFactoryTest {
             }
         }
 
-        @Nonnull
+        @NotNull
         @Override
         public String getName() {
             return "second";
@@ -259,13 +259,13 @@ public class AdapterFactoryTest {
     @SuppressWarnings("unchecked")
     private static class FirstIntegerExporter implements ModelExporter {
         @Override
-        public boolean isSupported(@Nonnull Class<?> aClass) {
+        public boolean isSupported(@NotNull Class<?> aClass) {
             return aClass == Integer.class;
         }
 
-        @CheckForNull
+        @Nullable
         @Override
-        public <T> T export(@Nonnull Object o, @Nonnull Class<T> aClass, @Nonnull Map<String, String> map) throws ExportException {
+        public <T> T export(@NotNull Object o, @NotNull Class<T> aClass, @NotNull Map<String, String> map) throws ExportException {
             if (aClass == Integer.class) {
                 return (T) Integer.valueOf(42);
             } else {
@@ -273,10 +273,51 @@ public class AdapterFactoryTest {
             }
         }
 
-        @Nonnull
+        @NotNull
         @Override
         public String getName() {
             return "first";
         }
+    }
+
+	@Test
+    public void testCreateCachedModelWillNotCrashTheVMWithOOM() throws Exception {
+        /*
+         * LOAD_FACTOR is used to ensure the test will try create instances of the model to fill up
+         * HEAP_SIZE * LOAD_FACTOR memory. This should be a number > 1.0, to ensure that memory would be
+         * exhausted, should this test fail.
+         */
+        double LOAD_FACTOR = 2.0;
+        long instanceSize = sizeOf(new CachedModelWithSelfReference());
+        long maxHeapSize = Runtime.getRuntime().maxMemory();
+        long maxInstances = (long) ((maxHeapSize / instanceSize) * LOAD_FACTOR);
+        
+        for (long i = 0; i < maxInstances; i++) {
+            factory.createModel(mock(SlingHttpServletRequest.class), CachedModelWithSelfReference.class);
+        }
+    }
+     
+    @SuppressWarnings({ "restriction", "rawtypes" })
+    public static long sizeOf(Object o) throws Exception {
+        Class<sun.misc.Unsafe> unsafeClass = sun.misc.Unsafe.class;
+        Field unsafeField = unsafeClass.getDeclaredField("theUnsafe");
+        unsafeField.setAccessible(true);
+        sun.misc.Unsafe theUnsafe = (sun.misc.Unsafe) unsafeField.get(unsafeClass);
+
+        long maxSize = 0;
+        Class c = o.getClass();
+        while (c != Object.class) {
+            for (Field f : c.getDeclaredFields()) {
+                if ((f.getModifiers() & Modifier.STATIC) == 0) {
+                    long offset = theUnsafe.objectFieldOffset(f);
+                    if (offset > maxSize) {
+                        maxSize = offset;
+                    }
+                }
+            }
+            c = c.getSuperclass();
+        }
+
+        return ((maxSize/8) + 1) * 8;
     }
 }

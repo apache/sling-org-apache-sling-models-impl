@@ -23,6 +23,8 @@ import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.spi.DisposalCallback;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,8 +35,6 @@ import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequestEvent;
@@ -181,13 +181,13 @@ public class RequestDisposalTest {
     }
 
     private class DisposedInjector implements Injector {
-        @Nonnull
+        @NotNull
         @Override
         public String getName() {
             return "disposed";
         }
 
-        @CheckForNull
+        @Nullable
         @Override
         public Object getValue(@Nonnull Object o, String s, @Nonnull Type type, @Nonnull AnnotatedElement annotatedElement, @Nonnull DisposalCallbackRegistry disposalCallbackRegistry) {
             TestDisposalCallback callback = new TestDisposalCallback();

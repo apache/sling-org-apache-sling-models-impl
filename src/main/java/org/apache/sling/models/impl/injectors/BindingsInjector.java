@@ -19,7 +19,6 @@ package org.apache.sling.models.impl.injectors;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 
-import javax.annotation.Nonnull;
 import javax.servlet.ServletRequest;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -35,6 +34,7 @@ import org.apache.sling.models.spi.ValuePreparer;
 import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 
 @Component
@@ -43,13 +43,13 @@ import org.osgi.framework.Constants;
 public class BindingsInjector implements Injector, StaticInjectAnnotationProcessorFactory, ValuePreparer {
 
     @Override
-    public @Nonnull String getName() {
+    public @NotNull String getName() {
         return "script-bindings";
     }
 
     @Override
-    public Object getValue(@Nonnull Object adaptable, String name, @Nonnull Type type, @Nonnull AnnotatedElement element,
-            @Nonnull DisposalCallbackRegistry callbackRegistry) {
+    public Object getValue(@NotNull Object adaptable, String name, @NotNull Type type, @NotNull AnnotatedElement element,
+            @NotNull DisposalCallbackRegistry callbackRegistry) {
         if (adaptable == ObjectUtils.NULL) {
             return null;
         }

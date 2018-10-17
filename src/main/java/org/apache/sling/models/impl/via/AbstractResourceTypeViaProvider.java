@@ -21,11 +21,10 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceWrapper;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.models.spi.ViaProvider;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 public abstract class AbstractResourceTypeViaProvider implements ViaProvider {
 
@@ -62,9 +61,9 @@ public abstract class AbstractResourceTypeViaProvider implements ViaProvider {
          }
     }
 
-    protected abstract boolean handle(@Nonnull String value);
+    protected abstract boolean handle(@NotNull String value);
 
-    protected abstract @CheckForNull String getResourceType(@Nonnull Resource resource, @Nonnull String value);
+    protected abstract @Nullable String getResourceType(@NotNull Resource resource, @NotNull String value);
 
     private class ResourceTypeForcingResourceWrapper extends ResourceWrapper {
 

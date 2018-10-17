@@ -19,8 +19,6 @@ package org.apache.sling.models.impl.injectors;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 
-import javax.annotation.Nonnull;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
@@ -33,6 +31,7 @@ import org.apache.sling.models.spi.Injector;
 import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 
 /**
@@ -44,12 +43,12 @@ import org.osgi.framework.Constants;
 public class SelfInjector implements Injector, StaticInjectAnnotationProcessorFactory, AcceptsNullName {
 
     @Override
-    public @Nonnull String getName() {
+    public @NotNull String getName() {
         return "self";
     }
 
-    public Object getValue(@Nonnull Object adaptable, String name, @Nonnull Type type, @Nonnull AnnotatedElement element,
-            @Nonnull DisposalCallbackRegistry callbackRegistry) {
+    public Object getValue(@NotNull Object adaptable, String name, @NotNull Type type, @NotNull AnnotatedElement element,
+            @NotNull DisposalCallbackRegistry callbackRegistry) {
         // if the @Self annotation is present return the adaptable to be inserted directly or to be adapted from
         if (element.isAnnotationPresent(Self.class)) {
             return adaptable;

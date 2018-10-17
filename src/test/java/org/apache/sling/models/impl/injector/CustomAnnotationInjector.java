@@ -19,25 +19,24 @@ package org.apache.sling.models.impl.injector;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 
-import javax.annotation.Nonnull;
-
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
 import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProcessor;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("deprecation")
 public class CustomAnnotationInjector implements Injector, InjectAnnotationProcessorFactory {
 
     @Override
-    public @Nonnull String getName() {
+    public @NotNull String getName() {
         return "with-annotation";
     }
 
     @Override
-    public Object getValue(@Nonnull Object adaptable, String name, @Nonnull Type declaredType, @Nonnull AnnotatedElement element,
-            @Nonnull DisposalCallbackRegistry callbackRegistry) {
+    public Object getValue(@NotNull Object adaptable, String name, @NotNull Type declaredType, @NotNull AnnotatedElement element,
+            @NotNull DisposalCallbackRegistry callbackRegistry) {
         if (name.equals("customString")) {
             return "custom value";
         } else {
