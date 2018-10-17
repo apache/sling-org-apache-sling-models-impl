@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -137,7 +138,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     private static final Object REQUEST_MARKER_VALUE = new Object();
 
-    private static class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry {
+    private static class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry, Disposable {
 
         private List<DisposalCallback> callbacks = new ArrayList<>();
 
@@ -150,7 +151,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             callbacks = Collections.unmodifiableList(callbacks);
         }
 
-        private void onDisposed() {
+
+        @Override
+        public void onDisposed() {
             for (DisposalCallback callback : callbacks) {
                 callback.onDisposed();
             }
@@ -158,11 +161,60 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     }
 
+    private static class CombinedDisposable implements Disposable {
+        private final Collection<Disposable> delegates = Collections.synchronizedCollection(new HashSet<Disposable>());
+
+        private void add(Disposable disposable) {
+            delegates.add(disposable);
+        }
+
+        @Override
+        public void onDisposed() {
+            for (Disposable delegate : delegates) {
+                delegate.onDisposed();
+            }
+        }
+    }
+
+    private interface Disposable  {
+        void onDisposed();
+    }
+
+    private static class RequestDisposalCallbacks {
+        private ConcurrentHashMap<ServletRequest, Disposable> callbacks = new ConcurrentHashMap<>();
+
+        public Collection<Disposable> values() {
+            return callbacks.values();
+        }
+
+        public Disposable remove(ServletRequest request) {
+            return callbacks.remove(request);
+        }
+
+        public void put(ServletRequest request, Disposable registry) {
+            synchronized (callbacks) {
+                CombinedDisposable combinedDisposable = null;
+                Disposable current = callbacks.get(request);
+                if (current == null) {
+                    callbacks.put(request, registry);
+                    return;
+                } else if (current instanceof CombinedDisposable) {
+                    combinedDisposable = (CombinedDisposable) current;
+                } else {
+                    combinedDisposable = new CombinedDisposable();
+                    combinedDisposable.add(current);
+                    callbacks.put(request, combinedDisposable);
+                }
+                combinedDisposable.add(registry);
+            }
+        }
+    }
+
     private ReferenceQueue<Object> queue;
 
-    private ConcurrentMap<java.lang.ref.Reference<Object>, DisposalCallbackRegistryImpl> disposalCallbacks;
+    private ConcurrentMap<java.lang.ref.Reference<Object>, Disposable> disposalCallbacks;
 
-    private ConcurrentHashMap<ServletRequest, DisposalCallbackRegistryImpl> requestDisposalCallbacks;
+    private RequestDisposalCallbacks requestDisposalCallbacks;
 
     @Override
     public void run() {
@@ -173,7 +225,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         java.lang.ref.Reference<?> ref = queue.poll();
         while (ref != null) {
             log.debug("calling disposal for {}.", ref.toString());
-            DisposalCallbackRegistryImpl registry = disposalCallbacks.remove(ref);
+            Disposable registry = disposalCallbacks.remove(ref);
             registry.onDisposed();
             ref = queue.poll();
         }
@@ -1072,7 +1124,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         BundleContext bundleContext = ctx.getBundleContext();
         this.queue = new ReferenceQueue<>();
         this.disposalCallbacks = new ConcurrentHashMap<>();
-        this.requestDisposalCallbacks = new ConcurrentHashMap<>();
+        this.requestDisposalCallbacks = new RequestDisposalCallbacks();
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put(Constants.SERVICE_VENDOR, "Apache Software Foundation");
         properties.put(Constants.SERVICE_DESCRIPTION, "Sling Models OSGi Service Disposal Job");
@@ -1101,7 +1153,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     protected void deactivate() {
         this.adapterCache = null;
         if (this.requestDisposalCallbacks != null) {
-            for (final DisposalCallbackRegistryImpl requestRegistries : this.requestDisposalCallbacks.values()) {
+            for (final Disposable requestRegistries : this.requestDisposalCallbacks.values()) {
                 requestRegistries.onDisposed();
             }
         }
@@ -1314,7 +1366,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     @Override
     public void requestDestroyed(ServletRequestEvent sre) {
         ServletRequest request = unwrapRequest(sre.getServletRequest());
-        DisposalCallbackRegistryImpl registry = requestDisposalCallbacks.remove(request);
+        Disposable registry = requestDisposalCallbacks.remove(request);
         if (registry != null) {
             registry.onDisposed();
         }
