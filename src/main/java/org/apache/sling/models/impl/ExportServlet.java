@@ -118,6 +118,7 @@ class ExportServlet extends SlingSafeMethodsServlet {
                 return;
             }
             response.getWriter().write(exported);
+            response.getWriter().flush();
         } finally {
             scriptHelper.cleanup();
         }
