@@ -202,6 +202,6 @@ class ExportServlet extends SlingSafeMethodsServlet {
             Object adapter = modelFactory.createModel(request, adapterClass);
             return modelFactory.exportModel(adapter, exporterName, String.class, options);
         }
-    };
+    }
 
 }

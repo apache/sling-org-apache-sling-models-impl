@@ -59,6 +59,6 @@ public class ModelClassConstructor<ModelType> {
 
     public ConstructorParameter[] getConstructorParameters() {
         return constructorParametersArray;
-    };
-    
+    }
+
 }
