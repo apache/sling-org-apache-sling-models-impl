@@ -34,6 +34,10 @@ public class ModelClassConstructor<ModelType> {
     private final ConstructorParameter[] constructorParametersArray;
 
     public ModelClassConstructor(Constructor<ModelType> constructor, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
+        if (!constructor.isAccessible()) {
+            constructor.setAccessible(true);
+        }
+
         this.constructor = constructor;
         this.hasInjectAnnotation = constructor.isAnnotationPresent(Inject.class);
 
