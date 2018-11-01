@@ -38,6 +38,9 @@ import org.apache.sling.models.testmodels.classes.WithOneConstructorModel;
 import org.apache.sling.models.testmodels.classes.WithThreeConstructorsModel;
 import org.apache.sling.models.testmodels.classes.WithTwoConstructorsModel;
 import org.apache.sling.models.testmodels.classes.constructorinjection.NoNameModel;
+import org.apache.sling.models.testmodels.classes.constructorinjection.NonPublicConstructorPackagePrivateModel;
+import org.apache.sling.models.testmodels.classes.constructorinjection.NonPublicConstructorPrivateModel;
+import org.apache.sling.models.testmodels.classes.constructorinjection.NonPublicConstructorProtectedModel;
 import org.apache.sling.models.testmodels.classes.constructorinjection.WithThreeConstructorsOneInjectModel;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,7 +80,7 @@ public class ConstructorTest {
         factory.activate(componentCtx);
         factory.bindInjector(new RequestAttributeInjector(), new ServicePropertiesMap(1, 1));
         factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(2, 2));
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(WithOneConstructorModel.class, WithThreeConstructorsModel.class, WithTwoConstructorsModel.class, SuperclassConstructorModel.class, InvalidConstructorModel.class, WithThreeConstructorsOneInjectModel.class, NoNameModel.class);
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(WithOneConstructorModel.class, WithThreeConstructorsModel.class, WithTwoConstructorsModel.class, SuperclassConstructorModel.class, InvalidConstructorModel.class, WithThreeConstructorsOneInjectModel.class, NoNameModel.class, NonPublicConstructorProtectedModel.class, NonPublicConstructorPackagePrivateModel.class, NonPublicConstructorPrivateModel.class);
     }
 
     @Test
@@ -184,5 +187,26 @@ public class ConstructorTest {
     public void testNoNameModel() {
         NoNameModel model = factory.getAdapter(request, NoNameModel.class);
         assertNull(model);
+    }
+    
+    @Test
+    public void testNonPublicConstructorProtectedModel() {
+        when(request.getAttribute("attribute")).thenReturn(INT_VALUE);
+        NonPublicConstructorProtectedModel model = factory.createModel(request, NonPublicConstructorProtectedModel.class);
+        assertNotNull(model);
+    }
+    
+    @Test
+    public void testNonPublicConstructorPackagePrivateModel() {
+        when(request.getAttribute("attribute")).thenReturn(INT_VALUE);
+        NonPublicConstructorPackagePrivateModel model = factory.createModel(request, NonPublicConstructorPackagePrivateModel.class);
+        assertNotNull(model);
+    }
+    
+    @Test
+    public void testNonPublicConstructorPrivateModel() {
+        when(request.getAttribute("attribute")).thenReturn(INT_VALUE);
+        NonPublicConstructorPrivateModel model = factory.createModel(request, NonPublicConstructorPrivateModel.class);
+        assertNotNull(model);
     }
 }
