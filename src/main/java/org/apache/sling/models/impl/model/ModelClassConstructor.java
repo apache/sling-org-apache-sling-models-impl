@@ -19,10 +19,9 @@
 package org.apache.sling.models.impl.model;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
-
 import javax.inject.Inject;
-
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.impl.ReflectionUtil;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
@@ -34,10 +33,6 @@ public class ModelClassConstructor<ModelType> {
     private final ConstructorParameter[] constructorParametersArray;
 
     public ModelClassConstructor(Constructor<ModelType> constructor, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
-        if (!constructor.isAccessible()) {
-            constructor.setAccessible(true);
-        }
-
         this.constructor = constructor;
         this.hasInjectAnnotation = constructor.isAnnotationPresent(Inject.class);
 
@@ -53,10 +48,26 @@ public class ModelClassConstructor<ModelType> {
         }
     }
 
+    public ModelType newInstance(Object... parameters) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        synchronized (constructor) {
+            boolean accessible = constructor.isAccessible();
+            try {
+                if (!accessible) {
+                    constructor.setAccessible(true);
+                }
+                return constructor.newInstance(parameters);
+            } finally {
+                if (!accessible) {
+                    constructor.setAccessible(false);
+                }
+            }
+        }
+    }
+
     public Constructor<ModelType> getConstructor() {
         return constructor;
     }
-    
+
     public boolean hasInjectAnnotation() {
         return hasInjectAnnotation;
     }
@@ -64,5 +75,5 @@ public class ModelClassConstructor<ModelType> {
     public ConstructorParameter[] getConstructorParameters() {
         return constructorParametersArray;
     };
-    
+
 }

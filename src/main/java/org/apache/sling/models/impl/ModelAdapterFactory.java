@@ -711,7 +711,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         ModelType object;
         if (constructorToUse.getConstructor().getParameterTypes().length == 0) {
             // no parameters for constructor injection? instantiate it right away
-            object = constructorToUse.getConstructor().newInstance();
+          
+            object = constructorToUse.newInstance();
         } else {
             // instantiate with constructor injection
             // if this fails, make sure resources that may be claimed by injectors are cleared up again
@@ -723,13 +724,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                 } else {
                     object = result.getValue();
                 }
-            } catch (InstantiationException ex) {
-                registry.onDisposed();
-                throw ex;
-            } catch (InvocationTargetException ex) {
-                registry.onDisposed();
-                throw ex;
-            } catch (IllegalAccessException ex) {
+            } catch (InstantiationException | InvocationTargetException | IllegalAccessException ex) {
                 registry.onDisposed();
                 throw ex;
             }
@@ -835,7 +830,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             }
             return new Result<>(missingElementsException);
         }
-        return new Result<>(constructor.getConstructor().newInstance(paramValues.toArray(new Object[paramValues.size()])));
+        return new Result<>(constructor.newInstance(paramValues.toArray(new Object[paramValues.size()])));
     }
 
     private Result<Boolean> injectDefaultValue(InjectableElement point, InjectAnnotationProcessor processor,
