@@ -224,7 +224,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     private void clearDisposalCallbackRegistryQueue() {
         java.lang.ref.Reference<?> ref = queue.poll();
         while (ref != null) {
-            log.debug("calling disposal for {}.", ref.toString());
+            log.debug("calling disposal for {}.", ref);
             Disposable registry = disposalCallbacks.remove(ref);
             registry.onDisposed();
             ref = queue.poll();
