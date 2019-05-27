@@ -29,16 +29,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.request.RequestPathInfo;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.factory.ModelClassException;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
 import org.apache.sling.models.impl.injectors.SelfInjector;
+import org.apache.sling.models.impl.via.BeanPropertyViaProvider;
 import org.apache.sling.models.testmodels.classes.InvalidConstructorModel;
 import org.apache.sling.models.testmodels.classes.SuperclassConstructorModel;
 import org.apache.sling.models.testmodels.classes.WithOneConstructorModel;
 import org.apache.sling.models.testmodels.classes.WithThreeConstructorsModel;
 import org.apache.sling.models.testmodels.classes.WithTwoConstructorsModel;
 import org.apache.sling.models.testmodels.classes.constructorinjection.NoNameModel;
+import org.apache.sling.models.testmodels.classes.constructorinjection.ViaRequestSuffixModel;
 import org.apache.sling.models.testmodels.classes.constructorinjection.WithThreeConstructorsOneInjectModel;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,7 +82,17 @@ public class ConstructorTest {
         factory.activate(componentCtx);
         factory.bindInjector(new RequestAttributeInjector(), new ServicePropertiesMap(1, 1));
         factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(2, 2));
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(WithOneConstructorModel.class, WithThreeConstructorsModel.class, WithTwoConstructorsModel.class, SuperclassConstructorModel.class, InvalidConstructorModel.class, WithThreeConstructorsOneInjectModel.class, NoNameModel.class);
+        factory.bindViaProvider(new BeanPropertyViaProvider(), null);
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(
+                WithOneConstructorModel.class,
+                WithThreeConstructorsModel.class,
+                WithTwoConstructorsModel.class,
+                SuperclassConstructorModel.class,
+                InvalidConstructorModel.class,
+                WithThreeConstructorsOneInjectModel.class,
+                NoNameModel.class,
+                ViaRequestSuffixModel.class
+        );
     }
 
     @Test
@@ -184,5 +199,20 @@ public class ConstructorTest {
     public void testNoNameModel() {
         NoNameModel model = factory.getAdapter(request, NoNameModel.class);
         assertNull(model);
+    }
+
+    @Test
+    public void testViaInjectionModel() throws Exception {
+        Resource suffixResource = mock(Resource.class);
+        when(suffixResource.getPath()).thenReturn("/the/suffix");
+
+        RequestPathInfo requestPathInfo = mock(RequestPathInfo.class);
+        when(requestPathInfo.getSuffixResource()).thenReturn(suffixResource);
+
+        when(request.getRequestPathInfo()).thenReturn(requestPathInfo);
+
+        ViaRequestSuffixModel model = factory.getAdapter(request, ViaRequestSuffixModel.class);
+        assertThat(model, Matchers.notNullValue());
+        assertThat(model.getSuffix(), Matchers.is("/the/suffix"));
     }
 }

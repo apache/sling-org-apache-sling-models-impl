@@ -45,6 +45,14 @@ public class BeanPropertyViaProvider implements ViaProvider {
         if (StringUtils.isBlank(value)) {
             return ORIGINAL;
         }
+
+        // support nested values, e.g. requestPathInfo.suffixResource.path
+        if (StringUtils.contains(value, '.')) {
+            String[] parts = StringUtils.split(value, ".", 2);
+            Object adaptable = getAdaptable(original, parts[0]);
+            return getAdaptable(adaptable, parts[1]);
+        }
+
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(original.getClass());
             for (PropertyDescriptor desc : beanInfo.getPropertyDescriptors()) {
