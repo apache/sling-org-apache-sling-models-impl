@@ -31,7 +31,7 @@ import org.osgi.framework.Constants;
 
 @Component
 @Service
-@Property(name = Constants.SERVICE_RANKING, intValue = (Integer.MAX_VALUE - 1))
+@Property(name = Constants.SERVICE_RANKING, intValue = 0) // this must come before FirstImplementationPicker
 public class ResourceTypeBasedResourcePicker implements ImplementationPicker {
 
     @Override
