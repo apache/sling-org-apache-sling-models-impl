@@ -34,7 +34,7 @@ public class ModelClass<ModelType> {
     private final Class<ModelType> type;
     private final Model modelAnnotation;
     final DefaultInjectionStrategy defaultInjectionStrategy;
-    private volatile ModelClassConstructor[] constructors;
+    private volatile ModelClassConstructor<?>[] constructors;
     private volatile InjectableField[] injectableFields;
     private volatile InjectableMethod[] injectableMethods;
 
@@ -60,7 +60,7 @@ public class ModelClass<ModelType> {
     }
     
     @SuppressWarnings("unchecked")
-    private static ModelClassConstructor[] getConstructors(Class<?> type, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
+    private static ModelClassConstructor<?>[] getConstructors(Class<?> type, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
         if (type.isInterface()) {
             return new ModelClassConstructor[0];
         }
@@ -69,7 +69,7 @@ public class ModelClass<ModelType> {
         // sort the constructor list in order from most params to least params, and constructors with @Inject annotation first
         Arrays.sort(constructors, new ParameterCountInjectComparator());
 
-        ModelClassConstructor[] array = new ModelClassConstructor[constructors.length];
+        ModelClassConstructor<?>[] array = new ModelClassConstructor[constructors.length];
         for (int i=0; i<array.length; i++) {
             array[i] = new ModelClassConstructor(constructors[i], processorFactories, defaultInjectionStrategy);
         }

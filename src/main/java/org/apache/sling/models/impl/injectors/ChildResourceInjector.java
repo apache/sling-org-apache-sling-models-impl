@@ -24,9 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.injectorspecific.ChildResource;
@@ -38,10 +35,9 @@ import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory2;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
 
-@Component
-@Service
-@Property(name = Constants.SERVICE_RANKING, intValue = 3000)
+@Component(property=Constants.SERVICE_RANKING+":Integer=3000")
 public class ChildResourceInjector extends AbstractInjector implements Injector, InjectAnnotationProcessorFactory2 {
 
     @Override

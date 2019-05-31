@@ -16,11 +16,11 @@
  */
 package org.apache.sling.models.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -35,29 +35,15 @@ import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InvalidAdaptationsTest {
-
-    @Mock
-    private ComponentContext componentCtx;
-
-    @Mock
-    private BundleContext bundleContext;
-
     private ModelAdapterFactory factory;
 
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(1, 1));
         factory.bindInjector(new ChildResourceInjector(), new ServicePropertiesMap(2, 0));
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(NonModel.class, RequestModel.class);

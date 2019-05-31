@@ -25,9 +25,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
@@ -42,12 +39,11 @@ import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component
-@Service
-@Property(name = Constants.SERVICE_RANKING, intValue = 2500)
+@Component(property=Constants.SERVICE_RANKING+":Integer=2500")
 public class ResourcePathInjector extends AbstractInjector implements Injector, AcceptsNullName,
         StaticInjectAnnotationProcessorFactory {
 

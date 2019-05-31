@@ -17,15 +17,13 @@
 package org.apache.sling.models.impl.via;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.ViaProviderType;
 import org.apache.sling.models.annotations.via.ForcedResourceType;
 import org.jetbrains.annotations.NotNull;
+import org.osgi.service.component.annotations.Component;
 
 @Component
-@Service
 public class ForcedResourceTypeViaProvider extends AbstractResourceTypeViaProvider {
     @Override
     public Class<? extends ViaProviderType> getType() {

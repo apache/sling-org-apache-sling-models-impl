@@ -22,8 +22,6 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Hashtable;
-
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.impl.injectors.ChildResourceInjector;
@@ -31,10 +29,7 @@ import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 
 /**
  * Validates that @Optional annotations works with primitive values which do not support null
@@ -42,21 +37,11 @@ import org.osgi.service.component.ComponentContext;
 @RunWith(MockitoJUnitRunner.class)
 public class OptionalPrimitivesTest {
 
-    @Mock
-    private ComponentContext componentCtx;
-
-    @Mock
-    private BundleContext bundleContext;
-
     private ModelAdapterFactory factory;
 
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(2, 2));
         factory.bindInjector(new ChildResourceInjector(), new ServicePropertiesMap(1, 1));
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(org.apache.sling.models.testmodels.classes.OptionalPrimitivesModel.class, org.apache.sling.models.testmodels.interfaces.OptionalPrimitivesModel.class, org.apache.sling.models.testmodels.classes.constructorinjection.OptionalPrimitivesModel.class);

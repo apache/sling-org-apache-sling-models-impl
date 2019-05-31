@@ -22,8 +22,6 @@ import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
-import java.util.Hashtable;
-
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.models.impl.injectors.SelfInjector;
 import org.apache.sling.models.testmodels.classes.DirectCyclicSelfDependencyModel;
@@ -38,17 +36,9 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SelfDependencyTest {
-
-    @Mock
-    private ComponentContext componentCtx;
-
-    @Mock
-    private BundleContext bundleContext;
 
     private ModelAdapterFactory factory;
 
@@ -58,9 +48,6 @@ public class SelfDependencyTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-
         when(request.adaptTo(any(Class.class))).then(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -69,8 +56,7 @@ public class SelfDependencyTest {
             }
         });
 
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(1, 1));
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(SelfDependencyModelA.class, SelfDependencyModelB.class, DirectCyclicSelfDependencyModel.class, IndirectCyclicSelfDependencyModelA.class, IndirectCyclicSelfDependencyModelB.class);
     }

@@ -22,9 +22,6 @@ import java.lang.reflect.Type;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -41,15 +38,14 @@ import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
 
 /**
  * Injects common Sling objects that can be derived from either a SlingHttpServletRequest, a ResourceResolver or a
  * Resource.
  * Documentation see {@link SlingObject}.
  */
-@Component
-@Service
-@Property(name = Constants.SERVICE_RANKING, intValue = Integer.MAX_VALUE)
+@Component(property=Constants.SERVICE_RANKING+":Integer="+Integer.MAX_VALUE)
 public final class SlingObjectInjector implements Injector, StaticInjectAnnotationProcessorFactory, AcceptsNullName {
 
     /**

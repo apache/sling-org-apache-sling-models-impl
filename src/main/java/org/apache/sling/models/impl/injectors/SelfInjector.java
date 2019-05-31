@@ -19,9 +19,6 @@ package org.apache.sling.models.impl.injectors;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.apache.sling.models.impl.model.ConstructorParameter;
@@ -33,13 +30,12 @@ import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
 
 /**
  * Injects the adaptable object itself.
  */
-@Component
-@Service
-@Property(name = Constants.SERVICE_RANKING, intValue = Integer.MAX_VALUE)
+@Component(property=Constants.SERVICE_RANKING+":Integer="+Integer.MAX_VALUE)
 public class SelfInjector implements Injector, StaticInjectAnnotationProcessorFactory, AcceptsNullName {
 
     @Override

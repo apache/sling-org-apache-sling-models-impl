@@ -20,7 +20,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -49,17 +48,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConstructorTest {
-
-    @Mock
-    private ComponentContext componentCtx;
-
-    @Mock
-    private BundleContext bundleContext;
 
     private ModelAdapterFactory factory;
 
@@ -72,14 +63,11 @@ public class ConstructorTest {
 
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-
+        
         when(request.getAttribute("attribute")).thenReturn(INT_VALUE);
         when(request.getAttribute("attribute2")).thenReturn(STRING_VALUE);
 
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindInjector(new RequestAttributeInjector(), new ServicePropertiesMap(1, 1));
         factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(2, 2));
         factory.bindViaProvider(new BeanPropertyViaProvider(), null);

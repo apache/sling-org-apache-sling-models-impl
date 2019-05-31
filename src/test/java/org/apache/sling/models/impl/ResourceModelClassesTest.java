@@ -30,7 +30,6 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -40,6 +39,7 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.factory.MissingElementsException;
 import org.apache.sling.models.impl.injectors.ChildResourceInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
+import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory;
 import org.apache.sling.models.testmodels.classes.ArrayPrimitivesModel;
 import org.apache.sling.models.testmodels.classes.ArrayWrappersModel;
 import org.apache.sling.models.testmodels.classes.ChildModel;
@@ -53,38 +53,24 @@ import org.apache.sling.models.testmodels.classes.SimplePropertyModel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.service.component.ComponentContext;
 
+@SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceModelClassesTest {
-
-    @Mock
-    private ComponentContext componentCtx;
-
-    @Mock
-    private BundleContext bundleContext;
 
     private ModelAdapterFactory factory;
 
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory();
         ValueMapInjector valueMapInjector = new ValueMapInjector();
         factory.bindInjector(valueMapInjector, new ServicePropertiesMap(2, 2));
         factory.bindInjector(new ChildResourceInjector(), new ServicePropertiesMap(1, 1));
 
-        factory.bindInjectAnnotationProcessorFactory(valueMapInjector,
-                Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 2L));
+        factory.injectAnnotationProcessorFactories = factory.injectAnnotationProcessorFactories = Collections.<InjectAnnotationProcessorFactory>singletonList(new ValueMapInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(SimplePropertyModel.class, ArrayWrappersModel.class, ResourceModelWithRequiredField.class, ChildValueMapModel.class, ArrayPrimitivesModel.class, ChildResourceModel.class, ResourceModelWithRequiredFieldOptionalStrategy.class, ParentModel.class, ChildModel.class, ListModel.class);
     }
 

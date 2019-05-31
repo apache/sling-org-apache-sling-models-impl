@@ -18,6 +18,14 @@
  */
 package org.apache.sling.models.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
@@ -30,28 +38,16 @@ import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 import org.apache.sling.models.factory.MissingElementException;
 import org.apache.sling.models.factory.MissingElementsException;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
+import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 
-import java.util.Collections;
-import java.util.Hashtable;
-
-import static org.mockito.Mockito.when;
-import static org.junit.Assert.*;
-
+@SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class AnnotationConflictsTest {
-
-    @Mock
-    private ComponentContext componentCtx;
-
-    @Mock
-    private BundleContext bundleContext;
 
     private ModelAdapterFactory factory;
 
@@ -60,15 +56,10 @@ public class AnnotationConflictsTest {
 
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory();
         ValueMapInjector injector = new ValueMapInjector();
-
         factory.bindInjector(injector, new ServicePropertiesMap(1, 1));
-        factory.bindInjectAnnotationProcessorFactory(injector, new ServicePropertiesMap(1, 1));
+        factory.injectAnnotationProcessorFactories = Collections.<InjectAnnotationProcessorFactory>singletonList(new ValueMapInjector());
 
         for (Class<?> clazz : this.getClass().getDeclaredClasses()) {
             if (!clazz.isInterface()) {

@@ -29,7 +29,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Dictionary;
-import java.util.Hashtable;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
@@ -53,16 +52,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
-
-import javax.servlet.ServletRequestListener;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OSGiInjectionTest {
     private ModelAdapterFactory factory;
-
-    @Mock
-    private ComponentContext componentCtx;
 
     @Mock
     private BundleContext bundleContext;
@@ -74,14 +67,10 @@ public class OSGiInjectionTest {
 
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory(bundleContext);
 
         OSGiServiceInjector injectorFactory = new OSGiServiceInjector();
-        injectorFactory.activate(componentCtx);
+        injectorFactory.activate(bundleContext);
         factory.bindInjector(injectorFactory, new ServicePropertiesMap(1, 1));
 
         bindings.setSling(helper);

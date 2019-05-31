@@ -16,10 +16,10 @@
  */
 package org.apache.sling.models.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-import java.util.Hashtable;
+import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -27,32 +27,21 @@ import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.impl.injector.CustomAnnotation;
 import org.apache.sling.models.impl.injector.CustomAnnotationInjector;
 import org.apache.sling.models.impl.injector.SimpleInjector;
+import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 
+@SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class CustomInjectorTest {
-
-    @Mock
-    private ComponentContext componentCtx;
-
-    @Mock
-    private BundleContext bundleContext;
 
     private ModelAdapterFactory factory;
 
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(TestModel.class, CustomAnnotationModel.class);
     }
 
@@ -71,7 +60,7 @@ public class CustomInjectorTest {
 
         factory.bindInjector(new SimpleInjector(), new ServicePropertiesMap(1, 1));
         factory.bindInjector(injector, new ServicePropertiesMap(1, 1));
-        factory.bindInjectAnnotationProcessorFactory(injector, new ServicePropertiesMap(1, 1));
+        factory.injectAnnotationProcessorFactories = factory.injectAnnotationProcessorFactories = Collections.<InjectAnnotationProcessorFactory>singletonList(injector);
 
         CustomAnnotationModel model = factory.getAdapter(new Object(), CustomAnnotationModel.class);
         assertNotNull(model);

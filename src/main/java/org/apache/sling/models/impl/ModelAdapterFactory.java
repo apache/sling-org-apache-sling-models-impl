@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -47,23 +46,11 @@ import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletRequestWrapper;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferencePolicyOption;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.Adaptable;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.commons.osgi.RankedServices;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.ValidationStrategy;
@@ -105,29 +92,22 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(metatype = true, immediate = true,
-        label = "Apache Sling Model Adapter Factory")
-@Service(value = { ModelFactory.class, ServletRequestListener.class })
-@Properties({
-    @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, value = "true"),
-    @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, value = "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)")
-})
-@References({
-    @Reference(
-        name = "injector",
-        referenceInterface = Injector.class,
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-        policy = ReferencePolicy.DYNAMIC),
-    @Reference(
-            name = "viaProvider",
-            referenceInterface = ViaProvider.class,
-            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC)
-})
+@Component(immediate = true, service={ ModelFactory.class, ServletRequestListener.class }, 
+    property= { HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER+"=true", 
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT+"=(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)" })
+@Designate(ocd=ModelAdapterFactoryConfiguration.class)
 @SuppressWarnings("deprecation")
 public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFactory, ServletRequestListener {
 
@@ -233,49 +213,32 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     private static final Logger log = LoggerFactory.getLogger(ModelAdapterFactory.class);
 
-    private static final int DEFAULT_MAX_RECURSION_DEPTH = 20;
-
-    private static final long DEFAULT_CLEANUP_JOB_PERIOD = 30l;
-
-    @Property(label = "Maximum Recursion Depth", description = "Maximum depth adaptation will be attempted.", intValue = DEFAULT_MAX_RECURSION_DEPTH)
-    private static final String PROP_MAX_RECURSION_DEPTH = "max.recursion.depth";
-
-    @Property(label = "Cleanup Job Period", description = "Period at which OSGi service references from ThreadLocals will be cleaned up.", longValue = DEFAULT_CLEANUP_JOB_PERIOD)
-    private static final String PROP_CLEANUP_JOB_PERIOD = "cleanup.job.period";
-
     private final @NotNull ConcurrentMap<String, RankedServices<Injector>> injectors = new ConcurrentHashMap<>();
     private final @NotNull RankedServices<Injector> sortedInjectors = new RankedServices<>();
     private final @NotNull ConcurrentMap<Class<? extends ViaProviderType>, ViaProvider> viaProviders = new ConcurrentHashMap<>();
 
-    @Reference(name = "injectAnnotationProcessorFactory", referenceInterface = InjectAnnotationProcessorFactory.class,
-            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    private final @NotNull RankedServices<InjectAnnotationProcessorFactory> injectAnnotationProcessorFactories = new RankedServices<>();
+    @Reference(name="injectAnnotationProcessorFactory", cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    volatile @NotNull Collection<InjectAnnotationProcessorFactory> injectAnnotationProcessorFactories; // this must be non-final for fieldOption=replace!
 
-    @Reference(name = "injectAnnotationProcessorFactory2", referenceInterface = InjectAnnotationProcessorFactory2.class,
-            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    private final @NotNull RankedServices<InjectAnnotationProcessorFactory2> injectAnnotationProcessorFactories2 = new RankedServices<>();
+    @Reference(name="injectAnnotationProcessorFactory2", cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    volatile @NotNull Collection<InjectAnnotationProcessorFactory2> injectAnnotationProcessorFactories2; // this must be non-final for fieldOption=replace!
 
-    @Reference(name = "staticInjectAnnotationProcessorFactory", referenceInterface = StaticInjectAnnotationProcessorFactory.class,
-            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     private final @NotNull RankedServices<StaticInjectAnnotationProcessorFactory> staticInjectAnnotationProcessorFactories = new RankedServices<>();
 
-    @Reference(name = "implementationPicker", referenceInterface = ImplementationPicker.class,
-            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     private final @NotNull RankedServices<ImplementationPicker> implementationPickers = new RankedServices<>();
 
     // bind the service with the highest priority (if a new one comes in this service gets restarted)
-    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY, policyOption=ReferencePolicyOption.GREEDY)
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL, policyOption=ReferencePolicyOption.GREEDY)
     private ModelValidation modelValidation = null;
 
-    @Reference(name = "modelExporter", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
-            referenceInterface = ModelExporter.class)
-    private final @NotNull RankedServices<ModelExporter> modelExporters = new RankedServices<>();
+    @Reference(name = "modelExporter", cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
+    volatile @NotNull Collection<ModelExporter> modelExporters; // this must be non-final for fieldOption=replace!
 
     @Reference
-    private BindingsValuesProvidersByContext bindingsValuesProvidersByContext;
+    BindingsValuesProvidersByContext bindingsValuesProvidersByContext;
 
-    @Reference
-    private AdapterManager adapterManager;
+    @Reference 
+    AdapterManager adapterManager;
 
     ModelPackageBundleListener listener;
 
@@ -288,7 +251,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     // Use threadlocal to count recursive invocations and break recursing if a max. limit is reached (to avoid cyclic dependencies)
     private ThreadLocal<ThreadInvocationCounter> invocationCountThreadLocal;
 
-    private Map<Object, Map<Class, SoftReference<Object>>> adapterCache;
+    private Map<Object, Map<Class<?>, SoftReference<Object>>> adapterCache;
 
     private SlingModelsScriptEngineFactory scriptEngineFactory;
 
@@ -401,7 +364,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             Model modelAnnotation = modelClass.getModelAnnotation();
 
             if (modelAnnotation.cache()) {
-                Map<Class, SoftReference<Object>> adaptableCache = adapterCache.get(adaptable);
+                Map<Class<?>, SoftReference<Object>> adaptableCache = adapterCache.get(adaptable);
                 if (adaptableCache != null) {
                     SoftReference<Object> SoftReference = adaptableCache.get(requestedType);
                     ModelType cachedObject = (ModelType) SoftReference.get();
@@ -431,9 +394,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                         ModelType model = (ModelType) Proxy.newProxyInstance(modelClass.getType().getClassLoader(), new Class<?>[] { modelClass.getType() }, handlerResult.getValue());
 
                         if (modelAnnotation.cache()) {
-                            Map<Class, SoftReference<Object>> adaptableCache = adapterCache.get(adaptable);
+                            Map<Class<?>, SoftReference<Object>> adaptableCache = adapterCache.get(adaptable);
                             if (adaptableCache == null) {
-                                adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class, SoftReference<Object>>());
+                                adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
                                 adapterCache.put(adaptable, adaptableCache);
                             }
                             adaptableCache.put(requestedType, new SoftReference<Object>(model));
@@ -448,9 +411,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                         result = createObject(adaptable, modelClass);
 
                         if (result.wasSuccessful() && modelAnnotation.cache()) {
-                            Map<Class, SoftReference<Object>> adaptableCache = adapterCache.get(adaptable);
+                            Map<Class<?>, SoftReference<Object>> adaptableCache = adapterCache.get(adaptable);
                             if (adaptableCache == null) {
-                                adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class, SoftReference<Object>>());
+                                adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
                                 adapterCache.put(adaptable, adaptableCache);
                             }
                             adaptableCache.put(requestedType, new SoftReference<Object>(result.getValue()));
@@ -1130,17 +1093,15 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @Activate
-    protected void activate(final ComponentContext ctx) {
-        Dictionary<?, ?> props = ctx.getProperties();
-        final int maxRecursionDepth = PropertiesUtil.toInteger(props.get(PROP_MAX_RECURSION_DEPTH), DEFAULT_MAX_RECURSION_DEPTH);
+    protected void activate(final ComponentContext ctx, final ModelAdapterFactoryConfiguration configuration) {
         this.invocationCountThreadLocal = new ThreadLocal<ThreadInvocationCounter>() {
             @Override
             protected ThreadInvocationCounter initialValue() {
-                return new ThreadInvocationCounter(maxRecursionDepth);
+                return new ThreadInvocationCounter(configuration.max_recursion_depth());
             }
         };
 
-        this.adapterCache = Collections.synchronizedMap(new WeakHashMap<Object, Map<Class, SoftReference<Object>>>());
+        this.adapterCache = Collections.synchronizedMap(new WeakHashMap<Object, Map<Class<?>, SoftReference<Object>>>());
 
         BundleContext bundleContext = ctx.getBundleContext();
         this.queue = new ReferenceQueue<>();
@@ -1151,7 +1112,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         properties.put(Constants.SERVICE_DESCRIPTION, "Sling Models OSGi Service Disposal Job");
         properties.put("scheduler.name", "Sling Models OSGi Service Disposal Job");
         properties.put("scheduler.concurrent", false);
-        properties.put("scheduler.period", PropertiesUtil.toLong(props.get(PROP_CLEANUP_JOB_PERIOD), DEFAULT_CLEANUP_JOB_PERIOD));
+        properties.put("scheduler.period", configuration.cleanup_job_period());
 
         this.jobRegistration = bundleContext.registerService(Runnable.class, this, properties);
 
@@ -1192,6 +1153,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         }
     }
 
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC)
     protected void bindInjector(final Injector injector, final Map<String, Object> props) {
         RankedServices<Injector> newRankedServices = new RankedServices<>();
         RankedServices<Injector> injectorsPerInjectorName = injectors.putIfAbsent(injector.getName(), newRankedServices);
@@ -1210,22 +1173,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         sortedInjectors.unbind(injector, props);
     }
 
-    protected void bindInjectAnnotationProcessorFactory(final InjectAnnotationProcessorFactory factory, final Map<String, Object> props) {
-        injectAnnotationProcessorFactories.bind(factory, props);
-    }
-
-    protected void unbindInjectAnnotationProcessorFactory(final InjectAnnotationProcessorFactory factory, final Map<String, Object> props) {
-        injectAnnotationProcessorFactories.unbind(factory, props);
-    }
-
-    protected void bindInjectAnnotationProcessorFactory2(final InjectAnnotationProcessorFactory2 factory, final Map<String, Object> props) {
-        injectAnnotationProcessorFactories2.bind(factory, props);
-    }
-
-    protected void unbindInjectAnnotationProcessorFactory2(final InjectAnnotationProcessorFactory2 factory, final Map<String, Object> props) {
-        injectAnnotationProcessorFactories2.unbind(factory, props);
-    }
-
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void bindStaticInjectAnnotationProcessorFactory(final StaticInjectAnnotationProcessorFactory factory, final Map<String, Object> props) {
         synchronized (staticInjectAnnotationProcessorFactories) {
             staticInjectAnnotationProcessorFactories.bind(factory, props);
@@ -1240,6 +1188,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         }
     }
 
+    @Reference(name="implementationPicker", cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void bindImplementationPicker(final ImplementationPicker implementationPicker, final Map<String, Object> props) {
         synchronized (implementationPickers) {
             implementationPickers.bind(implementationPicker, props);
@@ -1254,18 +1203,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         }
     }
 
-    protected void bindModelExporter(final ModelExporter s, final Map<String, Object> props) {
-        synchronized (modelExporters) {
-            modelExporters.bind(s, props);
-        }
-    }
-
-    protected void unbindModelExporter(final ModelExporter s, final Map<String, Object> props) {
-        synchronized (modelExporters) {
-            modelExporters.unbind(s, props);
-        }
-    }
-
+    @Reference(
+            name = "viaProvider",
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC
+            )
     protected void bindViaProvider(final ViaProvider viaProvider, final Map<String, Object> props) {
         Class<? extends ViaProviderType> type = viaProvider.getType();
         viaProviders.put(type, viaProvider);
@@ -1281,11 +1223,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @NotNull Collection<InjectAnnotationProcessorFactory> getInjectAnnotationProcessorFactories() {
-        return injectAnnotationProcessorFactories.get();
+        return injectAnnotationProcessorFactories;
     }
 
     @NotNull Collection<InjectAnnotationProcessorFactory2> getInjectAnnotationProcessorFactories2() {
-        return injectAnnotationProcessorFactories2.get();
+        return injectAnnotationProcessorFactories2;
     }
 
     @NotNull Collection<StaticInjectAnnotationProcessorFactory> getStaticInjectAnnotationProcessorFactories() {
