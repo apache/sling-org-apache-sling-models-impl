@@ -19,6 +19,7 @@
 package org.apache.sling.models.impl.model;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 
 import javax.inject.Inject;
@@ -49,10 +50,42 @@ public class ModelClassConstructor<ModelType> {
         }
     }
 
+    /**
+     * Proxies the call to {@link Constructor#newInstance(Object...)}, checking (and
+     * setting) accessibility first.
+     * 
+     * @param parameters
+     *            the constructor parameters that are passed to
+     *            {@link Constructor#newInstance(Object...)}
+     * @return The constructed object
+     * 
+     * @throws InstantiationException when {@link Constructor#newInstance(Object...)} would throw
+     * @throws IllegalAccessException when {@link Constructor#newInstance(Object...)} would throw
+     * @throws IllegalArgumentException when {@link Constructor#newInstance(Object...)} would throw
+     * @throws InvocationTargetException when {@link Constructor#newInstance(Object...)} would throw
+     * 
+     * @see Constructor#newInstance(Object...)
+     */
+    public ModelType newInstance(Object... parameters) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        synchronized (constructor) {
+            boolean accessible = constructor.isAccessible();
+            try {
+                if (!accessible) {
+                    constructor.setAccessible(true);
+                }
+                return constructor.newInstance(parameters);
+            } finally {
+                if (!accessible) {
+                    constructor.setAccessible(false);
+                }
+            }
+        }
+    }
+
     public Constructor<ModelType> getConstructor() {
         return constructor;
     }
-    
+
     public boolean hasInjectAnnotation() {
         return hasInjectAnnotation;
     }
@@ -60,5 +93,5 @@ public class ModelClassConstructor<ModelType> {
     public ConstructorParameter[] getConstructorParameters() {
         return constructorParametersArray;
     };
-    
+
 }
