@@ -231,7 +231,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     @Reference(cardinality=ReferenceCardinality.OPTIONAL, policyOption=ReferencePolicyOption.GREEDY)
     private ModelValidation modelValidation = null;
 
-    @Reference(name = "modelExporter", cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
+    @Reference(name = "modelExporter", cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     volatile @NotNull Collection<ModelExporter> modelExporters; // this must be non-final for fieldOption=replace!
 
     @Reference
