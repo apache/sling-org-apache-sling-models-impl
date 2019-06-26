@@ -22,8 +22,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
-import java.util.Hashtable;
-
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
@@ -34,18 +32,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.LoggerFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestInjectionTest {
-
-    @Mock
-    private ComponentContext componentCtx;
-
-    @Mock
-    private BundleContext bundleContext;
 
     private ModelAdapterFactory factory;
 
@@ -57,18 +47,13 @@ public class RequestInjectionTest {
 
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-
         SlingBindings bindings = new SlingBindings();
         bindings.setSling(sling);
         bindings.setLog(LoggerFactory.getLogger("test"));
         when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
 
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindInjector(new BindingsInjector(), new ServicePropertiesMap(1, 1));
-        
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(BindingsModel.class, org.apache.sling.models.testmodels.classes.constructorinjection.BindingsModel.class);
     }
 

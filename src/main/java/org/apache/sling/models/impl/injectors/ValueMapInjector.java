@@ -27,9 +27,6 @@ import java.util.List;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
@@ -42,12 +39,11 @@ import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component
-@Service
-@Property(name = Constants.SERVICE_RANKING, intValue = 2000)
+@Component(property=Constants.SERVICE_RANKING+":Integer=2000", service={Injector.class, InjectAnnotationProcessorFactory.class, ValuePreparer.class})
 @SuppressWarnings("deprecation")
 public class ValueMapInjector extends AbstractInjector implements Injector, InjectAnnotationProcessorFactory, ValuePreparer {
 

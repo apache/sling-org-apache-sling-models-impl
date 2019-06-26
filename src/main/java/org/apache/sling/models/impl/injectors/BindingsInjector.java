@@ -22,9 +22,6 @@ import java.lang.reflect.Type;
 import javax.servlet.ServletRequest;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.annotations.injectorspecific.ScriptVariable;
@@ -36,10 +33,9 @@ import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
 
-@Component
-@Service
-@Property(name = Constants.SERVICE_RANKING, intValue = 1000)
+@Component(property=Constants.SERVICE_RANKING+":Integer=1000", service={Injector.class, StaticInjectAnnotationProcessorFactory.class, ValuePreparer.class})
 public class BindingsInjector implements Injector, StaticInjectAnnotationProcessorFactory, ValuePreparer {
 
     @Override

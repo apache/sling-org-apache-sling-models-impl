@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.Hashtable;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -38,8 +37,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ViaTest {
@@ -53,23 +50,13 @@ public class ViaTest {
     @Mock
     private SlingHttpServletRequest request;
 
-    @Mock
-    private ComponentContext componentCtx;
-
-    @Mock
-    private BundleContext bundleContext;
-
     private ModelAdapterFactory factory;
 
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-
         when(request.getResource()).thenReturn(resource);
         when(resource.getChild("jcr:content")).thenReturn(childResource);
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(1, 1));
         factory.bindViaProvider(new BeanPropertyViaProvider(), null);
         factory.bindViaProvider(new ChildResourceViaProvider(), null);

@@ -34,6 +34,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
@@ -62,13 +63,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImplementsExtendsTest {
-
-    @Mock
-    private ComponentContext componentCtx;
 
     @Mock
     private BundleContext bundleContext;
@@ -81,7 +78,7 @@ public class ImplementsExtendsTest {
 
     private ModelAdapterFactory factory;
 
-    private ServiceRegistration[] registeredAdapterFactories;
+    private ServiceRegistration<AdapterFactory>[] registeredAdapterFactories;
 
     private ImplementationPicker firstImplementationPicker = new FirstImplementationPicker();
 
@@ -90,11 +87,9 @@ public class ImplementsExtendsTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setup() throws ClassNotFoundException, MalformedURLException {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
         when(bundleContext.registerService(anyString(), anyObject(), any(Dictionary.class))).then(new Answer<ServiceRegistration>() {
             @Override
-            public ServiceRegistration answer(InvocationOnMock invocation) throws Throwable {
+            public ServiceRegistration<?> answer(InvocationOnMock invocation) throws Throwable {
                 final Dictionary<String, Object> props = (Dictionary<String, Object>)invocation.getArguments()[2];
                 ServiceRegistration reg = mock(ServiceRegistration.class);
                 ServiceReference ref = mock(ServiceReference.class);
@@ -110,8 +105,7 @@ public class ImplementsExtendsTest {
             }
         });
 
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory(bundleContext);
         factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(2, 2));
         factory.bindImplementationPicker(firstImplementationPicker, firstImplementationPickerProps);
 

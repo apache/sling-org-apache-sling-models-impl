@@ -19,19 +19,15 @@ package org.apache.sling.models.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.spi.ImplementationPicker;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
 
-@Component
-@Service
-@Property(name = Constants.SERVICE_RANKING, intValue = 0) // this must come before FirstImplementationPicker
+@Component(property=Constants.SERVICE_RANKING+":Integer=0") // this must come before FirstImplementationPicker
 public class ResourceTypeBasedResourcePicker implements ImplementationPicker {
 
     @Override

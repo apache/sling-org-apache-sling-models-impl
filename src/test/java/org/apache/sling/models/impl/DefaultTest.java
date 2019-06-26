@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Hashtable;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -38,29 +37,16 @@ import org.apache.sling.models.testmodels.interfaces.PropertyModelWithDefaults;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultTest {
-
-    @Mock
-    private ComponentContext componentCtx;
-
-    @Mock
-    private BundleContext bundleContext;
 
     private ModelAdapterFactory factory;
 
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(0, 0));
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(DefaultStringModel.class, PropertyModelWithDefaults.class, DefaultPrimitivesModel.class, DefaultWrappersModel.class,  org.apache.sling.models.testmodels.classes.constructorinjection.DefaultPrimitivesModel.class, org.apache.sling.models.testmodels.classes.constructorinjection.DefaultStringModel.class, org.apache.sling.models.testmodels.classes.constructorinjection.DefaultWrappersModel.class);
     }

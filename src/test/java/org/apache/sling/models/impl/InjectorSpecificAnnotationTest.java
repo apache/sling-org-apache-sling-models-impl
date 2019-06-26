@@ -16,12 +16,13 @@
  */
 package org.apache.sling.models.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -36,6 +37,8 @@ import org.apache.sling.models.impl.injectors.OSGiServiceInjector;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.apache.sling.models.impl.via.BeanPropertyViaProvider;
+import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory;
+import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory2;
 import org.apache.sling.models.testmodels.classes.InjectorSpecificAnnotationModel;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,15 +50,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InjectorSpecificAnnotationTest {
-
-    @Mock
-    private ComponentContext componentCtx;
 
     @Mock
     private BundleContext bundleContext;
@@ -72,14 +71,10 @@ public class InjectorSpecificAnnotationTest {
 
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory();
 
         osgiInjector = new OSGiServiceInjector();
-        osgiInjector.activate(componentCtx);
+        osgiInjector.activate(bundleContext);
 
         BindingsInjector bindingsInjector = new BindingsInjector();
         ValueMapInjector valueMapInjector = new ValueMapInjector();
@@ -98,10 +93,8 @@ public class InjectorSpecificAnnotationTest {
 
         factory.bindStaticInjectAnnotationProcessorFactory(bindingsInjector,
                 Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 1L));
-        factory.bindInjectAnnotationProcessorFactory(valueMapInjector,
-                Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 2L));
-        factory.bindInjectAnnotationProcessorFactory2(childResourceInjector,
-                Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 3L));
+        factory.injectAnnotationProcessorFactories = Collections.<InjectAnnotationProcessorFactory>singletonList(valueMapInjector);
+        factory.injectAnnotationProcessorFactories2 = Collections.<InjectAnnotationProcessorFactory2>singletonList(childResourceInjector);
         factory.bindStaticInjectAnnotationProcessorFactory(requestAttributeInjector,
                 Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 4L));
         factory.bindStaticInjectAnnotationProcessorFactory(osgiInjector,

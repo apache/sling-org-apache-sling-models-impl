@@ -18,12 +18,14 @@ package org.apache.sling.models.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -50,17 +52,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.converter.Converter;
+import org.osgi.util.converter.Converters;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AdapterFactoryTest {
-    @Mock
-    private ComponentContext componentCtx;
-
-    @Mock
-    private BundleContext bundleContext;
 
     @Mock
     private Resource resource;
@@ -70,19 +70,31 @@ public class AdapterFactoryTest {
 
     private ModelAdapterFactory factory;
 
+    public static ModelAdapterFactory createModelAdapterFactory() {
+        BundleContext bundleContext = Mockito.mock(BundleContext.class);
+        return createModelAdapterFactory(bundleContext);
+    }
+    
+    public static ModelAdapterFactory createModelAdapterFactory(BundleContext bundleContext) {
+        ComponentContext componentCtx = Mockito.mock(ComponentContext.class);
+        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
+
+        ModelAdapterFactory factory = new ModelAdapterFactory();
+        Converter c = Converters.standardConverter();
+        Map<String, String> map = new HashMap<>();
+        ModelAdapterFactoryConfiguration config = c.convert(map).to(ModelAdapterFactoryConfiguration.class);
+        factory.activate(componentCtx, config);
+        factory.injectAnnotationProcessorFactories = Collections.emptyList();
+        factory.injectAnnotationProcessorFactories2 = Collections.emptyList();
+        return factory;
+    }
+
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = createModelAdapterFactory();
         factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(0, 0));
         factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(1, 1));
-        factory.bindModelExporter(new FirstStringExporter(), new ServicePropertiesMap(2, 0));
-        factory.bindModelExporter(new SecondStringExporter(), new ServicePropertiesMap(3, 1));
-        factory.bindModelExporter(new FirstIntegerExporter(), new ServicePropertiesMap(4, 2));
-        
+        factory.modelExporters = Arrays.<ModelExporter>asList(new FirstStringExporter(), new SecondStringExporter(), new FirstIntegerExporter());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(DefaultStringModel.class, ConstructorWithExceptionModel.class, NestedModel.class, NestedModelWithInvalidAdaptable.class, NestedModelWithInvalidAdaptable2.class, ResourceModelWithRequiredField.class, CachedModelWithSelfReference.class) ;
     }
 

@@ -16,6 +16,19 @@
  */
 package org.apache.sling.models.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+
+import javax.script.Bindings;
+import javax.script.ScriptEngineFactory;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
@@ -31,25 +44,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
-
-import javax.script.Bindings;
-import javax.script.ScriptEngineFactory;
-import java.util.Collections;
-import java.util.Hashtable;
-
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestWrapperTest {
-    @Mock
-    private ComponentContext componentCtx;
-
-    @Mock
-    private BundleContext bundleContext;
 
     @Mock
     private AdapterManager adapterManager;
@@ -71,9 +68,9 @@ public class RequestWrapperTest {
 
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory();
+        factory.bindingsValuesProvidersByContext = bindingsValuesProvidersByContext;
+        factory.adapterManager = adapterManager;
         when(bindingsValuesProvidersByContext.getBindingsValuesProviders(any(ScriptEngineFactory.class), eq(BindingsValuesProvider.DEFAULT_CONTEXT))).
                 thenReturn(Collections.singleton(bindingsValuesProvider));
     }

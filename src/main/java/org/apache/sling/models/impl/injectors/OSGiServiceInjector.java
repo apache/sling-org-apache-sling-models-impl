@@ -27,10 +27,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.models.annotations.Filter;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
@@ -46,13 +42,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component
-@Service
-@Property(name = Constants.SERVICE_RANKING, intValue = 5000)
+@Component(property=Constants.SERVICE_RANKING+":Integer=5000", service={Injector.class, StaticInjectAnnotationProcessorFactory.class, AcceptsNullName.class})
 public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProcessorFactory, AcceptsNullName {
 
     private static final Logger log = LoggerFactory.getLogger(OSGiServiceInjector.class);
@@ -65,8 +60,8 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
     }
 
     @Activate
-    public void activate(ComponentContext ctx) {
-        this.bundleContext = ctx.getBundleContext();
+    public void activate(BundleContext ctx) {
+        this.bundleContext = ctx;
     }
 
     @Override
@@ -87,17 +82,16 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
         return getValue(adaptable, type, filterString, callbackRegistry);
     }
 
-    @SuppressWarnings("unchecked")
     private <T> Object getService(Object adaptable, Class<T> type, String filter,
             DisposalCallbackRegistry callbackRegistry) {
         // cannot use SlingScriptHelper since it does not support ordering by service ranking due to https://issues.apache.org/jira/browse/SLING-5665
         try {
-            ServiceReference[] refs = bundleContext.getServiceReferences(type.getName(), filter);
+            ServiceReference<?>[] refs = bundleContext.getServiceReferences(type.getName(), filter);
             if (refs == null || refs.length == 0) {
                 return null;
             } else {
                 // sort by service ranking (lowest first) (see ServiceReference.compareTo)
-                List<ServiceReference> references = Arrays.asList(refs);
+                List<ServiceReference<?>> references = Arrays.asList(refs);
                 Collections.sort(references);
                 callbackRegistry.addDisposalCallback(new Callback(refs, bundleContext));
                 return bundleContext.getService(references.get(references.size() - 1));
@@ -108,23 +102,22 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
         }
     }
 
-    @SuppressWarnings("unchecked")
     private <T> Object[] getServices(Object adaptable, Class<T> type, String filter,
             DisposalCallbackRegistry callbackRegistry) {
         // cannot use SlingScriptHelper since it does not support ordering by service ranking due to https://issues.apache.org/jira/browse/SLING-5665
         try {
-            ServiceReference[] refs = bundleContext.getServiceReferences(type.getName(), filter);
+            ServiceReference<?>[] refs = bundleContext.getServiceReferences(type.getName(), filter);
             if (refs == null || refs.length == 0) {
                 return null;
             } else {
                 // sort by service ranking (lowest first) (see ServiceReference.compareTo)
-                List<ServiceReference> references = Arrays.asList(refs);
+                List<ServiceReference<?>> references = Arrays.asList(refs);
                 Collections.sort(references);
                 // make highest service ranking being returned first
                 Collections.reverse(references);
                 callbackRegistry.addDisposalCallback(new Callback(refs, bundleContext));
                 List<Object> services = new ArrayList<>();
-                for (ServiceReference ref : references) {
+                for (ServiceReference<?> ref : references) {
                     Object service = bundleContext.getService(ref);
                     if (service != null) {
                         services.add(service);
@@ -178,10 +171,10 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
     }
 
     private static class Callback implements DisposalCallback {
-        private final ServiceReference[] refs;
+        private final ServiceReference<?>[] refs;
         private final BundleContext context;
 
-        public Callback(ServiceReference[] refs, BundleContext context) {
+        public Callback(ServiceReference<?>[] refs, BundleContext context) {
             this.refs = refs;
             this.context = context;
         }
@@ -189,7 +182,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
         @Override
         public void onDisposed() {
             if (refs != null) {
-                for (ServiceReference ref : refs) {
+                for (ServiceReference<?> ref : refs) {
                     context.ungetService(ref);
                 }
             }
