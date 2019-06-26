@@ -8,3 +8,5 @@ Provide-Capability:\
     osgi.service;objectClass=javax.servlet.Servlet,\
     osgi.service;objectClass=org.apache.sling.api.adapter.AdapterFactory,\
     osgi.service;objectClass=org.apache.sling.models.factory.ModelFactory
+# Overwrite bundle description due to https://github.com/bndtools/bnd/issues/3282
+Bundle-Description: Apache Sling Models Implementation

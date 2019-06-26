@@ -20,10 +20,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.ViaProviderType;
 import org.apache.sling.models.annotations.via.ForcedResourceType;
+import org.apache.sling.models.spi.ViaProvider;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 
-@Component
+@Component(service=ViaProvider.class)
 public class ForcedResourceTypeViaProvider extends AbstractResourceTypeViaProvider {
     @Override
     public Class<? extends ViaProviderType> getType() {

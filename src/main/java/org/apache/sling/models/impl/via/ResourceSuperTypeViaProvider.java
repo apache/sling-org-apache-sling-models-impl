@@ -19,10 +19,11 @@ package org.apache.sling.models.impl.via;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.ViaProviderType;
 import org.apache.sling.models.annotations.via.ResourceSuperType;
+import org.apache.sling.models.spi.ViaProvider;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 
-@Component
+@Component(service=ViaProvider.class)
 public class ResourceSuperTypeViaProvider extends AbstractResourceTypeViaProvider {
 
     @Override
