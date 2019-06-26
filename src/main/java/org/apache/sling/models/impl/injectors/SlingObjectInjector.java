@@ -45,7 +45,7 @@ import org.osgi.service.component.annotations.Component;
  * Resource.
  * Documentation see {@link SlingObject}.
  */
-@Component(property=Constants.SERVICE_RANKING+":Integer="+Integer.MAX_VALUE)
+@Component(property=Constants.SERVICE_RANKING+":Integer="+Integer.MAX_VALUE, service={Injector.class, StaticInjectAnnotationProcessorFactory.class, AcceptsNullName.class})
 public final class SlingObjectInjector implements Injector, StaticInjectAnnotationProcessorFactory, AcceptsNullName {
 
     /**

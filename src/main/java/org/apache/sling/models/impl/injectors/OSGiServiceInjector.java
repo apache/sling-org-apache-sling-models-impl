@@ -47,7 +47,7 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(property=Constants.SERVICE_RANKING+":Integer=5000")
+@Component(property=Constants.SERVICE_RANKING+":Integer=5000", service={Injector.class, StaticInjectAnnotationProcessorFactory.class, AcceptsNullName.class})
 public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProcessorFactory, AcceptsNullName {
 
     private static final Logger log = LoggerFactory.getLogger(OSGiServiceInjector.class);

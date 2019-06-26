@@ -43,7 +43,7 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(property=Constants.SERVICE_RANKING+":Integer=2500")
+@Component(property=Constants.SERVICE_RANKING+":Integer=2500", service={Injector.class, StaticInjectAnnotationProcessorFactory.class, AcceptsNullName.class})
 public class ResourcePathInjector extends AbstractInjector implements Injector, AcceptsNullName,
         StaticInjectAnnotationProcessorFactory {
 

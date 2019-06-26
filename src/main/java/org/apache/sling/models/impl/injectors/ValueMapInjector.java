@@ -43,7 +43,7 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(property=Constants.SERVICE_RANKING+":Integer=2000")
+@Component(property=Constants.SERVICE_RANKING+":Integer=2000", service={Injector.class, InjectAnnotationProcessorFactory.class, ValuePreparer.class})
 @SuppressWarnings("deprecation")
 public class ValueMapInjector extends AbstractInjector implements Injector, InjectAnnotationProcessorFactory, ValuePreparer {
 

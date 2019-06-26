@@ -35,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
-@Component(property=Constants.SERVICE_RANKING+":Integer=1000")
+@Component(property=Constants.SERVICE_RANKING+":Integer=1000", service={Injector.class, StaticInjectAnnotationProcessorFactory.class, ValuePreparer.class})
 public class BindingsInjector implements Injector, StaticInjectAnnotationProcessorFactory, ValuePreparer {
 
     @Override

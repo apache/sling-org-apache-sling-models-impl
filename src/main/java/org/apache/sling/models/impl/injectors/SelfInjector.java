@@ -35,7 +35,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * Injects the adaptable object itself.
  */
-@Component(property=Constants.SERVICE_RANKING+":Integer="+Integer.MAX_VALUE)
+@Component(property=Constants.SERVICE_RANKING+":Integer="+Integer.MAX_VALUE, service={Injector.class, StaticInjectAnnotationProcessorFactory.class, AcceptsNullName.class})
 public class SelfInjector implements Injector, StaticInjectAnnotationProcessorFactory, AcceptsNullName {
 
     @Override

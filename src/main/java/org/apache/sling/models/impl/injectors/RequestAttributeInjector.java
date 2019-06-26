@@ -32,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
-@Component(property=Constants.SERVICE_RANKING+":Integer=4000")
+@Component(property=Constants.SERVICE_RANKING+":Integer=4000", service={Injector.class, StaticInjectAnnotationProcessorFactory.class})
 public class RequestAttributeInjector implements Injector, StaticInjectAnnotationProcessorFactory {
 
     @Override

@@ -37,7 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
-@Component(property=Constants.SERVICE_RANKING+":Integer=3000")
+@Component(property=Constants.SERVICE_RANKING+":Integer=3000", service={Injector.class, InjectAnnotationProcessorFactory2.class})
 public class ChildResourceInjector extends AbstractInjector implements Injector, InjectAnnotationProcessorFactory2 {
 
     @Override

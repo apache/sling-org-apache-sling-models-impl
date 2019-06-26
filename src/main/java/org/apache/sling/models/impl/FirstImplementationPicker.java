@@ -29,7 +29,7 @@ import org.osgi.service.component.annotations.Component;
  * But at least it gives a consistent behavior.
  * It's service ranking is set to the highest value to allow more intelligent implementations to step in.
  */
-@Component(property=Constants.SERVICE_RANKING+":Integer="+Integer.MAX_VALUE)
+@Component(property=Constants.SERVICE_RANKING+":Integer="+Integer.MAX_VALUE, service=ImplementationPicker.class)
 public class FirstImplementationPicker implements ImplementationPicker {
 
     @Override
