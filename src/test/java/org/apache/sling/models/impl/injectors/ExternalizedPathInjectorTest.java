@@ -127,7 +127,7 @@ public class ExternalizedPathInjectorTest {
         assertEquals("Wrong Provider was selected", mappedImagePath3, value);
     }
 
-    private class TestExternalizePathProvider
+    private static class TestExternalizePathProvider
         implements ExternalizePathProvider
     {
         private String from = "/";
