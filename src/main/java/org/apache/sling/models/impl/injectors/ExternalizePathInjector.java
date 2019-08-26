@@ -17,10 +17,11 @@
 package org.apache.sling.models.impl.injectors;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.commons.osgi.Order;
+import org.apache.sling.commons.osgi.RankedServices;
 import org.apache.sling.models.annotations.ExternalizePath;
-import org.apache.sling.models.annotations.injectorspecific.ExternalizedPathProvider;
+import org.apache.sling.models.annotations.injectorspecific.ExternalizePathProvider;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
 import org.jetbrains.annotations.NotNull;
@@ -32,39 +33,39 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Iterator;
+import java.util.Map;
 
+/**
+ * Injector for a Model Property with the Annotation 'Externalize Path'
+ * which will change a Sling Path into its externalize form (shortening etc)
+ *
+ * The Externalize Path Provider is what will do the actual transformation and
+ * is pluggable. The component with the highest service ranking is selected here
+ * to provide the transformation.
+ */
 @Component(
     property=Constants.SERVICE_RANKING+":Integer=1000",
     service={
         Injector.class
     }
 )
-public class ExternalizedPathInjector
+public class ExternalizePathInjector
     extends AbstractInjector
     implements Injector
 {
-    List<ExternalizedPathProvider> providerList = new ArrayList<>();
+    private RankedServices<ExternalizePathProvider> providers = new RankedServices<>(Order.DESCENDING);
 
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
-    void bindExternalizedPathProvider(ExternalizedPathProvider provider) {
-        providerList.add(provider);
-        // The providers are sorted so that the one with the highest priority is the first entry
-        Collections.sort(
-            providerList,
-            Comparator.comparingInt(ExternalizedPathProvider::getPriority).reversed()
-        );
+    @Reference(
+        cardinality = ReferenceCardinality.MULTIPLE,
+        policy = ReferencePolicy.DYNAMIC
+    )
+    protected void bindExternalizePathProvider(final ExternalizePathProvider provider, final Map<String, Object> props) {
+        providers.bind(provider, props);
     }
 
-    void unbindExternalizedPathProvider(ExternalizedPathProvider provider) {
-        providerList.remove(provider);
-    }
-
-    public ExternalizedPathInjector() {
-        bindExternalizedPathProvider(new DefaultExternalizedPathProvider());
+    protected void unbindExternalizePathProvider(final ExternalizePathProvider provider, final Map<String, Object> props) {
+        providers.unbind(provider, props);
     }
 
     @Override
@@ -80,34 +81,18 @@ public class ExternalizedPathInjector
         }
         if (element.isAnnotationPresent(ExternalizePath.class)) {
             ValueMap properties = getValueMap(adaptable);
-            if(properties != ObjectUtils.NULL) {
+            if (properties != ObjectUtils.NULL) {
                 String imagePath = properties.get(name, String.class);
-                if(imagePath != null) {
-                    ExternalizedPathProvider provider = providerList.get(0);
-                    return provider.externalize(adaptable, imagePath);
+                if (imagePath != null) {
+                    Iterator<ExternalizePathProvider> i = providers.iterator();
+                    if (i.hasNext()) {
+                        ExternalizePathProvider provider = i.next();
+                        return provider.externalize(adaptable, imagePath);
+                    }
                 }
             }
         }
         return null;
     }
 
-    /** Fallback Implementation of the Externalized Path Provider that uses the Resource Resolver's map function **/
-    private class DefaultExternalizedPathProvider
-        implements ExternalizedPathProvider
-    {
-        @Override
-        public int getPriority() {
-            return FALLBACK_PRIORITY;
-        }
-
-        @Override
-        public String externalize(@NotNull Object adaptable, String sourcePath) {
-            String answer = sourcePath;
-            ResourceResolver resourceResolver = getResourceResolver(adaptable);
-            if(sourcePath != null && resourceResolver != null) {
-                answer = resourceResolver.map(sourcePath);
-            }
-            return answer;
-        }
-    }
 }
