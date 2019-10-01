@@ -37,6 +37,9 @@ import org.apache.sling.models.spi.Injector;
 import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.scripting.SlingScriptHelper;
+import org.apache.sling.api.scripting.SlingBindings;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -79,7 +82,22 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
                 filterString = filter.value();
             }
         }
+        if (adaptable instanceof SlingHttpServletRequest && StringUtils.isBlank(filterString)) {
+            SlingHttpServletRequest request = (SlingHttpServletRequest) adaptable;
+            Object service = getValueFromServiceCache(request, type.getClass());
+            if (service != null) {
+                return service;
+            }
+        }
         return getValue(adaptable, type, filterString, callbackRegistry);
+    }
+
+    private <T> Object getValueFromServiceCache(final SlingHttpServletRequest request, Class<T> type) {
+        SlingBindings bindings = (SlingBindings) request.getAttribute(SlingBindings.class.getName());
+        if (bindings != null) {
+            return bindings.getSling().getService(type);
+        }
+        return null;
     }
 
     private <T> Object getService(Object adaptable, Class<T> type, String filter,
