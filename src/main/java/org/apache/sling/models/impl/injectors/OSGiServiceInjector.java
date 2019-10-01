@@ -38,7 +38,6 @@ import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProc
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.BundleContext;
@@ -84,7 +83,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
         }
         if (adaptable instanceof SlingHttpServletRequest && StringUtils.isBlank(filterString)) {
             SlingHttpServletRequest request = (SlingHttpServletRequest) adaptable;
-            Object service = getValueFromServiceCache(request, type.getClass());
+            Object service = getValueFromBindings(request, type.getClass());
             if (service != null) {
                 return service;
             }
@@ -92,7 +91,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
         return getValue(adaptable, type, filterString, callbackRegistry);
     }
 
-    private <T> Object getValueFromServiceCache(final SlingHttpServletRequest request, Class<T> type) {
+    private <T> Object getValueFromBindings(final SlingHttpServletRequest request, Class<T> type) {
         SlingBindings bindings = (SlingBindings) request.getAttribute(SlingBindings.class.getName());
         if (bindings != null) {
             return bindings.getSling().getService(type);
