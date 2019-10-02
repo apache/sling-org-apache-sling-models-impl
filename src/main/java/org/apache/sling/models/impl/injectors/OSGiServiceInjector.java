@@ -82,6 +82,8 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
             }
         }
         if (adaptable instanceof SlingHttpServletRequest && StringUtils.isBlank(filterString)) {
+            //in that case, we'll try to serve the service reference from the request bindings,
+            //as it's probably already cached.
             SlingHttpServletRequest request = (SlingHttpServletRequest) adaptable;
             Object service = getValueFromBindings(request, type.getClass());
             if (service != null) {
