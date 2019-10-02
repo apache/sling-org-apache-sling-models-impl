@@ -93,7 +93,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
 
     private <T> Object getValueFromBindings(final SlingHttpServletRequest request, Class<T> type) {
         SlingBindings bindings = (SlingBindings) request.getAttribute(SlingBindings.class.getName());
-        if (bindings != null) {
+        if (bindings != null && bindings.getSling() != null) {
             return bindings.getSling().getService(type);
         }
         return null;
