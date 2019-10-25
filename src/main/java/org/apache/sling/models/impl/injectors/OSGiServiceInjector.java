@@ -37,8 +37,6 @@ import org.apache.sling.models.spi.Injector;
 import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.scripting.SlingBindings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.BundleContext;
@@ -56,9 +54,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
     private static final Logger log = LoggerFactory.getLogger(OSGiServiceInjector.class);
 
     private BundleContext bundleContext;
-
-    private BundleContext modelBundleContext = null;
-
+    
     @Override
     public @NotNull String getName() {
         return "osgi-services";
@@ -99,24 +95,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
                 filterString = filter.value();
             }
         }
-        if (adaptable instanceof SlingHttpServletRequest && StringUtils.isBlank(filterString) && type instanceof Class<?>) {
-            //in that case, we'll try to serve the service reference from the request bindings,
-            //as it's probably already cached.
-            SlingHttpServletRequest request = (SlingHttpServletRequest) adaptable;
-            Object service = getValueFromBindings(request, (Class<?>)type);
-            if (service != null) {
-                return service;
-            }
-        }
         return getValue(adaptable, type, filterString, callbackRegistry, modelContext == null ? bundleContext : modelContext);
-    }
-
-    private <T> Object getValueFromBindings(final SlingHttpServletRequest request, Class<T> type) {
-        SlingBindings bindings = (SlingBindings) request.getAttribute(SlingBindings.class.getName());
-        if (bindings != null && bindings.getSling() != null) {
-            return bindings.getSling().getService(type);
-        }
-        return null;
     }
 
     private <T> Object getService(Object adaptable, Class<T> type, String filter,
