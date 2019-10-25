@@ -629,8 +629,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
         final Map<ValuePreparer, Object> preparedValues = new HashMap<>(VALUE_PREPARERS_COUNT);
         List<MissingElementException> missingElements = null;
+        final BundleContext modelContext = getModelBundleContext(modelClass);
         for (InjectableMethod method : injectableMethods) {
-            RuntimeException t = injectElement(method, adaptable, registry, callback, preparedValues, getModelBundleContext(modelClass));
+            RuntimeException t = injectElement(method, adaptable, registry, callback, preparedValues, modelContext);
             if (t != null) {
                 if (missingElements == null) {
                     missingElements = new ArrayList<>();

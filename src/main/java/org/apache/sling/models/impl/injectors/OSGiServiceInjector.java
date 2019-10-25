@@ -54,7 +54,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
     private static final Logger log = LoggerFactory.getLogger(OSGiServiceInjector.class);
 
     private BundleContext bundleContext;
-    
+
     @Override
     public @NotNull String getName() {
         return "osgi-services";
