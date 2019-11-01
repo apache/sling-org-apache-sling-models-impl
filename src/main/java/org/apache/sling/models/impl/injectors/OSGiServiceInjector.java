@@ -37,9 +37,8 @@ import org.apache.sling.models.spi.Injector;
 import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.scripting.SlingBindings;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -69,6 +68,21 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
     @Override
     public Object getValue(@NotNull Object adaptable, String name, @NotNull Type type, @NotNull AnnotatedElement element,
             @NotNull DisposalCallbackRegistry callbackRegistry) {
+        return getValue(adaptable, name, type, element, callbackRegistry, bundleContext);
+    }
+
+    /**
+     *
+     * @param adaptable
+     * @param name
+     * @param type
+     * @param element
+     * @param callbackRegistry
+     * @param modelContext
+     * @return
+     */
+    public Object getValue(@NotNull Object adaptable, String name, @NotNull Type type, @NotNull AnnotatedElement element,
+                           @NotNull DisposalCallbackRegistry callbackRegistry, @Nullable BundleContext modelContext) {
         OSGiService annotation = element.getAnnotation(OSGiService.class);
         String filterString = null;
         if (annotation != null) {
@@ -81,39 +95,22 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
                 filterString = filter.value();
             }
         }
-        if (adaptable instanceof SlingHttpServletRequest && StringUtils.isBlank(filterString) && type instanceof Class<?>) {
-            //in that case, we'll try to serve the service reference from the request bindings,
-            //as it's probably already cached.
-            SlingHttpServletRequest request = (SlingHttpServletRequest) adaptable;
-            Object service = getValueFromBindings(request, (Class<?>)type);
-            if (service != null) {
-                return service;
-            }
-        }
-        return getValue(adaptable, type, filterString, callbackRegistry);
-    }
-
-    private <T> Object getValueFromBindings(final SlingHttpServletRequest request, Class<T> type) {
-        SlingBindings bindings = (SlingBindings) request.getAttribute(SlingBindings.class.getName());
-        if (bindings != null && bindings.getSling() != null) {
-            return bindings.getSling().getService(type);
-        }
-        return null;
+        return getValue(adaptable, type, filterString, callbackRegistry, modelContext == null ? bundleContext : modelContext);
     }
 
     private <T> Object getService(Object adaptable, Class<T> type, String filter,
-            DisposalCallbackRegistry callbackRegistry) {
+            DisposalCallbackRegistry callbackRegistry, BundleContext modelContext) {
         // cannot use SlingScriptHelper since it does not support ordering by service ranking due to https://issues.apache.org/jira/browse/SLING-5665
         try {
-            ServiceReference<?>[] refs = bundleContext.getServiceReferences(type.getName(), filter);
+            ServiceReference<?>[] refs = modelContext.getServiceReferences(type.getName(), filter);
             if (refs == null || refs.length == 0) {
                 return null;
             } else {
                 // sort by service ranking (lowest first) (see ServiceReference.compareTo)
                 List<ServiceReference<?>> references = Arrays.asList(refs);
                 Collections.sort(references);
-                callbackRegistry.addDisposalCallback(new Callback(refs, bundleContext));
-                return bundleContext.getService(references.get(references.size() - 1));
+                callbackRegistry.addDisposalCallback(new Callback(refs, modelContext));
+                return modelContext.getService(references.get(references.size() - 1));
             }
         } catch (InvalidSyntaxException e) {
             log.error("invalid filter expression", e);
@@ -122,10 +119,10 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
     }
 
     private <T> Object[] getServices(Object adaptable, Class<T> type, String filter,
-            DisposalCallbackRegistry callbackRegistry) {
+            DisposalCallbackRegistry callbackRegistry, BundleContext modelContext) {
         // cannot use SlingScriptHelper since it does not support ordering by service ranking due to https://issues.apache.org/jira/browse/SLING-5665
         try {
-            ServiceReference<?>[] refs = bundleContext.getServiceReferences(type.getName(), filter);
+            ServiceReference<?>[] refs = modelContext.getServiceReferences(type.getName(), filter);
             if (refs == null || refs.length == 0) {
                 return null;
             } else {
@@ -134,10 +131,10 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
                 Collections.sort(references);
                 // make highest service ranking being returned first
                 Collections.reverse(references);
-                callbackRegistry.addDisposalCallback(new Callback(refs, bundleContext));
+                callbackRegistry.addDisposalCallback(new Callback(refs, modelContext));
                 List<Object> services = new ArrayList<>();
                 for (ServiceReference<?> ref : references) {
-                    Object service = bundleContext.getService(ref);
+                    Object service = modelContext.getService(ref);
                     if (service != null) {
                         services.add(service);
                     }
@@ -150,12 +147,13 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
         }
     }
 
-    private Object getValue(Object adaptable, Type type, String filterString, DisposalCallbackRegistry callbackRegistry) {
+    private Object getValue(Object adaptable, Type type, String filterString, DisposalCallbackRegistry callbackRegistry,
+                            BundleContext modelContext) {
         if (type instanceof Class) {
             Class<?> injectedClass = (Class<?>) type;
             if (injectedClass.isArray()) {
                 Object[] services = getServices(adaptable, injectedClass.getComponentType(), filterString,
-                        callbackRegistry);
+                        callbackRegistry, modelContext);
                 if (services == null) {
                     return null;
                 }
@@ -165,7 +163,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
                 }
                 return arr;
             } else {
-                return getService(adaptable, injectedClass, filterString, callbackRegistry);
+                return getService(adaptable, injectedClass, filterString, callbackRegistry, modelContext);
             }
         } else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType) type;
@@ -178,7 +176,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
             }
 
             Class<?> serviceType = (Class<?>) ptype.getActualTypeArguments()[0];
-            Object[] services = getServices(adaptable, serviceType, filterString, callbackRegistry);
+            Object[] services = getServices(adaptable, serviceType, filterString, callbackRegistry, modelContext);
             if (services == null) {
                 return null;
             }

@@ -67,6 +67,7 @@ import org.apache.sling.models.factory.ModelClassException;
 import org.apache.sling.models.factory.ModelFactory;
 import org.apache.sling.models.factory.PostConstructException;
 import org.apache.sling.models.factory.ValidationException;
+import org.apache.sling.models.impl.injectors.OSGiServiceInjector;
 import org.apache.sling.models.impl.model.ConstructorParameter;
 import org.apache.sling.models.impl.model.InjectableElement;
 import org.apache.sling.models.impl.model.InjectableField;
@@ -88,8 +89,10 @@ import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProces
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -496,7 +499,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     @Nullable
     RuntimeException injectElement(final InjectableElement element, final Object adaptable,
                                    final @NotNull DisposalCallbackRegistry registry, final InjectCallback callback,
-                                   final @NotNull Map<ValuePreparer, Object> preparedValues) {
+                                   final @NotNull Map<ValuePreparer, Object> preparedValues,
+                                   final @Nullable BundleContext modelContext) {
 
         InjectAnnotationProcessor annotationProcessor = null;
         String source = element.getSource();
@@ -552,8 +556,12 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                             preparedValues.put(preparer, preparedValue);
                         }
                     }
-
-                    Object value = injector.getValue(preparedValue, name, element.getType(), element.getAnnotatedElement(), registry);
+                    Object value = null;
+                    if (injector instanceof OSGiServiceInjector) {
+                        value = ((OSGiServiceInjector)injector).getValue(preparedValue, name, element.getType(), element.getAnnotatedElement(), registry, modelContext);
+                    } else {
+                        value = injector.getValue(preparedValue, name, element.getType(), element.getAnnotatedElement(), registry);
+                    }
                     if (value != null) {
                         lastInjectionException = callback.inject(element, value);
                         if (lastInjectionException == null) {
@@ -602,6 +610,15 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         return null;
     }
 
+    private BundleContext getModelBundleContext(final ModelClass<?> modelClass) {
+        BundleContext modelContext = null;
+        Bundle modelBundle = FrameworkUtil.getBundle(modelClass.getType());
+        if (modelBundle != null) {
+            return modelBundle.getBundleContext();
+        }
+        return null;
+    }
+
     private <ModelType> Result<InvocationHandler> createInvocationHandler(final Object adaptable, final ModelClass<ModelType> modelClass) {
         InjectableMethod[] injectableMethods = modelClass.getInjectableMethods();
         final Map<Method, Object> methods = new HashMap<>();
@@ -611,10 +628,10 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         DisposalCallbackRegistryImpl registry = new DisposalCallbackRegistryImpl();
 
         final Map<ValuePreparer, Object> preparedValues = new HashMap<>(VALUE_PREPARERS_COUNT);
-
         List<MissingElementException> missingElements = null;
+        final BundleContext modelContext = getModelBundleContext(modelClass);
         for (InjectableMethod method : injectableMethods) {
-            RuntimeException t = injectElement(method, adaptable, registry, callback, preparedValues);
+            RuntimeException t = injectElement(method, adaptable, registry, callback, preparedValues, modelContext);
             if (t != null) {
                 if (missingElements == null) {
                     missingElements = new ArrayList<>();
@@ -702,9 +719,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
         InjectableField[] injectableFields = modelClass.getInjectableFields();
         List<MissingElementException> missingElements = null;
-
+        final BundleContext modelContext = getModelBundleContext(modelClass);
         for (InjectableField field : injectableFields) {
-            RuntimeException t = injectElement(field, adaptable, registry, callback, preparedValues);
+            RuntimeException t = injectElement(field, adaptable, registry, callback, preparedValues, modelContext);
             if (t != null) {
                 if (missingElements == null) {
                     missingElements = new ArrayList<>();
@@ -781,9 +798,10 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         List<Object> paramValues = new ArrayList<>(Arrays.asList(new Object[parameters.length]));
         InjectCallback callback = new SetConstructorParameterCallback(paramValues);
 
+        final BundleContext modelContext = getModelBundleContext(modelClass);
         List<MissingElementException> missingElements = null;
         for (int i = 0; i < parameters.length; i++) {
-            RuntimeException t = injectElement(parameters[i], adaptable, registry, callback, preparedValues);
+            RuntimeException t = injectElement(parameters[i], adaptable, registry, callback, preparedValues, modelContext);
             if (t != null) {
                 if (missingElements == null) {
                     missingElements = new ArrayList<>();
