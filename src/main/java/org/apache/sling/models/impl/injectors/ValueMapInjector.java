@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -98,6 +99,11 @@ public class ValueMapInjector extends AbstractInjector implements Injector, Inje
                 return null;
             }
             Class<?> collectionType = (Class<?>) pType.getRawType();
+
+            if (collectionType.equals(Optional.class)) {
+                return Optional.ofNullable(map.get(name));
+            }
+
             if (!(collectionType.equals(Collection.class) || collectionType.equals(List.class))) {
                 return null;
             }
