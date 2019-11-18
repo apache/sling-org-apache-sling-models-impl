@@ -19,23 +19,8 @@ package org.apache.sling.models.impl;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -495,9 +480,84 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         }
     }
 
+    @NotNull
+    private InjectableElement getElement(InjectableElement element, Type type) {
+        return new InjectableElement() {
+            @Override
+            public AnnotatedElement getAnnotatedElement() {
+                return element.getAnnotatedElement();
+            }
+
+            @Override
+            public Type getType() {
+                return type;
+            }
+
+            @Override
+            public boolean isPrimitive() {
+                return element.isPrimitive();
+            }
+
+            @Override
+            public String getName() {
+                return element.getName();
+            }
+
+            @Override
+            public String getSource() {
+                return element.getSource();
+            }
+
+            @Override
+            public String getVia() {
+                return element.getVia();
+            }
+
+            @Override
+            public Class<? extends ViaProviderType> getViaProviderType() {
+                return element.getViaProviderType();
+            }
+
+            @Override
+            public boolean hasDefaultValue() {
+                return true;
+            }
+
+            @Override
+            public Object getDefaultValue() {
+                return Optional.empty();
+            }
+
+            @Override
+            public boolean isOptional(InjectAnnotationProcessor annotationProcessor) {
+                return true;
+            }
+        };
+    }
+
     private
     @Nullable
     RuntimeException injectElement(final InjectableElement element, final Object adaptable,
+                                   final @NotNull DisposalCallbackRegistry registry, final InjectCallback callback,
+                                   final @NotNull Map<ValuePreparer, Object> preparedValues,
+                                   final @Nullable BundleContext modelContext) {
+
+        Type genericType = ((InjectableField) element).getFieldGenericType();
+
+        if (genericType instanceof ParameterizedType) {
+            ParameterizedType pType = (ParameterizedType) genericType;
+            if (pType.getRawType().equals(Optional.class)) {
+                InjectableElement el = getElement(element, pType.getActualTypeArguments()[0]);
+                return injectElementInternal(el, adaptable, registry, (element1, value)
+                        -> callback.inject(element, value != Optional.empty() ? Optional.ofNullable(value) : value), preparedValues, modelContext);
+            }
+        }
+        return injectElementInternal(element, adaptable, registry, callback, preparedValues, modelContext);
+    }
+
+    private
+    @Nullable
+    RuntimeException injectElementInternal(final InjectableElement element, final Object adaptable,
                                    final @NotNull DisposalCallbackRegistry registry, final InjectCallback callback,
                                    final @NotNull Map<ValuePreparer, Object> preparedValues,
                                    final @Nullable BundleContext modelContext) {

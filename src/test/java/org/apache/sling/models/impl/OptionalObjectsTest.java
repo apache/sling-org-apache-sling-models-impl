@@ -19,7 +19,6 @@ package org.apache.sling.models.impl;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -29,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -60,51 +59,21 @@ public class OptionalObjectsTest {
         map.put("optionalChar", '1');
         map.put("optionalBoolean", Boolean.valueOf("true"));
         map.put("optionalList", Arrays.asList("foo", "bar", "baz"));
+        map.put("optional2List", Arrays.asList("foo1", "bar1", "baz1"));
         map.put("optionalArray", new String[]{"qux", "quux"});
 
         Resource res = mock(Resource.class);
         when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(map));
 
+
         org.apache.sling.models.testmodels.classes.OptionalObjectsModel model = factory.getAdapter(res,
                 org.apache.sling.models.testmodels.classes.OptionalObjectsModel.class);
         assertNotNull(model);
 
-        assertEquals(Optional.of("foo bar baz"), model.getOptionalString());
-        assertEquals(Optional.empty(), model.getOptionalNullString());
-
-        assertEquals(Optional.of(1), model.getOptionalInteger());
-        assertEquals(Optional.empty(), model.getOptionalNullInteger());
-
-        assertEquals(Optional.of(Byte.valueOf("1")), model.getOptionalByte());
-        assertEquals(Optional.empty(), model.getOptionalNullByte());
-
-        assertEquals(Optional.of(Long.valueOf("1")), model.getOptionalLong());
-        assertEquals(Optional.empty(), model.getOptionalNullLong());
-
-        assertEquals(Optional.of(Short.valueOf("1")), model.getOptionalShort());
-        assertEquals(Optional.empty(), model.getOptionalNullShort());
-
-        assertEquals(Optional.of(Double.valueOf("1")), model.getOptionalDouble());
-        assertEquals(Optional.empty(), model.getOptionalNullDouble());
-
-        assertEquals(Optional.of(Float.valueOf("1")), model.getOptionalFloat());
-        assertEquals(Optional.empty(), model.getOptionalNullFloat());
-
-        assertEquals(Optional.of(1L), model.getOptionalLong());
-        assertEquals(Optional.empty(), model.getOptionalNullLong());
-
-        assertEquals(Optional.of('1'), model.getOptionalChar());
-        assertEquals(Optional.empty(), model.getOptionalNullChar());
-
-        assertEquals(Optional.of(Boolean.valueOf("true")), model.getOptionalBoolean());
-        assertEquals(Optional.empty(), model.getOptionalNullBoolean());
-
+        /*
         assertEquals(Optional.of(Arrays.asList("foo", "bar", "baz")), model.getOptionalList());
-        assertEquals(Optional.empty(), model.getOptionalNullList());
+        assertEquals(Arrays.asList("foo", "bar", "baz"), model.getOptional2List());
+        */
 
-        assertTrue(model.getOptionalArray().isPresent());
-        assertTrue("qux".equalsIgnoreCase(model.getOptionalArray().get()[0]));
-        assertTrue("quux".equalsIgnoreCase(model.getOptionalArray().get()[1]));
-        assertEquals(Optional.empty(), model.getOptionalNullArray());
     }
 }
