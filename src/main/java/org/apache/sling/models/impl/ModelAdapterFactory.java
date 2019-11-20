@@ -520,12 +520,12 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
             @Override
             public boolean hasDefaultValue() {
-                return true;
+                return element.hasDefaultValue();
             }
 
             @Override
             public Object getDefaultValue() {
-                return Optional.empty();
+                return element.getDefaultValue() == null ? Optional.empty() : element.getDefaultValue();
             }
 
             @Override
@@ -541,17 +541,27 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                                    final @NotNull DisposalCallbackRegistry registry, final InjectCallback callback,
                                    final @NotNull Map<ValuePreparer, Object> preparedValues,
                                    final @Nullable BundleContext modelContext) {
+        if (element instanceof InjectableField) {
+            Type genericType = ((InjectableField) element).getFieldGenericType();
 
-        Type genericType = ((InjectableField) element).getFieldGenericType();
+            if (genericType instanceof ParameterizedType) {
+                ParameterizedType pType = (ParameterizedType) genericType;
 
-        if (genericType instanceof ParameterizedType) {
-            ParameterizedType pType = (ParameterizedType) genericType;
-            if (pType.getRawType().equals(Optional.class)) {
-                InjectableElement el = getElement(element, pType.getActualTypeArguments()[0]);
-                return injectElementInternal(el, adaptable, registry, (element1, value)
-                        -> callback.inject(element, value != Optional.empty() ? Optional.ofNullable(value) : value), preparedValues, modelContext);
+                if (pType.getRawType().equals(Optional.class)) {
+                    InjectableElement el = getElement(element, pType.getActualTypeArguments()[0]);
+
+                    return injectElementInternal(el, adaptable, registry, new InjectCallback() {
+                        @Override
+                        public RuntimeException inject(InjectableElement element1, Object value) {
+                            return callback.inject(element, value.equals(Optional.empty())
+                                    ? value
+                                    : Optional.of(value));
+                        }
+                    }, preparedValues, modelContext);
+                }
             }
         }
+
         return injectElementInternal(element, adaptable, registry, callback, preparedValues, modelContext);
     }
 
