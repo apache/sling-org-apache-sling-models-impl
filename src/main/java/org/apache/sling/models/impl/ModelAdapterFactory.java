@@ -369,10 +369,12 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             if (modelAnnotation.cache()) {
                 Map<Class<?>, SoftReference<Object>> adaptableCache = adapterCache.get(adaptable);
                 if (adaptableCache != null) {
-                    SoftReference<Object> SoftReference = adaptableCache.get(requestedType);
-                    ModelType cachedObject = (ModelType) SoftReference.get();
-                    if (cachedObject != null) {
-                        return new Result<>(cachedObject);
+                    SoftReference<Object> softReference = adaptableCache.get(requestedType);
+                    if (softReference != null) {
+                        ModelType cachedObject = (ModelType) softReference.get();
+                        if (cachedObject != null) {
+                            return new Result<>(cachedObject);
+                        }
                     }
                 }
             }
