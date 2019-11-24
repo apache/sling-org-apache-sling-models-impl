@@ -21,11 +21,17 @@ import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
 
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.models.annotations.Default;
+import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.ChildResource;
+import org.apache.sling.models.annotations.injectorspecific.OSGiService;
+import org.apache.sling.models.annotations.injectorspecific.RequestAttribute;
+import org.apache.sling.models.annotations.injectorspecific.ScriptVariable;
+import org.slf4j.Logger;
 
-@Model(adaptables = Resource.class)
+@Model(adaptables = {Resource.class, SlingHttpServletRequest.class})
 public class OptionalObjectsModel {
 
     @Inject
@@ -100,9 +106,26 @@ public class OptionalObjectsModel {
     @Inject
     private Optional<List<Integer>> intList;
 
-    @Inject
-    @Default(longValues = 1L)
-    private Long optionalLongDefaultProperty;
+    @ChildResource(name = "child")
+    private Optional<Resource> optionalChild;
+
+    @ChildResource
+    private Optional<Resource> optionalNullChild;
+
+    @ScriptVariable(name = "sling")
+    private Optional<SlingScriptHelper> optionalHelper;
+
+    @ScriptVariable(name = "foo")
+    private Optional<SlingScriptHelper> optionalNullHelper;
+
+    @OSGiService
+    private Optional<Logger> log;
+
+    @RequestAttribute(name = "attribute")
+    private Optional<Object> optionalRequestAttribute;
+
+    @RequestAttribute(name = "foo")
+    private Optional<Object> optionalNullRequestAttribute;
 
     public Optional<String> getOptionalString() {
         return optionalString;
@@ -200,7 +223,31 @@ public class OptionalObjectsModel {
         return intList;
     }
 
-    public Long getOptionalLongDefaultProperty() {
-        return optionalLongDefaultProperty;
+    public Optional<Resource> getOptionalChild() {
+        return optionalChild;
+    }
+
+    public Optional<Resource> getOptionalNullChild() {
+        return optionalNullChild;
+    }
+
+    public Optional<SlingScriptHelper> getOptionalHelper() {
+        return optionalHelper;
+    }
+
+    public Optional<SlingScriptHelper> getOptionalNullHelper() {
+        return optionalNullHelper;
+    }
+
+    public Optional<Logger> getLog() {
+        return log;
+    }
+
+    public Optional<Object> getOptionalRequestAttribute() {
+        return optionalRequestAttribute;
+    }
+
+    public Optional<Object> getOptionalNullRequestAttribute() {
+        return optionalNullRequestAttribute;
     }
 }

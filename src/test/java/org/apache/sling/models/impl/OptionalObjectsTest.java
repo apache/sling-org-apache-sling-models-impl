@@ -16,23 +16,32 @@
  */
 package org.apache.sling.models.impl;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.scripting.SlingBindings;
+import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.models.impl.injectors.ValueMapInjector;
+import org.apache.sling.models.impl.injectors.*;
+import org.apache.sling.models.impl.via.BeanPropertyViaProvider;
+import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory;
+import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory2;
 import org.apache.sling.models.testmodels.classes.OptionalObjectsModel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,12 +50,55 @@ public class OptionalObjectsTest {
 
     private ModelAdapterFactory factory;
 
+    private OSGiServiceInjector osgiInjector;
+
+    @Mock
+    private BundleContext bundleContext;
+
+    @Mock
+    private SlingHttpServletRequest request;
+
+    @Mock
+    private Logger log;
+
     @Before
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(2, 2));
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(
-                org.apache.sling.models.testmodels.classes.OptionalObjectsModel.class);
+
+        osgiInjector = new OSGiServiceInjector();
+        osgiInjector.activate(bundleContext);
+
+        BindingsInjector bindingsInjector = new BindingsInjector();
+        ValueMapInjector valueMapInjector = new ValueMapInjector();
+        ChildResourceInjector childResourceInjector = new ChildResourceInjector();
+        RequestAttributeInjector requestAttributeInjector = new RequestAttributeInjector();
+
+        factory.bindInjector(bindingsInjector,
+                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 1L));
+        factory.bindInjector(valueMapInjector,
+                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 2L));
+        factory.bindInjector(childResourceInjector,
+                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 3L));
+        factory.bindInjector(requestAttributeInjector,
+                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 4L));
+        factory.bindInjector(osgiInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 5L));
+
+        factory.bindStaticInjectAnnotationProcessorFactory(bindingsInjector,
+                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 1L));
+        factory.injectAnnotationProcessorFactories = Collections.<InjectAnnotationProcessorFactory>singletonList(valueMapInjector);
+        factory.injectAnnotationProcessorFactories2 = Collections.<InjectAnnotationProcessorFactory2>singletonList(childResourceInjector);
+        factory.bindStaticInjectAnnotationProcessorFactory(requestAttributeInjector,
+                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 4L));
+        factory.bindStaticInjectAnnotationProcessorFactory(osgiInjector,
+                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 5L));
+        factory.bindViaProvider(new BeanPropertyViaProvider(), null);
+
+        SlingBindings bindings = new SlingBindings();
+        bindings.setLog(log);
+        Mockito.when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
+
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(OptionalObjectsModel.class);
+
     }
 
     @Test
@@ -63,12 +115,11 @@ public class OptionalObjectsTest {
         map.put("optionalChar", '1');
         map.put("optionalBoolean", Boolean.valueOf("true"));
 
-
         Resource res = mock(Resource.class);
         when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(map));
 
         org.apache.sling.models.testmodels.classes.OptionalObjectsModel model = factory.getAdapter(res,
-                org.apache.sling.models.testmodels.classes.OptionalObjectsModel.class);
+                OptionalObjectsModel.class);
         assertNotNull(model);
 
         assertEquals(Optional.of("foo bar baz"), model.getOptionalString());
@@ -105,8 +156,9 @@ public class OptionalObjectsTest {
     @Test
     public void testFieldInjectionListsAndArrays() {
         Map<String, Object> map = new HashMap<>();
-        map.put("intList", new Integer[] {1, 2, 9, 8});
-        map.put("stringList", new String[] {"hello", "world"});
+
+        map.put("intList", new Integer[]{1, 2, 9, 8});
+        map.put("stringList", new String[]{"hello", "world"});
         map.put("optionalList", Arrays.asList("foo", "bar", "baz"));
         map.put("optionalArray", new String[]{"qux", "quux"});
 
@@ -133,18 +185,53 @@ public class OptionalObjectsTest {
     }
 
     @Test
-    public void testMethodInjectionsListsAndArrays() throws Exception {
-        Map<String, Object> map = new HashMap<>();
-        map.put("optionalLongDefaultProperty", null);
-
-        ValueMap vm = new ValueMapDecorator(map);
+    public void testFieldInjectionsChildResource() throws Exception {
         Resource res = mock(Resource.class);
-        when(res.adaptTo(ValueMap.class)).thenReturn(vm);
+        Resource child = mock(Resource.class);
+        when(child.getName()).thenReturn("child");
+        when(res.getChild(eq("child"))).thenReturn(child);
 
         OptionalObjectsModel model = factory.getAdapter(res, OptionalObjectsModel.class);
         assertNotNull(model);
 
-        assertEquals(1L, model.getOptionalLongDefaultProperty().longValue());
+        assertEquals(child.getName(), model.getOptionalChild().get().getName());
+        assertEquals(Optional.empty(), model.getOptionalNullChild());
+    }
 
+    @Test
+    public void testFieldInjectionsScriptVariable() throws Exception {
+        SlingBindings bindings = new SlingBindings();
+        SlingScriptHelper helper = mock(SlingScriptHelper.class);
+        bindings.setSling(helper);
+        when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
+
+        OptionalObjectsModel model = factory.getAdapter(request, OptionalObjectsModel.class);
+        assertNotNull(model);
+        assertEquals(helper, model.getOptionalHelper().get());
+        assertEquals(Optional.empty(), model.getOptionalNullHelper());
+    }
+
+    @Test
+    public void testFieldInjectionsOSGiService() throws InvalidSyntaxException {
+        ServiceReference ref = mock(ServiceReference.class);
+        Logger log = mock(Logger.class);
+        when(bundleContext.getServiceReferences(Logger.class.getName(), null)).thenReturn(
+                new ServiceReference[]{ref});
+        when(bundleContext.getService(ref)).thenReturn(log);
+
+        OptionalObjectsModel model = factory.getAdapter(request, OptionalObjectsModel.class);
+        assertNotNull(model);
+        assertEquals(log, model.getLog().get());
+    }
+
+    @Test
+    public void testFieldInjectionsRequestAttribute() throws InvalidSyntaxException {
+        Object attribute = new Object();
+        when(request.getAttribute("attribute")).thenReturn(attribute);
+
+        OptionalObjectsModel model = factory.getAdapter(request, OptionalObjectsModel.class);
+        assertNotNull(model);
+        assertEquals(attribute, model.getOptionalRequestAttribute().get());
+        assertEquals(Optional.empty(), model.getOptionalNullRequestAttribute());
     }
 }
