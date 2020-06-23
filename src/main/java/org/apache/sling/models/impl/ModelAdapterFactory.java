@@ -59,6 +59,7 @@ import org.apache.sling.models.impl.model.InjectableField;
 import org.apache.sling.models.impl.model.InjectableMethod;
 import org.apache.sling.models.impl.model.ModelClass;
 import org.apache.sling.models.impl.model.ModelClassConstructor;
+import org.apache.sling.models.impl.model.OptionalTypedInjectableElement;
 import org.apache.sling.models.spi.AcceptsNullName;
 import org.apache.sling.models.spi.DisposalCallback;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
@@ -480,59 +481,22 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         }
     }
 
-    @NotNull
-    private InjectableElement getElement(InjectableElement element, Type type) {
-        return new InjectableElement() {
-            @Override
-            public AnnotatedElement getAnnotatedElement() {
-                return element.getAnnotatedElement();
-            }
+    private class OptionalWrappingCallback implements InjectCallback {
 
-            @Override
-            public Type getType() {
-                return type;
-            }
+        private final InjectCallback chainedCallback;
+        private final InjectableElement element;
 
-            @Override
-            public boolean isPrimitive() {
-                return element.isPrimitive();
-            }
+        private OptionalWrappingCallback(InjectCallback chainedCallback, InjectableElement element) {
+            this.chainedCallback = chainedCallback;
+            this.element = element;
+        }
 
-            @Override
-            public String getName() {
-                return element.getName();
-            }
-
-            @Override
-            public String getSource() {
-                return element.getSource();
-            }
-
-            @Override
-            public String getVia() {
-                return element.getVia();
-            }
-
-            @Override
-            public Class<? extends ViaProviderType> getViaProviderType() {
-                return element.getViaProviderType();
-            }
-
-            @Override
-            public boolean hasDefaultValue() {
-                return element.hasDefaultValue();
-            }
-
-            @Override
-            public Object getDefaultValue() {
-                return element.getDefaultValue() == null ? Optional.empty() : element.getDefaultValue();
-            }
-
-            @Override
-            public boolean isOptional(InjectAnnotationProcessor annotationProcessor) {
-                return true;
-            }
-        };
+        @Override
+        public RuntimeException inject(InjectableElement element1, Object value) {
+            return chainedCallback.inject(element, value.equals(Optional.empty())
+                    ? value    // if the value is null it's already represented as Optional.empty(), return as is
+                    : Optional.of(value)); // otherwise wrap in Optional
+        }
     }
 
     private
@@ -548,16 +512,10 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                 ParameterizedType pType = (ParameterizedType) genericType;
 
                 if (pType.getRawType().equals(Optional.class)) {
-                    InjectableElement el = getElement(element, pType.getActualTypeArguments()[0]);
+                    InjectableElement el = new OptionalTypedInjectableElement(element, pType.getActualTypeArguments()[0]);
+                    InjectCallback wrappedCallback = new OptionalWrappingCallback(callback, element);
 
-                    return injectElementInternal(el, adaptable, registry, new InjectCallback() {
-                        @Override
-                        public RuntimeException inject(InjectableElement element1, Object value) {
-                            return callback.inject(element, value.equals(Optional.empty())
-                                    ? value
-                                    : Optional.of(value));
-                        }
-                    }, preparedValues, modelContext);
+                    return injectElementInternal(el, adaptable, registry, wrappedCallback, preparedValues, modelContext);
                 }
             }
         }
