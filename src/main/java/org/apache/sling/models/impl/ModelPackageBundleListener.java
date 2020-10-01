@@ -16,6 +16,7 @@
  */
 package org.apache.sling.models.impl;
 
+import java.lang.annotation.AnnotationFormatError;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -187,8 +188,8 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
                 }
 
             }
-        } catch (ClassNotFoundException e) {
-            log.warn("Unable to load class", e);
+        } catch (ClassNotFoundException|AnnotationFormatError e) {
+            log.warn("Unable to load class '{}' from bundle '{}': {}", className, bundle.getSymbolicName(), e.getLocalizedMessage(), e);
         }
     }
 
