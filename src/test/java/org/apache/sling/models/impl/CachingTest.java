@@ -22,6 +22,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import javax.servlet.ServletRequestWrapper;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
 import org.apache.sling.models.testmodels.classes.CachedModel;
@@ -38,6 +40,9 @@ public class CachingTest {
     @Mock
     private SlingHttpServletRequest request;
 
+    @Mock
+    private ServletRequestWrapper requestWrapper;
+
     private ModelAdapterFactory factory;
 
     @Before
@@ -48,6 +53,7 @@ public class CachingTest {
                 org.apache.sling.models.testmodels.interfaces.CachedModel.class, org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
 
         when(request.getAttribute("testValue")).thenReturn("test");
+        when(requestWrapper.getRequest()).thenReturn(request);
     }
 
     @Test
@@ -96,5 +102,29 @@ public class CachingTest {
         assertEquals("test", uncached2.getTestValue());
 
         verify(request, times(2)).getAttribute("testValue");
+    }
+
+    @Test
+    public void testCachedClassWithRequestWrapper() {
+        CachedModel cached1 = factory.getAdapter(request, CachedModel.class);
+        CachedModel cached2 = factory.getAdapter(requestWrapper, CachedModel.class);
+
+        assertTrue(cached1 == cached2);
+        assertEquals("test", cached1.getTestValue());
+        assertEquals("test", cached2.getTestValue());
+
+        verify(request, times(1)).getAttribute("testValue");
+    }
+
+    @Test
+    public void testCachedInterfaceWithRequestWrapper() {
+        org.apache.sling.models.testmodels.interfaces.CachedModel cached1 = factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.CachedModel.class);
+        org.apache.sling.models.testmodels.interfaces.CachedModel cached2 = factory.getAdapter(requestWrapper, org.apache.sling.models.testmodels.interfaces.CachedModel.class);
+
+        assertTrue(cached1 == cached2);
+        assertEquals("test", cached1.getTestValue());
+        assertEquals("test", cached2.getTestValue());
+
+        verify(request, times(1)).getAttribute("testValue");
     }
 }
