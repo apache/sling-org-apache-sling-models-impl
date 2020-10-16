@@ -16,32 +16,33 @@
  */
 package org.apache.sling.models.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.servlet.ServletRequestWrapper;
-
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
 import org.apache.sling.models.testmodels.classes.CachedModel;
 import org.apache.sling.models.testmodels.classes.UncachedModel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CachingTest {
 
-    @Mock
-    private SlingHttpServletRequest request;
+    @Spy
+    private MockRequest request;
 
-    @Mock
-    private ServletRequestWrapper requestWrapper;
+    private SlingHttpServletRequestWrapper requestWrapper;
 
     private ModelAdapterFactory factory;
 
@@ -53,7 +54,7 @@ public class CachingTest {
                 org.apache.sling.models.testmodels.interfaces.CachedModel.class, org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
 
         when(request.getAttribute("testValue")).thenReturn("test");
-        when(requestWrapper.getRequest()).thenReturn(request);
+        requestWrapper = new SlingHttpServletRequestWrapper(request);
     }
 
     @Test
@@ -114,6 +115,11 @@ public class CachingTest {
         assertEquals("test", cached2.getTestValue());
 
         verify(request, times(1)).getAttribute("testValue");
+        
+        // If we clear the request attributes, the sling model is no longer cached
+        request.clearAttributes();
+        CachedModel cached3 = factory.getAdapter(request, CachedModel.class);
+        assertTrue(cached1 != cached3);
     }
 
     @Test
@@ -127,4 +133,29 @@ public class CachingTest {
 
         verify(request, times(1)).getAttribute("testValue");
     }
+    
+    // MockSlingHttpServletRequest doesn't implement set and get attributes
+    private static class MockRequest extends MockSlingHttpServletRequest {
+
+        private Map<String, Object> attributes = new HashMap<>();
+        
+        MockRequest() {
+            super(null, null, null, null, null);
+        }
+        
+        @Override
+        public void setAttribute(String name, Object o) {
+            attributes.put(name, o);
+        }
+        
+        @Override
+        public Object getAttribute(String name) {
+            return attributes.get(name);
+        }
+        
+        public void clearAttributes() {
+            attributes.clear();
+        }
+    }
 }
+
