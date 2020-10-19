@@ -421,7 +421,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                     if (handlerResult.wasSuccessful()) {
                         ModelType model = (ModelType) Proxy.newProxyInstance(modelClass.getType().getClassLoader(), new Class<?>[] { modelClass.getType() }, handlerResult.getValue());
 
-                        if (modelAnnotation.cache()) {
+                        if (modelAnnotation.cache() && adaptableCache != null) {
                             adaptableCache.put(requestedType, new SoftReference<Object>(model));
                         }
 
@@ -433,7 +433,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                     try {
                         result = createObject(adaptable, modelClass);
 
-                        if (result.wasSuccessful() && modelAnnotation.cache()) {
+                        if (result.wasSuccessful() && modelAnnotation.cache() && adaptableCache != null) {
                             adaptableCache.put(requestedType, new SoftReference<Object>(result.getValue()));
                         }
                     } catch (Exception e) {
