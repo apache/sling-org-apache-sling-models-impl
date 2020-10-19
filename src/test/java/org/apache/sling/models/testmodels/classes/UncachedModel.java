@@ -17,12 +17,13 @@
 package org.apache.sling.models.testmodels.classes;
 
 
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.models.annotations.Model;
-
 import javax.inject.Inject;
 
-@Model(adaptables = SlingHttpServletRequest.class)
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.models.annotations.Model;
+
+@Model(adaptables = {SlingHttpServletRequest.class, Resource.class})
 public class UncachedModel {
 
     @Inject

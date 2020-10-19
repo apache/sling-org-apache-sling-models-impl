@@ -345,34 +345,27 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         // throw exception here
         throw new ModelClassException("Could not yet find an adapter factory for the model " + requestedType + " from adaptable " + adaptable.getClass());
     }
-
-    @SuppressWarnings("unchecked")
-    private Map<Class<?>, SoftReference<Object>> getCache(final Object adaptable) {
-        if (adaptable instanceof ServletRequest) {
-            ServletRequest request = (ServletRequest) adaptable;
-            return (Map<Class<?>, SoftReference<Object>>) request.getAttribute(REQUEST_CACHE_ATTRIBUTE);
-        } else {
-            return adapterCache.get(adaptable);
-        }
-    }
     
-    private Map<Class<?>, SoftReference<Object>> createCache(final Object adaptable) {
-        Map<Class<?>, SoftReference<Object>> adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
-        if (adaptable instanceof ServletRequest) {
-            ServletRequest request = (ServletRequest) adaptable;
-            request.setAttribute(REQUEST_CACHE_ATTRIBUTE, adaptableCache);
-        } else {
-            adapterCache.put(adaptable, adaptableCache);
-        }
-        return adaptableCache;
-    }
-
+    @SuppressWarnings("unchecked")
     private Map<Class<?>, SoftReference<Object>> getOrCreateCache(final Object adaptable) {
-        Map<Class<?>, SoftReference<Object>> adaptableCache = getCache(adaptable);
-        if (adaptableCache == null) {
-            adaptableCache = createCache(adaptable);
+        synchronized (adaptable) {
+            Map<Class<?>, SoftReference<Object>> adaptableCache;
+            if (adaptable instanceof ServletRequest) {
+                ServletRequest request = (ServletRequest) adaptable;
+                adaptableCache = (Map<Class<?>, SoftReference<Object>>) request.getAttribute(REQUEST_CACHE_ATTRIBUTE);
+                if (adaptableCache == null) {
+                    adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
+                    request.setAttribute(REQUEST_CACHE_ATTRIBUTE, adaptableCache);
+                }
+            } else {
+                adaptableCache = adapterCache.get(adaptable);
+                if (adaptableCache == null) {
+                    adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
+                    adapterCache.put(adaptable, adaptableCache);
+                }
+            }
+            return adaptableCache;
         }
-        return adaptableCache;
     }
     
     @SuppressWarnings("unchecked")
@@ -396,16 +389,15 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             boolean isAdaptable = false;
 
             Model modelAnnotation = modelClass.getModelAnnotation();
+            Map<Class<?>, SoftReference<Object>> adaptableCache = null;
 
             if (modelAnnotation.cache()) {
-                Map<Class<?>, SoftReference<Object>> adaptableCache = getCache(adaptable);
-                if (adaptableCache != null) {
-                    SoftReference<Object> softReference = adaptableCache.get(requestedType);
-                    if (softReference != null) {
-                        ModelType cachedObject = (ModelType) softReference.get();
-                        if (cachedObject != null) {
-                            return new Result<>(cachedObject);
-                        }
+                adaptableCache = getOrCreateCache(adaptable);
+                SoftReference<Object> softReference = adaptableCache.get(requestedType);
+                if (softReference != null) {
+                    ModelType cachedObject = (ModelType) softReference.get();
+                    if (cachedObject != null) {
+                        return new Result<>(cachedObject);
                     }
                 }
             }
@@ -430,7 +422,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                         ModelType model = (ModelType) Proxy.newProxyInstance(modelClass.getType().getClassLoader(), new Class<?>[] { modelClass.getType() }, handlerResult.getValue());
 
                         if (modelAnnotation.cache()) {
-                            Map<Class<?>, SoftReference<Object>> adaptableCache = getOrCreateCache(adaptable);
                             adaptableCache.put(requestedType, new SoftReference<Object>(model));
                         }
 
@@ -443,7 +434,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                         result = createObject(adaptable, modelClass);
 
                         if (result.wasSuccessful() && modelAnnotation.cache()) {
-                            Map<Class<?>, SoftReference<Object>> adaptableCache = getOrCreateCache(adaptable);
                             adaptableCache.put(requestedType, new SoftReference<Object>(result.getValue()));
                         }
                     } catch (Exception e) {

@@ -16,17 +16,23 @@
  */
 package org.apache.sling.models.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
+import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.apache.sling.models.testmodels.classes.CachedModel;
 import org.apache.sling.models.testmodels.classes.UncachedModel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -44,17 +50,24 @@ public class CachingTest {
 
     private SlingHttpServletRequestWrapper requestWrapper;
 
+    @Mock
+    private Resource resource;
+    
     private ModelAdapterFactory factory;
 
     @Before
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindInjector(new RequestAttributeInjector(), new ServicePropertiesMap(0, 0));
+        factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(1, 1));
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(CachedModel.class, UncachedModel.class,
                 org.apache.sling.models.testmodels.interfaces.CachedModel.class, org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
 
         when(request.getAttribute("testValue")).thenReturn("test");
         requestWrapper = new SlingHttpServletRequestWrapper(request);
+        
+        ValueMap vm = new ValueMapDecorator(Collections.singletonMap("testValue", "test"));
+        when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
     }
 
     @Test
@@ -68,6 +81,18 @@ public class CachingTest {
 
         verify(request, times(1)).getAttribute("testValue");
     }
+    
+    @Test
+    public void testCachedClassWithResource() {
+        CachedModel cached1 = factory.getAdapter(resource, CachedModel.class);
+        CachedModel cached2 = factory.getAdapter(resource, CachedModel.class);
+
+        assertTrue(cached1 == cached2);
+        assertEquals("test", cached1.getTestValue());
+        assertEquals("test", cached2.getTestValue());
+
+        verify(resource, times(1)).adaptTo(ValueMap.class);
+    }
 
     @Test
     public void testNoCachedClass() {
@@ -79,6 +104,18 @@ public class CachingTest {
         assertEquals("test", uncached2.getTestValue());
 
         verify(request, times(2)).getAttribute("testValue");
+    }
+    
+    @Test
+    public void testNoCachedClassWithResource() {
+        UncachedModel uncached1 = factory.getAdapter(resource, UncachedModel.class);
+        UncachedModel uncached2 = factory.getAdapter(resource, UncachedModel.class);
+
+        assertTrue(uncached1 != uncached2);
+        assertEquals("test", uncached1.getTestValue());
+        assertEquals("test", uncached2.getTestValue());
+
+        verify(resource, times(2)).adaptTo(ValueMap.class);
     }
 
     @Test
