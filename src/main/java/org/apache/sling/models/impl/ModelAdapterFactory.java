@@ -121,6 +121,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     private static final Object REQUEST_MARKER_VALUE = new Object();
 
+    private static final String REQUEST_CACHE_ATTRIBUTE = ModelAdapterFactory.class.getName() + ".AdapterCache";
+
     private static class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry, Disposable {
 
         private List<DisposalCallback> callbacks = new ArrayList<>();
@@ -343,7 +345,25 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         // throw exception here
         throw new ModelClassException("Could not yet find an adapter factory for the model " + requestedType + " from adaptable " + adaptable.getClass());
     }
-
+    
+    @SuppressWarnings("unchecked")
+    private Map<Class<?>, SoftReference<Object>> getOrCreateCache(final Object adaptable) {
+        Map<Class<?>, SoftReference<Object>> adaptableCache;
+        if (adaptable instanceof ServletRequest) {
+            ServletRequest request = (ServletRequest) adaptable;
+            adaptableCache = (Map<Class<?>, SoftReference<Object>>) request.getAttribute(REQUEST_CACHE_ATTRIBUTE);
+            if (adaptableCache == null) {
+                adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
+                request.setAttribute(REQUEST_CACHE_ATTRIBUTE, adaptableCache);
+            }
+        } else {
+            adaptableCache = adapterCache.computeIfAbsent(adaptable, k -> {
+                return Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
+            });
+        }
+        return adaptableCache;
+    }
+    
     @SuppressWarnings("unchecked")
     private <ModelType> Result<ModelType> internalCreateModel(final Object adaptable, final Class<ModelType> requestedType) {
         Result<ModelType> result;
@@ -365,21 +385,15 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             boolean isAdaptable = false;
 
             Model modelAnnotation = modelClass.getModelAnnotation();
-            Object cacheKey = adaptable;
+            Map<Class<?>, SoftReference<Object>> adaptableCache = null;
 
             if (modelAnnotation.cache()) {
-                if (adaptable instanceof ServletRequestWrapper) {
-                    cacheKey = unwrapRequest((ServletRequest) adaptable);
-                }
-
-                Map<Class<?>, SoftReference<Object>> adaptableCache = adapterCache.get(cacheKey);
-                if (adaptableCache != null) {
-                    SoftReference<Object> softReference = adaptableCache.get(requestedType);
-                    if (softReference != null) {
-                        ModelType cachedObject = (ModelType) softReference.get();
-                        if (cachedObject != null) {
-                            return new Result<>(cachedObject);
-                        }
+                adaptableCache = getOrCreateCache(adaptable);
+                SoftReference<Object> softReference = adaptableCache.get(requestedType);
+                if (softReference != null) {
+                    ModelType cachedObject = (ModelType) softReference.get();
+                    if (cachedObject != null) {
+                        return new Result<>(cachedObject);
                     }
                 }
             }
@@ -403,12 +417,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                     if (handlerResult.wasSuccessful()) {
                         ModelType model = (ModelType) Proxy.newProxyInstance(modelClass.getType().getClassLoader(), new Class<?>[] { modelClass.getType() }, handlerResult.getValue());
 
-                        if (modelAnnotation.cache()) {
-                            Map<Class<?>, SoftReference<Object>> adaptableCache = adapterCache.get(cacheKey);
-                            if (adaptableCache == null) {
-                                adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
-                                adapterCache.put(cacheKey, adaptableCache);
-                            }
+                        if (modelAnnotation.cache() && adaptableCache != null) {
                             adaptableCache.put(requestedType, new SoftReference<Object>(model));
                         }
 
@@ -420,12 +429,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                     try {
                         result = createObject(adaptable, modelClass);
 
-                        if (result.wasSuccessful() && modelAnnotation.cache()) {
-                            Map<Class<?>, SoftReference<Object>> adaptableCache = adapterCache.get(cacheKey);
-                            if (adaptableCache == null) {
-                                adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
-                                adapterCache.put(cacheKey, adaptableCache);
-                            }
+                        if (result.wasSuccessful() && modelAnnotation.cache() && adaptableCache != null) {
                             adaptableCache.put(requestedType, new SoftReference<Object>(result.getValue()));
                         }
                     } catch (Exception e) {
