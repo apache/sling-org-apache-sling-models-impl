@@ -353,13 +353,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             ServletRequest request = (ServletRequest) adaptable;
             adaptableCache = (Map<Class<?>, SoftReference<Object>>) request.getAttribute(REQUEST_CACHE_ATTRIBUTE);
             if (adaptableCache == null) {
-                adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
+                adaptableCache = Collections.synchronizedMap(new WeakHashMap<>());
                 request.setAttribute(REQUEST_CACHE_ATTRIBUTE, adaptableCache);
             }
         } else {
-            adaptableCache = adapterCache.computeIfAbsent(adaptable, k -> {
-                return Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
-            });
+            adaptableCache = adapterCache.computeIfAbsent(adaptable, k -> Collections.synchronizedMap(new WeakHashMap<>()));
         }
         return adaptableCache;
     }

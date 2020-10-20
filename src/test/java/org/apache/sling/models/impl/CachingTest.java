@@ -37,6 +37,8 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -75,7 +77,7 @@ public class CachingTest {
         CachedModel cached1 = factory.getAdapter(request, CachedModel.class);
         CachedModel cached2 = factory.getAdapter(request, CachedModel.class);
 
-        assertTrue(cached1 == cached2);
+        assertSame(cached1, cached2);
         assertEquals("test", cached1.getTestValue());
         assertEquals("test", cached2.getTestValue());
 
@@ -87,7 +89,7 @@ public class CachingTest {
         CachedModel cached1 = factory.getAdapter(resource, CachedModel.class);
         CachedModel cached2 = factory.getAdapter(resource, CachedModel.class);
 
-        assertTrue(cached1 == cached2);
+        assertSame(cached1, cached2);
         assertEquals("test", cached1.getTestValue());
         assertEquals("test", cached2.getTestValue());
 
@@ -99,7 +101,7 @@ public class CachingTest {
         UncachedModel uncached1 = factory.getAdapter(request, UncachedModel.class);
         UncachedModel uncached2 = factory.getAdapter(request, UncachedModel.class);
 
-        assertTrue(uncached1 != uncached2);
+        assertNotSame(uncached1, uncached2);
         assertEquals("test", uncached1.getTestValue());
         assertEquals("test", uncached2.getTestValue());
 
@@ -111,7 +113,7 @@ public class CachingTest {
         UncachedModel uncached1 = factory.getAdapter(resource, UncachedModel.class);
         UncachedModel uncached2 = factory.getAdapter(resource, UncachedModel.class);
 
-        assertTrue(uncached1 != uncached2);
+        assertNotSame(uncached1, uncached2);
         assertEquals("test", uncached1.getTestValue());
         assertEquals("test", uncached2.getTestValue());
 
@@ -123,7 +125,7 @@ public class CachingTest {
         org.apache.sling.models.testmodels.interfaces.CachedModel cached1 = factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.CachedModel.class);
         org.apache.sling.models.testmodels.interfaces.CachedModel cached2 = factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.CachedModel.class);
 
-        assertTrue(cached1 == cached2);
+        assertSame(cached1, cached2);
         assertEquals("test", cached1.getTestValue());
         assertEquals("test", cached2.getTestValue());
 
@@ -135,7 +137,7 @@ public class CachingTest {
         org.apache.sling.models.testmodels.interfaces.UncachedModel uncached1 = factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
         org.apache.sling.models.testmodels.interfaces.UncachedModel uncached2 = factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
 
-        assertTrue(uncached1 != uncached2);
+        assertNotSame(uncached1, uncached2);
         assertEquals("test", uncached1.getTestValue());
         assertEquals("test", uncached2.getTestValue());
 
@@ -147,7 +149,7 @@ public class CachingTest {
         CachedModel cached1 = factory.getAdapter(request, CachedModel.class);
         CachedModel cached2 = factory.getAdapter(requestWrapper, CachedModel.class);
 
-        assertTrue(cached1 == cached2);
+        assertSame(cached1, cached2);
         assertEquals("test", cached1.getTestValue());
         assertEquals("test", cached2.getTestValue());
 
@@ -156,7 +158,7 @@ public class CachingTest {
         // If we clear the request attributes, the sling model is no longer cached
         request.clearAttributes();
         CachedModel cached3 = factory.getAdapter(request, CachedModel.class);
-        assertTrue(cached1 != cached3);
+        assertNotSame(cached1, cached3);
     }
 
     @Test
@@ -164,7 +166,7 @@ public class CachingTest {
         org.apache.sling.models.testmodels.interfaces.CachedModel cached1 = factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.CachedModel.class);
         org.apache.sling.models.testmodels.interfaces.CachedModel cached2 = factory.getAdapter(requestWrapper, org.apache.sling.models.testmodels.interfaces.CachedModel.class);
 
-        assertTrue(cached1 == cached2);
+        assertSame(cached1, cached2);
         assertEquals("test", cached1.getTestValue());
         assertEquals("test", cached2.getTestValue());
 
