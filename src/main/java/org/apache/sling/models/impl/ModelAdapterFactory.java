@@ -348,24 +348,20 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     
     @SuppressWarnings("unchecked")
     private Map<Class<?>, SoftReference<Object>> getOrCreateCache(final Object adaptable) {
-        synchronized (adaptable) {
-            Map<Class<?>, SoftReference<Object>> adaptableCache;
-            if (adaptable instanceof ServletRequest) {
-                ServletRequest request = (ServletRequest) adaptable;
-                adaptableCache = (Map<Class<?>, SoftReference<Object>>) request.getAttribute(REQUEST_CACHE_ATTRIBUTE);
-                if (adaptableCache == null) {
-                    adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
-                    request.setAttribute(REQUEST_CACHE_ATTRIBUTE, adaptableCache);
-                }
-            } else {
-                adaptableCache = adapterCache.get(adaptable);
-                if (adaptableCache == null) {
-                    adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
-                    adapterCache.put(adaptable, adaptableCache);
-                }
+        Map<Class<?>, SoftReference<Object>> adaptableCache;
+        if (adaptable instanceof ServletRequest) {
+            ServletRequest request = (ServletRequest) adaptable;
+            adaptableCache = (Map<Class<?>, SoftReference<Object>>) request.getAttribute(REQUEST_CACHE_ATTRIBUTE);
+            if (adaptableCache == null) {
+                adaptableCache = Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
+                request.setAttribute(REQUEST_CACHE_ATTRIBUTE, adaptableCache);
             }
-            return adaptableCache;
+        } else {
+            adaptableCache = adapterCache.computeIfAbsent(adaptable, k -> {
+                return Collections.synchronizedMap(new WeakHashMap<Class<?>, SoftReference<Object>>());
+            });
         }
+        return adaptableCache;
     }
     
     @SuppressWarnings("unchecked")
