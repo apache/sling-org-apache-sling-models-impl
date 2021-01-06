@@ -60,6 +60,8 @@ public class ModelPackageBundleListenerTest {
         public HideClassesClassLoader(ClassLoader parent, String... classNamesToHide) {
             super(parent);
             this.classNamesToHide = Arrays.asList(classNamesToHide);
+            //Exclude Hidden class since its loading via default class loader and throws ClassNotFoundException in line:70
+            this.excludeClass(Hidden.class.getName());
         }
 
         @Override
