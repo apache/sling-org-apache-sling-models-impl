@@ -19,8 +19,6 @@ package org.apache.sling.models.impl;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -291,14 +289,16 @@ public class AdapterFactoryTest {
             return "first";
         }
     }
-
-	@Test
+    
+    /*
+     * LOAD_FACTOR is used to ensure the test will try create instances of the model to fill up
+     * HEAP_SIZE * LOAD_FACTOR memory. This should be a number > 1.0, to ensure that memory would be
+     * exhausted, should this test fail.
+     * 
+     * SLING-10037 - Disabled tests since sun.misc.Unsafe is not available on jdk11 as 1.8 maven-compiler
+     */
+    /*@Test
     public void testCreateCachedModelWillNotCrashTheVMWithOOM() throws Exception {
-        /*
-         * LOAD_FACTOR is used to ensure the test will try create instances of the model to fill up
-         * HEAP_SIZE * LOAD_FACTOR memory. This should be a number > 1.0, to ensure that memory would be
-         * exhausted, should this test fail.
-         */
         double LOAD_FACTOR = 2.0;
         long instanceSize = sizeOf(new CachedModelWithSelfReference());
         long maxHeapSize = Runtime.getRuntime().maxMemory();
@@ -331,5 +331,5 @@ public class AdapterFactoryTest {
         }
 
         return ((maxSize/8) + 1) * 8;
-    }
+    }*/
 }
