@@ -19,23 +19,8 @@ package org.apache.sling.models.impl;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -74,6 +59,7 @@ import org.apache.sling.models.impl.model.InjectableField;
 import org.apache.sling.models.impl.model.InjectableMethod;
 import org.apache.sling.models.impl.model.ModelClass;
 import org.apache.sling.models.impl.model.ModelClassConstructor;
+import org.apache.sling.models.impl.model.OptionalTypedInjectableElement;
 import org.apache.sling.models.spi.AcceptsNullName;
 import org.apache.sling.models.spi.DisposalCallback;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
@@ -504,9 +490,51 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         }
     }
 
+    private class OptionalWrappingCallback implements InjectCallback {
+
+        private final InjectCallback chainedCallback;
+        private final InjectableElement element;
+
+        private OptionalWrappingCallback(InjectCallback chainedCallback, InjectableElement element) {
+            this.chainedCallback = chainedCallback;
+            this.element = element;
+        }
+
+        @Override
+        public RuntimeException inject(InjectableElement element1, Object value) {
+            return chainedCallback.inject(element, value.equals(Optional.empty())
+                    ? value    // if the value is null it's already represented as Optional.empty(), return as is
+                    : Optional.of(value)); // otherwise wrap in Optional
+        }
+    }
+
     private
     @Nullable
     RuntimeException injectElement(final InjectableElement element, final Object adaptable,
+                                   final @NotNull DisposalCallbackRegistry registry, final InjectCallback callback,
+                                   final @NotNull Map<ValuePreparer, Object> preparedValues,
+                                   final @Nullable BundleContext modelContext) {
+        if (element instanceof InjectableField) {
+            Type genericType = ((InjectableField) element).getFieldGenericType();
+
+            if (genericType instanceof ParameterizedType) {
+                ParameterizedType pType = (ParameterizedType) genericType;
+
+                if (pType.getRawType().equals(Optional.class)) {
+                    InjectableElement el = new OptionalTypedInjectableElement(element, pType.getActualTypeArguments()[0]);
+                    InjectCallback wrappedCallback = new OptionalWrappingCallback(callback, element);
+
+                    return injectElementInternal(el, adaptable, registry, wrappedCallback, preparedValues, modelContext);
+                }
+            }
+        }
+
+        return injectElementInternal(element, adaptable, registry, callback, preparedValues, modelContext);
+    }
+
+    private
+    @Nullable
+    RuntimeException injectElementInternal(final InjectableElement element, final Object adaptable,
                                    final @NotNull DisposalCallbackRegistry registry, final InjectCallback callback,
                                    final @NotNull Map<ValuePreparer, Object> preparedValues,
                                    final @Nullable BundleContext modelContext) {
