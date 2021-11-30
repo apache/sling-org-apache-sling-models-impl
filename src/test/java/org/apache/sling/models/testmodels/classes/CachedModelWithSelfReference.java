@@ -30,6 +30,5 @@ public class CachedModelWithSelfReference {
     SlingHttpServletRequest request;
 
     // Add a big array of longs to the class, to make it take fewer iterations to fill the heap
-    @SuppressWarnings("unused")
-    long[] longs = new long[numberOfLongs];
+    public long[] longs = new long[numberOfLongs];
 }

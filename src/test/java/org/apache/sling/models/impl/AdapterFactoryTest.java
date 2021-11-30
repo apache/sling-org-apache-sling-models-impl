@@ -316,7 +316,11 @@ public class AdapterFactoryTest {
         long maxInstances = (long) ((maxHeapSize / instanceSize) * LOAD_FACTOR);
 
         for (long i = 0; i < maxInstances; i++) {
-            factory.createModel(mock(SlingHttpServletRequest.class), CachedModelWithSelfReference.class);
+            CachedModelWithSelfReference model =
+                    factory.createModel(mock(SlingHttpServletRequest.class), CachedModelWithSelfReference.class);
+            for (int j = 0; j < model.longs.length; j++) {
+                model.longs[j] = j;
+            }
         }
     }
 }
