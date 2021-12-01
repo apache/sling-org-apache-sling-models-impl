@@ -292,7 +292,7 @@ public class AdapterFactoryTest {
         }
     }
 
-	@Test
+    @Test
     public void testCreateCachedModelWillNotCrashTheVMWithOOM() throws Exception {
         /*
          * LOAD_FACTOR is used to ensure the test will try create instances of the model to fill up
@@ -300,36 +300,27 @@ public class AdapterFactoryTest {
          * exhausted, should this test fail.
          */
         double LOAD_FACTOR = 2.0;
-        long instanceSize = sizeOf(new CachedModelWithSelfReference());
+        /*
+         * SIZE_OF_LONG is the same as Long.BYTES, in Java 8. When Java 8 source & target are used, this
+         * can be removed and replaced with Long.BYTES.
+         */
+        long SIZE_OF_LONG = 8;
+        /*
+         * instanceSize is an underestimate of the actual size, based on the number of longs in the array.
+         * This works for this test, because we want it to try to OOM the VM, and having more instances is
+         * better. The smaller instanceSize is, the more instances we try to create (see the calculation for
+         * maxInstances below).
+         */
+        long instanceSize = SIZE_OF_LONG * CachedModelWithSelfReference.numberOfLongs;
         long maxHeapSize = Runtime.getRuntime().maxMemory();
         long maxInstances = (long) ((maxHeapSize / instanceSize) * LOAD_FACTOR);
-        
+
         for (long i = 0; i < maxInstances; i++) {
-            factory.createModel(mock(SlingHttpServletRequest.class), CachedModelWithSelfReference.class);
-        }
-    }
-     
-    @SuppressWarnings({ "restriction", "rawtypes" })
-    public static long sizeOf(Object o) throws Exception {
-        Class<sun.misc.Unsafe> unsafeClass = sun.misc.Unsafe.class;
-        Field unsafeField = unsafeClass.getDeclaredField("theUnsafe");
-        unsafeField.setAccessible(true);
-        sun.misc.Unsafe theUnsafe = (sun.misc.Unsafe) unsafeField.get(unsafeClass);
-
-        long maxSize = 0;
-        Class c = o.getClass();
-        while (c != Object.class) {
-            for (Field f : c.getDeclaredFields()) {
-                if ((f.getModifiers() & Modifier.STATIC) == 0) {
-                    long offset = theUnsafe.objectFieldOffset(f);
-                    if (offset > maxSize) {
-                        maxSize = offset;
-                    }
-                }
+            CachedModelWithSelfReference model =
+                    factory.createModel(mock(SlingHttpServletRequest.class), CachedModelWithSelfReference.class);
+            for (int j = 0; j < model.longs.length; j++) {
+                model.longs[j] = j;
             }
-            c = c.getSuperclass();
         }
-
-        return ((maxSize/8) + 1) * 8;
     }
 }
