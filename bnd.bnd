@@ -1,6 +1,5 @@
 # Remove those package imports because embedded and relocated via shade plugin (see below)
 Import-Package:\
-    !org.apache.sling.commons.osgi,\
     !org.apache.sling.scripting.core.impl.helper,\
     *
 Provide-Capability:\
