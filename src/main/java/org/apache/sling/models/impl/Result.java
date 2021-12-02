@@ -32,9 +32,10 @@ public class Result<SuccessObjectType> {
     private final SuccessObjectType object;
     /**
      * instantiate with one throwable (i.e. failure)
-     * 
+     *
      * @param throwable
      */
+    @SuppressWarnings("null")
     public Result(RuntimeException throwable) {
         this.t = throwable;
         this.object = null;
@@ -42,7 +43,7 @@ public class Result<SuccessObjectType> {
 
     /**
      * instantate with a model (i.e. success)
-     * 
+     *
      * @param object
      */
     public Result(SuccessObjectType object) {
@@ -51,7 +52,7 @@ public class Result<SuccessObjectType> {
     }
 
     /**
-     * 
+     *
      * @return the encapsulated exception
      * @throws IllegalStateException
      *             in case this object does not represent a failure
@@ -64,11 +65,12 @@ public class Result<SuccessObjectType> {
     }
 
     /**
-     * 
+     *
      * @return the encapsulated success value
      * @throws IllegalStateException
      *             in case this object does not represent a success
      */
+    @SuppressWarnings("null")
     public @NotNull SuccessObjectType getValue() {
         if (object == null) {
             throw new IllegalStateException(
@@ -78,7 +80,7 @@ public class Result<SuccessObjectType> {
     }
 
     /**
-     * 
+     *
      * @return {@code true} in case this object represents a success, otherwise
      *         {@code false}
      */

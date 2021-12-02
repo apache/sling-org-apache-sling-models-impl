@@ -51,6 +51,7 @@ public class RequestAttributeInjector implements Injector, StaticInjectAnnotatio
     }
 
     @Override
+    @SuppressWarnings({ "unused", "null" })
     public InjectAnnotationProcessor2 createAnnotationProcessor(AnnotatedElement element) {
         // check if the element has the expected annotation
         RequestAttribute annotation = element.getAnnotation(RequestAttribute.class);
@@ -72,7 +73,7 @@ public class RequestAttributeInjector implements Injector, StaticInjectAnnotatio
         public InjectionStrategy getInjectionStrategy() {
             return annotation.injectionStrategy();
         }
-        
+
         @Override
         @SuppressWarnings("deprecation")
         public Boolean isOptional() {
@@ -90,5 +91,5 @@ public class RequestAttributeInjector implements Injector, StaticInjectAnnotatio
         }
     }
 
-    
+
 }

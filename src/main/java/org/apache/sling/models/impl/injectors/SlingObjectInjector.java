@@ -122,6 +122,7 @@ public final class SlingObjectInjector implements Injector, StaticInjectAnnotati
     }
 
     @Override
+    @SuppressWarnings({ "unused", "null" })
     public InjectAnnotationProcessor2 createAnnotationProcessor(final AnnotatedElement element) {
         // check if the element has the expected annotation
         SlingObject annotation = element.getAnnotation(SlingObject.class);
@@ -143,7 +144,7 @@ public final class SlingObjectInjector implements Injector, StaticInjectAnnotati
         public InjectionStrategy getInjectionStrategy() {
             return annotation.injectionStrategy();
         }
-        
+
         @Override
         @SuppressWarnings("deprecation")
         public Boolean isOptional() {

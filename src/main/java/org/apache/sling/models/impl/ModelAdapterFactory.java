@@ -107,8 +107,8 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate = true, service={ ModelFactory.class, ServletRequestListener.class }, 
-    property= { HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER+"=true", 
+@Component(immediate = true, service={ ModelFactory.class, ServletRequestListener.class },
+    property= { HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER+"=true",
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT+"=(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)" })
 @Designate(ocd=ModelAdapterFactoryConfiguration.class)
 @SuppressWarnings("deprecation")
@@ -218,31 +218,31 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     private static final Logger log = LoggerFactory.getLogger(ModelAdapterFactory.class);
 
-    private final @NotNull ConcurrentMap<String, RankedServices<Injector>> injectors = new ConcurrentHashMap<>();
-    private final @NotNull RankedServices<Injector> sortedInjectors = new RankedServices<>();
-    private final @NotNull ConcurrentMap<Class<? extends ViaProviderType>, ViaProvider> viaProviders = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, RankedServices<Injector>> injectors = new ConcurrentHashMap<>();
+    private final RankedServices<Injector> sortedInjectors = new RankedServices<>();
+    private final ConcurrentMap<Class<? extends ViaProviderType>, ViaProvider> viaProviders = new ConcurrentHashMap<>();
 
     @Reference(name="injectAnnotationProcessorFactory", cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    volatile @NotNull Collection<InjectAnnotationProcessorFactory> injectAnnotationProcessorFactories; // this must be non-final for fieldOption=replace!
+    volatile Collection<InjectAnnotationProcessorFactory> injectAnnotationProcessorFactories; // this must be non-final for fieldOption=replace!
 
     @Reference(name="injectAnnotationProcessorFactory2", cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    volatile @NotNull Collection<InjectAnnotationProcessorFactory2> injectAnnotationProcessorFactories2; // this must be non-final for fieldOption=replace!
+    volatile Collection<InjectAnnotationProcessorFactory2> injectAnnotationProcessorFactories2; // this must be non-final for fieldOption=replace!
 
-    private final @NotNull RankedServices<StaticInjectAnnotationProcessorFactory> staticInjectAnnotationProcessorFactories = new RankedServices<>();
+    private final RankedServices<StaticInjectAnnotationProcessorFactory> staticInjectAnnotationProcessorFactories = new RankedServices<>();
 
-    private final @NotNull RankedServices<ImplementationPicker> implementationPickers = new RankedServices<>();
+    private final RankedServices<ImplementationPicker> implementationPickers = new RankedServices<>();
 
     // bind the service with the highest priority (if a new one comes in this service gets restarted)
     @Reference(cardinality=ReferenceCardinality.OPTIONAL, policyOption=ReferencePolicyOption.GREEDY)
     private ModelValidation modelValidation = null;
 
     @Reference(name = "modelExporter", cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    volatile @NotNull Collection<ModelExporter> modelExporters; // this must be non-final for fieldOption=replace!
+    volatile Collection<ModelExporter> modelExporters; // this must be non-final for fieldOption=replace!
 
     @Reference
     BindingsValuesProvidersByContext bindingsValuesProvidersByContext;
 
-    @Reference 
+    @Reference
     AdapterManager adapterManager;
 
     ModelPackageBundleListener listener;
@@ -260,12 +260,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     private SlingModelsScriptEngineFactory scriptEngineFactory;
 
-    // use a smaller initial capacity than the default as we expect a relatively small number of
-    // adapters per adaptable
-    private final int INNER_CACHE_INITIAL_CAPACITY = 4;
-
-
     @Override
+    @SuppressWarnings("null")
     public <AdapterType> AdapterType getAdapter(Object adaptable, Class<AdapterType> type) {
         Result<AdapterType> result = internalCreateModel(adaptable, type);
         if (!result.wasSuccessful()) {
@@ -345,7 +341,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         // throw exception here
         throw new ModelClassException("Could not yet find an adapter factory for the model " + requestedType + " from adaptable " + adaptable.getClass());
     }
-    
+
     @SuppressWarnings("unchecked")
     private Map<Class<?>, SoftReference<Object>> getOrCreateCache(final Object adaptable) {
         Map<Class<?>, SoftReference<Object>> adaptableCache;
@@ -361,7 +357,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         }
         return adaptableCache;
     }
-    
+
     @SuppressWarnings("unchecked")
     private <ModelType> Result<ModelType> internalCreateModel(final Object adaptable, final Class<ModelType> requestedType) {
         Result<ModelType> result;
@@ -620,7 +616,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     private BundleContext getModelBundleContext(final ModelClass<?> modelClass) {
-        BundleContext modelContext = null;
         Bundle modelBundle = FrameworkUtil.getBundle(modelClass.getType());
         if (modelBundle != null) {
             return modelBundle.getBundleContext();
@@ -940,6 +935,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         return true;
     }
 
+    @SuppressWarnings("null")
     private <ModelType> ModelType invokePostConstruct(ModelType object) throws InvocationTargetException, IllegalAccessException {
         Class<?> clazz = object.getClass();
         List<Method> postConstructMethods = new ArrayList<>();
@@ -1007,6 +1003,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         }
     }
 
+    @SuppressWarnings("null")
     private Result<Object> adaptIfNecessary(final Object value, final Class<?> type, final Type genericType) {
         final Object adaptedValue;
         if (!isAcceptableType(type, genericType, value)) {
@@ -1072,6 +1069,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         }
     }
 
+    @SuppressWarnings("null")
     private static boolean isAcceptableType(Class<?> type, Type genericType, Object value) {
         if (type.isInstance(value)) {
             if ((type == Collection.class || type == List.class) && genericType instanceof ParameterizedType &&
@@ -1280,7 +1278,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @Override
-    public Object getModelFromResource(Resource resource) {
+    public Object getModelFromResource(@NotNull Resource resource) {
         Class<?> clazz = this.adapterImplementations.getModelClassForResource(resource);
         if (clazz == null) {
             throw new ModelClassException("Could find model registered for resource type: " + resource.getResourceType());
@@ -1289,7 +1287,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @Override
-    public Object getModelFromRequest(SlingHttpServletRequest request) {
+    public Object getModelFromRequest(@NotNull SlingHttpServletRequest request) {
         Class<?> clazz = this.adapterImplementations.getModelClassForRequest(request);
         if (clazz == null) {
             throw new ModelClassException("Could find model registered for request path: " + request.getServletPath());
@@ -1306,6 +1304,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @Override
+    @SuppressWarnings("null")
     public <T> T exportModel(Object model, String name, Class<T> targetClass, Map<String, String> options)
             throws ExportException, MissingExporterException {
         for (ModelExporter exporter : modelExporters) {

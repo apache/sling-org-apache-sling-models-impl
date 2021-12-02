@@ -85,6 +85,7 @@ public class ResourceModelInterfacesTest {
     }
 
     @Test
+    @SuppressWarnings({ "unused", "null" })
     public void testRequiredPropertyModel() {
         Map<String, Object> map = new HashMap<>();
         map.put("first", "first-value");

@@ -25,8 +25,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -54,7 +52,7 @@ public class CachingTest {
 
     @Mock
     private Resource resource;
-    
+
     private ModelAdapterFactory factory;
 
     @Before
@@ -67,7 +65,7 @@ public class CachingTest {
 
         when(request.getAttribute("testValue")).thenReturn("test");
         requestWrapper = new SlingHttpServletRequestWrapper(request);
-        
+
         ValueMap vm = new ValueMapDecorator(Collections.singletonMap("testValue", "test"));
         when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
     }
@@ -83,7 +81,7 @@ public class CachingTest {
 
         verify(request, times(1)).getAttribute("testValue");
     }
-    
+
     @Test
     public void testCachedClassWithResource() {
         CachedModel cached1 = factory.getAdapter(resource, CachedModel.class);
@@ -107,7 +105,7 @@ public class CachingTest {
 
         verify(request, times(2)).getAttribute("testValue");
     }
-    
+
     @Test
     public void testNoCachedClassWithResource() {
         UncachedModel uncached1 = factory.getAdapter(resource, UncachedModel.class);
@@ -154,7 +152,7 @@ public class CachingTest {
         assertEquals("test", cached2.getTestValue());
 
         verify(request, times(1)).getAttribute("testValue");
-        
+
         // If we clear the request attributes, the sling model is no longer cached
         Enumeration<String> attributeNames = request.getAttributeNames();
         while (attributeNames.hasMoreElements()) {

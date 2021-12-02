@@ -31,7 +31,7 @@ import org.osgi.service.component.annotations.Component;
 public class ResourceTypeBasedResourcePicker implements ImplementationPicker {
 
     @Override
-    public Class<?> pick(@NotNull Class<?> adapterType, @NotNull Class<?>[] implementationsTypes, @NotNull Object adaptable) {
+    public Class<?> pick(@NotNull Class<?> adapterType, Class<?> @NotNull [] implementationsTypes, @NotNull Object adaptable) {
         final Resource resource = findResource(adaptable);
         if (resource == null) {
             return null;

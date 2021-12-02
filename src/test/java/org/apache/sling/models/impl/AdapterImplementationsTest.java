@@ -29,6 +29,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.spi.ImplementationPicker;
 import org.apache.sling.testing.mock.osgi.MockOsgi;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +41,7 @@ import org.osgi.framework.BundleContext;
 public class AdapterImplementationsTest {
 
     private static final Class<?> SAMPLE_ADAPTER = Comparable.class;
-    private static final Object SAMPLE_ADAPTABLE = new Object();    
+    private static final Object SAMPLE_ADAPTABLE = new Object();
 
     private AdapterImplementations underTest;
 
@@ -55,7 +56,7 @@ public class AdapterImplementationsTest {
 
     @Mock
     private ResourceResolver resourceResolver;
-    
+
     @Before
     public void setUp() {
         underTest = new AdapterImplementations();
@@ -63,21 +64,21 @@ public class AdapterImplementationsTest {
             new FirstImplementationPicker()
         }));
     }
-    
+
     @Test
     public void testNoMapping() {
         assertNull(underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE));
-        
+
         // make sure this raises no exception
         underTest.remove(SAMPLE_ADAPTER.getName(), String.class.getName());
     }
-    
+
     @Test
     public void testSingleMapping() {
         underTest.addAll(String.class, SAMPLE_ADAPTER);
-        
+
         assertEquals(String.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
-        
+
         underTest.remove(SAMPLE_ADAPTER.getName(), String.class.getName());
 
         assertNull(underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE));
@@ -88,30 +89,30 @@ public class AdapterImplementationsTest {
         underTest.addAll(String.class, SAMPLE_ADAPTER);
         underTest.addAll(Integer.class, SAMPLE_ADAPTER);
         underTest.addAll(Long.class, SAMPLE_ADAPTER);
-        
+
         assertEquals(Integer.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
-        
+
         underTest.remove(SAMPLE_ADAPTER.getName(), Integer.class.getName());
 
         assertEquals(Long.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
 
         underTest.remove(SAMPLE_ADAPTER.getName(), Long.class.getName());
         underTest.remove(SAMPLE_ADAPTER.getName(), String.class.getName());
-        
+
         assertNull(underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE));
     }
-    
+
     @Test
     public void testRemoveAll() {
         underTest.addAll(String.class, SAMPLE_ADAPTER);
         underTest.addAll(Integer.class, SAMPLE_ADAPTER);
         underTest.addAll(Long.class, SAMPLE_ADAPTER);
-        
+
         underTest.removeAll();
-        
+
         assertNull(underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE));
     }
-    
+
     @Test
     public void testMultipleImplementationPickers() {
         underTest.setImplementationPickers(Arrays.asList(
@@ -123,14 +124,14 @@ public class AdapterImplementationsTest {
         underTest.addAll(String.class, SAMPLE_ADAPTER);
         underTest.addAll(Integer.class, SAMPLE_ADAPTER);
         underTest.addAll(Long.class, SAMPLE_ADAPTER);
-        
+
         assertEquals(String.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
     }
-    
+
     @Test
     public void testSimpleModel() {
         underTest.addAll(SAMPLE_ADAPTER, SAMPLE_ADAPTER);
-        
+
         assertEquals(SAMPLE_ADAPTER, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
     }
 
@@ -243,7 +244,7 @@ public class AdapterImplementationsTest {
         assertNull(underTest.getModelClassForRequest(request));
         assertNull(underTest.getModelClassForResource(resource));
     }
-    
+
     @Test
     public void testResourceTypeRegistrationForResourceWithoutResourceType() {
         when(resource.getResourceType()).thenReturn(null);
@@ -253,19 +254,19 @@ public class AdapterImplementationsTest {
         // ensure we don't have any registrations and no exception is thrown
         assertNull(underTest.getModelClassForResource(resource));
     }
-    
+
     static final class NoneImplementationPicker implements ImplementationPicker {
         @Override
-        public Class<?> pick(Class<?> adapterType, Class<?>[] implementationsTypes, Object adaptable) {
+        public Class<?> pick(@NotNull Class<?> adapterType, Class<?> @NotNull [] implementationsTypes, @NotNull Object adaptable) {
             return null;
-        }        
+        }
     }
-    
+
     static final class LastImplementationPicker implements ImplementationPicker {
         @Override
-        public Class<?> pick(Class<?> adapterType, Class<?>[] implementationsTypes, Object adaptable) {
+        public Class<?> pick(@NotNull Class<?> adapterType, Class<?> @NotNull [] implementationsTypes, @NotNull Object adaptable) {
             return implementationsTypes[implementationsTypes.length - 1];
-        }        
+        }
     }
-    
+
 }

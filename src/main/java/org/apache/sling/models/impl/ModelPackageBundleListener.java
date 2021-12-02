@@ -111,9 +111,7 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
             packageList = StringUtils.deleteWhitespace(packageList);
             String[] packages = packageList.split(",");
             for (String singlePackage : packages) {
-                @SuppressWarnings("unchecked")
-                Enumeration<URL> classUrls = bundle.findEntries("/" + singlePackage.replace('.', '/'), "*.class",
-                        true);
+                Enumeration<URL> classUrls = bundle.findEntries("/" + singlePackage.replace('.', '/'), "*.class", true);
 
                 if (classUrls == null) {
                     log.warn("No adaptable classes found in package {}, ignoring", singlePackage);

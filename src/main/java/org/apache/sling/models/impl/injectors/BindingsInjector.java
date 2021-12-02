@@ -68,6 +68,7 @@ public class BindingsInjector implements Injector, StaticInjectAnnotationProcess
     }
 
     @Override
+    @SuppressWarnings("unused")
     public InjectAnnotationProcessor2 createAnnotationProcessor(AnnotatedElement element) {
         // check if the element has the expected annotation
         ScriptVariable annotation = element.getAnnotation(ScriptVariable.class);
@@ -78,7 +79,7 @@ public class BindingsInjector implements Injector, StaticInjectAnnotationProcess
     }
 
     @Override
-    public Object prepareValue(Object adaptable) {
+    public @NotNull Object prepareValue(@NotNull Object adaptable) {
         Object prepared = getBindings(adaptable);
         return prepared != null ? prepared : ObjectUtils.NULL;
     }

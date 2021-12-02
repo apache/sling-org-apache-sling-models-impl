@@ -70,6 +70,7 @@ public final class ReflectionUtil {
         }
     }
 
+    @SuppressWarnings("unused")
     public static <T extends AnnotatedElement> void addAnnotated(T[] elements, List<T> set) {
         for (T element : elements) {
             Inject injection = getAnnotation(element, Inject.class);
@@ -92,6 +93,7 @@ public final class ReflectionUtil {
      * @param annotationClass the annotation class
      * @return the found annotation or null
      */
+    @SuppressWarnings("null")
     public static <T extends Annotation> T getAnnotation(AnnotatedElement element, Class<T> annotationClass) {
         T annotation = element.getAnnotation(annotationClass);
         if (annotation != null) {

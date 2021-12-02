@@ -89,6 +89,7 @@ public class ChildResourceInjector extends AbstractInjector implements Injector,
 
 
     @Override
+    @SuppressWarnings("unused")
     public InjectAnnotationProcessor2 createAnnotationProcessor(Object adaptable, AnnotatedElement element) {
         // check if the element has the expected annotation
         ChildResource annotation = element.getAnnotation(ChildResource.class);

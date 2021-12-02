@@ -19,8 +19,6 @@ package org.apache.sling.models.impl;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -74,7 +72,7 @@ public class AdapterFactoryTest {
         BundleContext bundleContext = Mockito.mock(BundleContext.class);
         return createModelAdapterFactory(bundleContext);
     }
-    
+
     public static ModelAdapterFactory createModelAdapterFactory(BundleContext bundleContext) {
         ComponentContext componentCtx = Mockito.mock(ComponentContext.class);
         when(componentCtx.getBundleContext()).thenReturn(bundleContext);

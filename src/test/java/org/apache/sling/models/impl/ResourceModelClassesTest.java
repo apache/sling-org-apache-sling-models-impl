@@ -166,6 +166,7 @@ public class ResourceModelClassesTest {
         assertEquals("hello", model.getStringList().get(0));
     }
 
+    @SuppressWarnings({ "unused", "null" })
     @Test
     public void testRequiredPropertyModel() {
         Map<String, Object> map = new HashMap<>();
@@ -204,6 +205,7 @@ public class ResourceModelClassesTest {
         verify(vm).get("required", String.class);
     }
 
+    @SuppressWarnings({ "unused", "null" })
     @Test
     public void testRequiredPropertyMissingModelOptionalStrategy() {
         Map<String, Object> map = new HashMap<>();

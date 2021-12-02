@@ -62,6 +62,7 @@ public class SelfInjector implements Injector, StaticInjectAnnotationProcessorFa
     }
 
     @Override
+    @SuppressWarnings({ "unused", "null" })
     public InjectAnnotationProcessor2 createAnnotationProcessor(AnnotatedElement element) {
         // check if the element has the expected annotation
         Self annotation = element.getAnnotation(Self.class);
@@ -83,7 +84,7 @@ public class SelfInjector implements Injector, StaticInjectAnnotationProcessorFa
         public InjectionStrategy getInjectionStrategy() {
             return annotation.injectionStrategy();
         }
-        
+
         @Override
         @SuppressWarnings("deprecation")
         public Boolean isOptional() {

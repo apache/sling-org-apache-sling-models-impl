@@ -81,6 +81,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
      * @param modelContext
      * @return
      */
+    @SuppressWarnings({ "null", "unused" })
     public Object getValue(@NotNull Object adaptable, String name, @NotNull Type type, @NotNull AnnotatedElement element,
                            @NotNull DisposalCallbackRegistry callbackRegistry, @Nullable BundleContext modelContext) {
         OSGiService annotation = element.getAnnotation(OSGiService.class);
@@ -207,6 +208,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
     }
 
     @Override
+    @SuppressWarnings({ "unused", "null" })
     public InjectAnnotationProcessor2 createAnnotationProcessor(AnnotatedElement element) {
         // check if the element has the expected annotation
         OSGiService annotation = element.getAnnotation(OSGiService.class);

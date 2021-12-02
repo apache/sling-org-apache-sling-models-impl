@@ -78,6 +78,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
+    @SuppressWarnings({ "unchecked", "null" })
     public void testSimpleOSGiModelField() throws Exception {
         ServiceReference ref = mock(ServiceReference.class);
         ServiceInterface service = mock(ServiceInterface.class);
@@ -96,6 +97,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
+    @SuppressWarnings({ "unchecked", "null", "deprecation" })
     public void testListOSGiModelField() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
@@ -120,6 +122,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
+    @SuppressWarnings({ "unchecked", "null", "deprecation" })
     public void testArrayOSGiModelField() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
@@ -144,6 +147,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     public void testOptionalArrayOSGiModelField() throws Exception {
 
         Resource res = mock(Resource.class);
@@ -156,6 +160,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     public void testOptionalListOSGiModelField() throws Exception {
         Resource res = mock(Resource.class);
 
@@ -167,6 +172,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
+    @SuppressWarnings({ "unchecked", "null", "deprecation" })
     public void testCollectionOSGiModelField() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
@@ -191,6 +197,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
+    @SuppressWarnings({ "unused", "unchecked", "null" })
     public void testSetOSGiModelField() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
@@ -216,6 +223,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
+    @SuppressWarnings({ "unchecked", "null" })
     public void testSimpleOSGiModelConstructor() throws Exception {
         ServiceReference ref = mock(ServiceReference.class);
         ServiceInterface service = mock(ServiceInterface.class);
@@ -235,6 +243,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
+    @SuppressWarnings({ "deprecation", "unchecked", "null" })
     public void testListOSGiModelConstructor() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);

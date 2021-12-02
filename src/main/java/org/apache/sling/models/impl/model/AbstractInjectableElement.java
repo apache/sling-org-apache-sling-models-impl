@@ -83,6 +83,7 @@ abstract class AbstractInjectableElement implements InjectableElement {
         return null;
     }
 
+    @SuppressWarnings("unused")
     private static String getName(AnnotatedElement element, String defaultName, InjectAnnotationProcessor2 annotationProcessor) {
         String name = null;
         if (annotationProcessor != null) {
@@ -100,6 +101,7 @@ abstract class AbstractInjectableElement implements InjectableElement {
         return name;
     }
 
+    @SuppressWarnings("unused")
     private static String getSource(AnnotatedElement element) {
         Source source = ReflectionUtil.getAnnotation(element, Source.class);
         if (source != null) {
@@ -133,6 +135,7 @@ abstract class AbstractInjectableElement implements InjectableElement {
         return element.isAnnotationPresent(Default.class);
     }
 
+    @SuppressWarnings("unused")
     private static Object getDefaultValue(AnnotatedElement element, Type type, InjectAnnotationProcessor2 annotationProcessor) {
         if (annotationProcessor != null && annotationProcessor.hasDefault()) {
             return annotationProcessor.getDefault();

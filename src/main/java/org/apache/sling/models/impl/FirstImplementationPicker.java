@@ -19,6 +19,7 @@
 package org.apache.sling.models.impl;
 
 import org.apache.sling.models.spi.ImplementationPicker;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
@@ -33,7 +34,7 @@ import org.osgi.service.component.annotations.Component;
 public class FirstImplementationPicker implements ImplementationPicker {
 
     @Override
-    public Class<?> pick(Class<?> adapterType, Class<?>[] implementationsTypes, Object adaptable) {
+    public Class<?> pick(@NotNull Class<?> adapterType, Class<?> @NotNull [] implementationsTypes, @NotNull Object adaptable) {
         // implementations is never null or empty
         return implementationsTypes[0];
     }

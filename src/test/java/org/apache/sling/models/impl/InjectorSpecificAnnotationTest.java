@@ -54,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("deprecation")
 public class InjectorSpecificAnnotationTest {
 
     @Mock
@@ -148,6 +149,7 @@ public class InjectorSpecificAnnotationTest {
     }
 
     @Test
+    @SuppressWarnings({ "unchecked", "null" })
     public void testOSGiServiceField() throws InvalidSyntaxException {
         ServiceReference ref = mock(ServiceReference.class);
         Logger log = mock(Logger.class);
@@ -236,6 +238,7 @@ public class InjectorSpecificAnnotationTest {
     }
 
     @Test
+    @SuppressWarnings({ "unchecked", "null" })
     public void testOSGiServiceConstructor() throws InvalidSyntaxException {
         ServiceReference ref = mock(ServiceReference.class);
         Logger log = mock(Logger.class);

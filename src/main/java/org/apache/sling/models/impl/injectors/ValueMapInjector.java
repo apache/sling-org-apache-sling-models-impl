@@ -55,6 +55,7 @@ public class ValueMapInjector extends AbstractInjector implements Injector, Inje
     }
 
     @Override
+    @SuppressWarnings({ "unused", "null" })
     public Object getValue(@NotNull Object adaptable, String name, @NotNull Type type, @NotNull AnnotatedElement element,
             @NotNull DisposalCallbackRegistry callbackRegistry) {
         if (adaptable == ObjectUtils.NULL) {
@@ -135,12 +136,13 @@ public class ValueMapInjector extends AbstractInjector implements Injector, Inje
     }
 
     @Override
-    public Object prepareValue(final Object adaptable) {
+    public @NotNull Object prepareValue(final @NotNull Object adaptable) {
         Object prepared = getValueMap(adaptable);
         return prepared != null ? prepared : ObjectUtils.NULL;
     }
 
     @Override
+    @SuppressWarnings({ "unused", "null" })
     public InjectAnnotationProcessor createAnnotationProcessor(Object adaptable, AnnotatedElement element) {
         // check if the element has the expected annotation
         ValueMapValue annotation = element.getAnnotation(ValueMapValue.class);

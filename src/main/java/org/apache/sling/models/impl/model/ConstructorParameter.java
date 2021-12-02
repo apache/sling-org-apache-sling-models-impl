@@ -58,21 +58,21 @@ public class ConstructorParameter extends AbstractInjectableElement {
     public boolean isPrimitive() {
         return isPrimitive;
     }
-    
+
     public int getParameterIndex() {
         return this.parameterIndex;
     }
-    
+
     @Override
     public String toString() {
         return "Parameter" + this.parameterIndex + "[" + this.genericType.toString() + "]";
     }
 
     public static class FakeAnnotatedElement implements AnnotatedElement {
-        
+
         private final Annotation[] annotations;
         private final int parameterIndex;
-        
+
         public FakeAnnotatedElement(Annotation[] annotations, int parameterIndex) {
             this.annotations = annotations;
             this.parameterIndex = parameterIndex;
@@ -83,7 +83,7 @@ public class ConstructorParameter extends AbstractInjectableElement {
             return getAnnotation(paramClass) != null;
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({ "unchecked", "null" })
         @Override
         public <T extends Annotation> T getAnnotation(Class<T> paramClass) {
             for (Annotation annotation : this.annotations) {
@@ -103,7 +103,7 @@ public class ConstructorParameter extends AbstractInjectableElement {
         public Annotation[] getDeclaredAnnotations() {
             return annotations;
         }
-        
+
         public int getParameterIndex() {
             return this.parameterIndex;
         }
@@ -115,5 +115,5 @@ public class ConstructorParameter extends AbstractInjectableElement {
         }
 
     }
-   
+
 }

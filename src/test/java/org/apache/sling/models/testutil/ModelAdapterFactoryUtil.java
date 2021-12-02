@@ -44,7 +44,7 @@ import org.osgi.framework.Version;
  * for registering sling model classes in ModelAdapterFactory.
  */
 public final class ModelAdapterFactoryUtil {
-    
+
     private ModelAdapterFactoryUtil() {
         // static methods only
     }
@@ -77,14 +77,14 @@ public final class ModelAdapterFactoryUtil {
         }
 
         @Override
-        public Dictionary getHeaders() {
-            Dictionary<String, Object> headers = new Hashtable<String, Object>();
+        public Dictionary<String,String> getHeaders() {
+            Dictionary<String, String> headers = new Hashtable<>();
             headers.put("Sling-Model-Packages", "dummy.package");
             return headers;
         }
 
         @Override
-        public Enumeration findEntries(String path, String filePattern, boolean recurse) {
+        public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
             Vector<URL> urls = new Vector<>(); // NOPMD
             for (int i = 0; i < classes.length; i++) {
                 try {
@@ -98,7 +98,7 @@ public final class ModelAdapterFactoryUtil {
         }
 
         @Override
-        public Class loadClass(String name) throws ClassNotFoundException {
+        public Class<?> loadClass(String name) throws ClassNotFoundException {
             return getClass().getClassLoader().loadClass(name);
         }
 
@@ -153,12 +153,12 @@ public final class ModelAdapterFactoryUtil {
         }
 
         @Override
-        public ServiceReference[] getRegisteredServices() { // NOPMD
+        public ServiceReference<?>[] getRegisteredServices() { // NOPMD
             return null;
         }
 
         @Override
-        public ServiceReference[] getServicesInUse() { // NOPMD
+        public ServiceReference<?>[] getServicesInUse() { // NOPMD
             return null;
         }
 
@@ -173,7 +173,7 @@ public final class ModelAdapterFactoryUtil {
         }
 
         @Override
-        public Dictionary getHeaders(String locale) {
+        public Dictionary<String,String> getHeaders(String locale) {
             return null;
         }
 
@@ -183,12 +183,12 @@ public final class ModelAdapterFactoryUtil {
         }
 
         @Override
-        public Enumeration getResources(String name) throws IOException {
+        public Enumeration<URL> getResources(String name) throws IOException {
             return null;
         }
 
         @Override
-        public Enumeration getEntryPaths(String path) {
+        public Enumeration<String> getEntryPaths(String path) {
             return null;
         }
 

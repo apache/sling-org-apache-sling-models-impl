@@ -55,6 +55,7 @@ public class ResourcePathInjector extends AbstractInjector implements Injector, 
     }
 
     @Override
+    @SuppressWarnings({ "unused", "null" })
     public Object getValue(@NotNull Object adaptable, String name, @NotNull Type declaredType, @NotNull AnnotatedElement element,
             @NotNull DisposalCallbackRegistry callbackRegistry) {
         String[] resourcePaths = null;
@@ -149,6 +150,7 @@ public class ResourcePathInjector extends AbstractInjector implements Injector, 
     }
 
     @Override
+    @SuppressWarnings({ "unused", "null" })
     public InjectAnnotationProcessor2 createAnnotationProcessor(AnnotatedElement element) {
         // check if the element has the expected annotation
         ResourcePath annotation = element.getAnnotation(ResourcePath.class);

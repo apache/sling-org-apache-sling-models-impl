@@ -16,8 +16,13 @@
  */
 package org.apache.sling.models.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +68,7 @@ public class ConstructorTest {
 
     @Before
     public void setup() {
-        
+
         when(request.getAttribute("attribute")).thenReturn(INT_VALUE);
         when(request.getAttribute("attribute2")).thenReturn(STRING_VALUE);
 
@@ -145,6 +150,7 @@ public class ConstructorTest {
 
         class ModelCreator implements Callable<String> {
             @Override
+            @SuppressWarnings("unused")
             public String call() throws Exception {
                 try {
                     WithOneConstructorModel model = factory.getAdapter(request, WithOneConstructorModel.class);
@@ -190,6 +196,7 @@ public class ConstructorTest {
     }
 
     @Test
+    @SuppressWarnings({ "deprecation", "null" })
     public void testViaInjectionModel() throws Exception {
         Resource suffixResource = mock(Resource.class);
         when(suffixResource.getPath()).thenReturn("/the/suffix");
