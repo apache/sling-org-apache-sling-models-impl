@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
 
 import java.util.HashMap;
 import java.util.List;
@@ -52,10 +53,10 @@ public class ResourcePathInjectionTest {
     private ModelAdapterFactory factory;
 
     @Mock
-    private Resource adaptable;
+    private Resource adaptableResource;
 
     @Mock
-    SlingHttpServletRequest nonResourceAdaptable;
+    SlingHttpServletRequest adaptableRequest;
 
     @Mock
     private Resource byPathResource;
@@ -90,13 +91,16 @@ public class ResourcePathInjectionTest {
 
         ValueMap properties = new ValueMapDecorator(map);
 
-        when(adaptable.getResourceResolver()).thenReturn(resourceResolver);
-        when(adaptable.adaptTo(ValueMap.class)).thenReturn(properties);
+        when(adaptableResource.getResourceResolver()).thenReturn(resourceResolver);
+        when(adaptableResource.adaptTo(ValueMap.class)).thenReturn(properties);
 
         when(resourceResolver.getResource("/some/path")).thenReturn(byPathResource);
         when(resourceResolver.getResource("/some/path2")).thenReturn(byPathResource2);
         when(resourceResolver.getResource("/some/other/path")).thenReturn(byPropertyValueResource);
         when(resourceResolver.getResource("/some/other/path2")).thenReturn(byPropertyValueResource2);
+
+        when(adaptableRequest.getResource()).thenReturn(byPathResource);
+        when(adaptableRequest.getResourceResolver()).thenReturn(resourceResolver);
 
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(1, Integer.MAX_VALUE));
@@ -108,8 +112,8 @@ public class ResourcePathInjectionTest {
     }
 
     @Test
-    public void testPathInjection() {
-        ResourcePathModel model = factory.getAdapter(adaptable, ResourcePathModel.class);
+    public void testPathInjectionFromResource() {
+        ResourcePathModel model = factory.getAdapter(adaptableResource, ResourcePathModel.class);
         assertNotNull(model);
         assertEquals(byPathResource, model.getFromPath());
         assertEquals(byPropertyValueResource, model.getByDerefProperty());
@@ -118,15 +122,20 @@ public class ResourcePathInjectionTest {
     }
 
     @Test
-    public void testPathInjectionWithNonResourceAdaptable() {
-        ResourcePathModel model = factory.getAdapter(nonResourceAdaptable, ResourcePathModel.class);
-        // should be null because mandatory fields could not be injected
-        assertNull(model);
+    public void testPathInjectionFromRequest() {
+        // return the same properties through this request's resource, as through adaptableResource
+        doReturn(adaptableResource.adaptTo(ValueMap.class)).when(byPathResource).adaptTo(ValueMap.class);
+        ResourcePathModel model = factory.getAdapter(adaptableRequest, ResourcePathModel.class);
+        assertNotNull(model);
+        assertEquals(byPathResource, model.getFromPath());
+        assertEquals(byPropertyValueResource, model.getByDerefProperty());
+        assertEquals(byPathResource2, model.getFromPath2());
+        assertEquals(byPropertyValueResource2, model.getByDerefProperty2());
     }
 
     @Test
     public void testOptionalPathInjectionWithNonResourceAdaptable() {
-        ResourcePathAllOptionalModel model = factory.getAdapter(nonResourceAdaptable, ResourcePathAllOptionalModel.class);
+        ResourcePathAllOptionalModel model = factory.getAdapter(adaptableRequest, ResourcePathAllOptionalModel.class);
         // should not be null because resource paths fields are optional
         assertNotNull(model);
         // but the field itself are null
@@ -138,7 +147,7 @@ public class ResourcePathInjectionTest {
 
     @Test
     public void testMultiplePathInjection() {
-        ResourcePathModel model = factory.getAdapter(adaptable, ResourcePathModel.class);
+        ResourcePathModel model = factory.getAdapter(adaptableResource, ResourcePathModel.class);
         assertNotNull(model);
         List<Resource> resources=model.getMultipleResources();
         assertNotNull(resources);
@@ -164,7 +173,7 @@ public class ResourcePathInjectionTest {
     public void testPartialInjectionFailure1() {
         when(resourceResolver.getResource("/some/other/path")).thenReturn(null);
 
-        ResourcePathPartialModel model = factory.getAdapter(adaptable, ResourcePathPartialModel.class);
+        ResourcePathPartialModel model = factory.getAdapter(adaptableResource, ResourcePathPartialModel.class);
         assertNull(model);
     }
 
@@ -173,13 +182,13 @@ public class ResourcePathInjectionTest {
         lenient().when(resourceResolver.getResource("/some/other/path")).thenReturn(null);
         lenient().when(resourceResolver.getResource("/some/other/path2")).thenReturn(null);
 
-        ResourcePathPartialModel model = factory.getAdapter(adaptable, ResourcePathPartialModel.class);
+        ResourcePathPartialModel model = factory.getAdapter(adaptableResource, ResourcePathPartialModel.class);
         assertNull(model);
     }
 
     @Test
     public void TestWithArrayWrapping() {
-        ResourcePathModelWrapping model = factory.getAdapter(adaptable, ResourcePathModelWrapping.class);
+        ResourcePathModelWrapping model = factory.getAdapter(adaptableResource, ResourcePathModelWrapping.class);
         assertNotNull(model);
         assertTrue(model.getFromPath().length > 0);
         assertTrue(model.getMultipleResources().length > 0);
