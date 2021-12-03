@@ -62,7 +62,7 @@ public class ModelClass<ModelType> {
     @SuppressWarnings("unchecked")
     private static <T> ModelClassConstructor<T>[] getConstructors(Class<T> type, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
         if (type.isInterface()) {
-            return (ModelClassConstructor<T>[]) new ModelClassConstructor[0];
+            return new ModelClassConstructor[0];
         }
         Constructor<T>[] constructors = (Constructor<T>[]) type.getDeclaredConstructors();
         
