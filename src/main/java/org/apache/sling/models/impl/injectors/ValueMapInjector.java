@@ -156,11 +156,8 @@ public class ValueMapInjector extends AbstractInjector implements Injector, Inje
 
         private final ValueMapValue annotation;
 
-        private final Object adaptable;
-
         public ValueAnnotationProcessor(ValueMapValue annotation, Object adaptable) {
             this.annotation = annotation;
-            this.adaptable = adaptable;
         }
 
         @Override

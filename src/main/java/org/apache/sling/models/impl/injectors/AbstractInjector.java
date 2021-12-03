@@ -28,6 +28,7 @@ import org.apache.sling.api.adapter.Adaptable;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Abstract base class for injectors to consolidate common functionality.
@@ -55,7 +56,7 @@ abstract class AbstractInjector {
      * @param adaptable
      * @return a ValueMap or {@code null}.
      */
-    protected ValueMap getValueMap(Object adaptable) {
+    protected @Nullable ValueMap getValueMap(Object adaptable) {
         if (adaptable instanceof ValueMap) {
             return (ValueMap) adaptable;
         } else if (adaptable instanceof SlingHttpServletRequest) {
