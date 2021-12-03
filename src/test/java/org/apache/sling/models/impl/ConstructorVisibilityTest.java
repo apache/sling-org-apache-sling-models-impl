@@ -17,9 +17,6 @@
 package org.apache.sling.models.impl;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.when;
-
-import java.util.Hashtable;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
@@ -31,19 +28,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConstructorVisibilityTest {
-
-    @Mock
-    private ComponentContext componentCtx;
-
-    @Mock
-    private BundleContext bundleContext;
-
     private ModelAdapterFactory factory;
 
     @Mock
@@ -51,11 +39,7 @@ public class ConstructorVisibilityTest {
 
     @Before
     public void setup() {
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-        when(componentCtx.getProperties()).thenReturn(new Hashtable<String, Object>());
-        
-        factory = new ModelAdapterFactory();
-        factory.activate(componentCtx);
+        factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindInjector(new RequestAttributeInjector(), new ServicePropertiesMap(1, 1));
         factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(2, 2));
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(ProtectedConstructorModel.class, PackagePrivateConstructorModel.class, PrivateConstructorModel.class);
