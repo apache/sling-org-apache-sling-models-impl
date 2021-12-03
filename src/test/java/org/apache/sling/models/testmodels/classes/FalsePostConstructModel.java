@@ -24,7 +24,7 @@ import org.apache.sling.models.annotations.Model;
 import javax.annotation.PostConstruct;
 
 @Model(adaptables=Resource.class)
-public class FalsePostConstuctModel {
+public class FalsePostConstructModel {
 
     @PostConstruct
     protected boolean pc() throws Exception {

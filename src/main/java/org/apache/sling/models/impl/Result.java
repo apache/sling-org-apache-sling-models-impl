@@ -18,6 +18,7 @@
  */
 package org.apache.sling.models.impl;
 
+import org.apache.sling.models.factory.PostConstructException;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -88,5 +89,13 @@ public class Result<SuccessObjectType> {
         return object != null;
     }
 
+    public static final Result<Object> POST_CONSTRUCT_PREVENTED_MODEL_CONSTRUCTION = new Result<Object>((RuntimeException)null) {
 
+        @Override
+        public @NotNull RuntimeException getThrowable() {
+            // generate exception lazily
+            return new PostConstructException("PostConstruct method returned false", null);
+        }
+        
+    };
 }

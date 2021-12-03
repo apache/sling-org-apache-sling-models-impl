@@ -19,12 +19,13 @@ package org.apache.sling.models.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.factory.PostConstructException;
 import org.apache.sling.models.testmodels.classes.FailingPostConstuctModel;
-import org.apache.sling.models.testmodels.classes.FalsePostConstuctModel;
+import org.apache.sling.models.testmodels.classes.FalsePostConstructModel;
 import org.apache.sling.models.testmodels.classes.SubClass;
 import org.apache.sling.models.testmodels.classes.SubClassOverriddenPostConstruct;
 import org.apache.sling.models.testmodels.classes.TruePostConstuctModel;
@@ -46,7 +47,7 @@ public class PostConstructTest {
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         // no injectors are necessary
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(SubClass.class, SubClassOverriddenPostConstruct.class, FailingPostConstuctModel.class, FalsePostConstuctModel.class, TruePostConstuctModel.class);
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(SubClass.class, SubClassOverriddenPostConstruct.class, FailingPostConstuctModel.class, FalsePostConstructModel.class, TruePostConstuctModel.class);
     }
 
     @Test
@@ -71,7 +72,7 @@ public class PostConstructTest {
 
     @Test
     public void testPostConstructMethodWhichReturnsFalse() {
-        FalsePostConstuctModel model = factory.getAdapter(resource, FalsePostConstuctModel.class);
+        FalsePostConstructModel model = factory.getAdapter(resource, FalsePostConstructModel.class);
         assertNull(model);
     }
 
@@ -81,9 +82,13 @@ public class PostConstructTest {
         assertNotNull(model);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = PostConstructException.class)
     public void testPostConstructMethodWhichReturnsFalseCreateModel() {
-        factory.createModel(resource, FalsePostConstuctModel.class);
+        factory.createModel(resource, FalsePostConstructModel.class);
+    }
+
+    public void testPostConstructMethodWhichReturnsFalseInternalCreateModel() {
+        assertSame(Result.POST_CONSTRUCT_PREVENTED_MODEL_CONSTRUCTION, factory.internalCreateModel(resource, FalsePostConstructModel.class));
     }
 
     @Test
