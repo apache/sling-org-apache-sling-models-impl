@@ -266,7 +266,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         Result<AdapterType> result = internalCreateModel(adaptable, type);
         if (!result.wasSuccessful()) {
             if (result == Result.POST_CONSTRUCT_PREVENTED_MODEL_CONSTRUCTION) {
-                log.warn("Could not adapt to model as PostConstruct method returned false"); // do no construct runtime exception in this case
+                log.debug("Could not adapt to model as PostConstruct method returned false"); // do no construct runtime exception in this case
             } else {
                 log.warn("Could not adapt to model", result.getThrowable());
             }
