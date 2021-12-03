@@ -19,10 +19,9 @@ package org.apache.sling.models.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -56,7 +55,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -87,7 +86,7 @@ public class ImplementsExtendsTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setup() throws ClassNotFoundException, MalformedURLException {
-        when(bundleContext.registerService(anyString(), anyObject(), any(Dictionary.class))).then(new Answer<ServiceRegistration>() {
+        when(bundleContext.registerService(anyString(), any(), any(Dictionary.class))).then(new Answer<ServiceRegistration>() {
             @Override
             public ServiceRegistration<?> answer(InvocationOnMock invocation) throws Throwable {
                 final Dictionary<String, Object> props = (Dictionary<String, Object>)invocation.getArguments()[2];
@@ -132,7 +131,7 @@ public class ImplementsExtendsTest {
             }
         });
 
-        registeredAdapterFactories = (ServiceRegistration[])factory.listener.addingBundle(bundle, bundleEvent);
+        registeredAdapterFactories = factory.listener.addingBundle(bundle, bundleEvent);
     }
 
     private URL getClassUrl(Class<?> clazz) throws MalformedURLException {
@@ -144,14 +143,14 @@ public class ImplementsExtendsTest {
     public void tearDown() {
         // simulate bundle remove for ModelPackageBundleListener
         factory.listener.removedBundle(bundle, bundleEvent, registeredAdapterFactories);
-        
+
         // make sure adaption is not longer possible: implementation class mapping is removed
         Resource res = getMockResourceWithProps();
         try {
             factory.getAdapter(res, SampleServiceInterface.class);
             Assert.fail("Getting the model for interface 'SampleServiceInterface' should fail after the accroding adapter factory has been unregistered");
         } catch (ModelClassException e) {
-            
+
         }
     }
 
@@ -177,13 +176,13 @@ public class ImplementsExtendsTest {
         factory.unbindImplementationPicker(firstImplementationPicker, firstImplementationPickerProps);
 
         Resource res = getMockResourceWithProps();
-        
+
         SampleServiceInterface model = factory.getAdapter(res, ImplementsInterfacePropertyModel.class);
         assertNotNull(model);
         assertEquals("first-value|null|third-value", model.getAllProperties());
         assertTrue(factory.canCreateFromAdaptable(res, ImplementsInterfacePropertyModel.class));
     }
-    
+
     /**
      * Try to adapt in a case where there is no picker available.
      * The case where the class is the adapter still works.

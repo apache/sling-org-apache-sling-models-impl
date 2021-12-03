@@ -19,6 +19,7 @@ package org.apache.sling.models.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import javax.inject.Inject;
@@ -35,7 +36,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MultipleInjectorTest {
@@ -74,7 +75,7 @@ public class MultipleInjectorTest {
         bindings.put("firstAttribute", bindingsValue);
 
         String attributeValue = "attribute value";
-        when(request.getAttribute("firstAttribute")).thenReturn(attributeValue);
+        lenient().when(request.getAttribute("firstAttribute")).thenReturn(attributeValue);
 
         ForTwoInjectors obj = factory.getAdapter(request, ForTwoInjectors.class);
 

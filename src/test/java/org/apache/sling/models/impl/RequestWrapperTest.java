@@ -17,9 +17,9 @@
 package org.apache.sling.models.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,15 +35,13 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.scripting.api.BindingsValuesProvider;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestWrapperTest {
@@ -87,30 +85,20 @@ public class RequestWrapperTest {
         verify(bindingsValuesProvider, times(1)).addBindings(argThat(bindingsHasResource(resource)));
     }
 
-    private Matcher<Bindings> bindingsHasResource(final Resource resource) {
-        return new TypeSafeMatcher<Bindings>() {
+    private ArgumentMatcher<Bindings> bindingsHasResource(final Resource resource) {
+        return new ArgumentMatcher<Bindings>() {
             @Override
-            protected boolean matchesSafely(Bindings bindings) {
+            public boolean matches(Bindings bindings) {
                 return bindings.get(SlingBindings.RESOURCE) == resource;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("a bindings object with the resource " + resource);
             }
         };
     }
 
-    private Matcher<SlingHttpServletRequest> requestHasResource(final Resource resource) {
-        return new TypeSafeMatcher<SlingHttpServletRequest>() {
+    private ArgumentMatcher<SlingHttpServletRequest> requestHasResource(final Resource resource) {
+        return new ArgumentMatcher<SlingHttpServletRequest>() {
             @Override
-            protected boolean matchesSafely(SlingHttpServletRequest slingHttpServletRequest) {
+            public boolean matches(SlingHttpServletRequest slingHttpServletRequest) {
                 return slingHttpServletRequest.getResource().equals(resource);
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("a request with the resource " + resource);
             }
         };
     }

@@ -19,8 +19,8 @@ package org.apache.sling.models.impl;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.models.impl.injectors.SelfInjector;
@@ -34,7 +34,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -48,7 +48,7 @@ public class SelfDependencyTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setup() {
-        when(request.adaptTo(any(Class.class))).then(new Answer<Object>() {
+        lenient().when(request.adaptTo(any(Class.class))).then(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Class<?> clazz = (Class<?>) invocation.getArguments()[0];

@@ -16,12 +16,13 @@
  */
 package org.apache.sling.models.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -48,7 +49,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.ServiceReference;
@@ -97,7 +98,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "null", "deprecation" })
+    @SuppressWarnings({ "unchecked", "null" })
     public void testListOSGiModelField() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
@@ -122,7 +123,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "null", "deprecation" })
+    @SuppressWarnings({ "unchecked", "null" })
     public void testArrayOSGiModelField() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
@@ -172,7 +173,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "null", "deprecation" })
+    @SuppressWarnings({ "unchecked", "null" })
     public void testCollectionOSGiModelField() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
@@ -201,12 +202,12 @@ public class OSGiInjectionTest {
     public void testSetOSGiModelField() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
-        when(bundleContext.getService(ref1)).thenReturn(service1);
+        lenient().when(bundleContext.getService(ref1)).thenReturn(service1);
         ServiceReference ref2 = mock(ServiceReference.class);
         ServiceInterface service2 = mock(ServiceInterface.class);
-        when(bundleContext.getService(ref2)).thenReturn(service2);
+        lenient().when(bundleContext.getService(ref2)).thenReturn(service2);
 
-        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null)).thenReturn(
+        lenient().when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null)).thenReturn(
                 new ServiceReference[] { ref1, ref2 });
 
         Resource res = mock(Resource.class);
@@ -243,7 +244,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({ "deprecation", "unchecked", "null" })
+    @SuppressWarnings({ "unchecked", "null" })
     public void testListOSGiModelConstructor() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);

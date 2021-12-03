@@ -18,8 +18,10 @@
  */
 package org.apache.sling.models.impl.injectors;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -38,7 +40,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SelfInjectorTest {
@@ -50,19 +52,19 @@ public class SelfInjectorTest {
 
     @Mock
     private AnnotatedElement annotatedElement;
-    
+
     @Mock
     private Model modelAnnotation;
 
     @Mock
     private DisposalCallbackRegistry registry;
-    
+
     private ConstructorParameter firstConstructorParameter;
     private ConstructorParameter secondConstructorParameter;
-    
+
     @Before
     public void setup() {
-        when(modelAnnotation.defaultInjectionStrategy()).thenReturn(DefaultInjectionStrategy.REQUIRED);
+        lenient().when(modelAnnotation.defaultInjectionStrategy()).thenReturn(DefaultInjectionStrategy.REQUIRED);
         firstConstructorParameter = new ConstructorParameter(new Annotation[0], Object.class, Object.class, true, 0,
                 new StaticInjectAnnotationProcessorFactory[0], null);
         secondConstructorParameter = new ConstructorParameter(new Annotation[0], Object.class, Object.class, true, 1,

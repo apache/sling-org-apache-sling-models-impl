@@ -17,8 +17,8 @@
 package org.apache.sling.models.impl;
 
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
@@ -35,7 +35,7 @@ import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InvalidAdaptationsTest {
@@ -54,7 +54,7 @@ public class InvalidAdaptationsTest {
         Map<String, Object> emptyMap = Collections.<String, Object> emptyMap();
 
         Resource res = mock(Resource.class);
-        when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
+        lenient().when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
 
         assertNull(factory.getAdapter(res, NonModel.class));
     }
@@ -64,7 +64,7 @@ public class InvalidAdaptationsTest {
         Map<String, Object> emptyMap = Collections.<String, Object> emptyMap();
 
         Resource res = mock(Resource.class);
-        when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
+        lenient().when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
 
         assertNull(factory.createModel(res, NonModel.class));
     }
@@ -74,7 +74,7 @@ public class InvalidAdaptationsTest {
         Map<String, Object> emptyMap = Collections.<String, Object> emptyMap();
 
         Resource res = mock(Resource.class);
-        when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
+        lenient().when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
 
         assertNull(factory.getAdapter(res, RequestModel.class));
     }
@@ -84,7 +84,7 @@ public class InvalidAdaptationsTest {
         Map<String, Object> emptyMap = Collections.<String, Object> emptyMap();
 
         Resource res = mock(Resource.class);
-        when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
+        lenient().when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
 
         assertNull(factory.createModel(res, RequestModel.class));
     }

@@ -31,7 +31,7 @@ import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * This was a unit test for the ResourceResolverInjector which is now removed

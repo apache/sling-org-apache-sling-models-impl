@@ -19,6 +19,7 @@ package org.apache.sling.models.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +30,7 @@ import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Validates that @Optional annotations works with primitive values which do not support null
@@ -84,7 +85,7 @@ public class OptionalPrimitivesTest {
         ValueMap vm = ValueMap.EMPTY;
 
         Resource res = mock(Resource.class);
-        when(res.adaptTo(ValueMap.class)).thenReturn(vm);
+        lenient().when(res.adaptTo(ValueMap.class)).thenReturn(vm);
 
         org.apache.sling.models.testmodels.classes.constructorinjection.OptionalPrimitivesModel model
                 = factory.getAdapter(res, org.apache.sling.models.testmodels.classes.constructorinjection.OptionalPrimitivesModel.class);
@@ -116,7 +117,7 @@ public class OptionalPrimitivesTest {
         ValueMap vm = ValueMap.EMPTY;
 
         Resource res = mock(Resource.class);
-        when(res.adaptTo(ValueMap.class)).thenReturn(vm);
+        lenient().when(res.adaptTo(ValueMap.class)).thenReturn(vm);
 
         org.apache.sling.models.testmodels.interfaces.OptionalPrimitivesModel model
                 = factory.getAdapter(res, org.apache.sling.models.testmodels.interfaces.OptionalPrimitivesModel.class);

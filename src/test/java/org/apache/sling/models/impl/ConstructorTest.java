@@ -16,10 +16,10 @@
  */
 package org.apache.sling.models.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -52,7 +52,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConstructorTest {
@@ -196,7 +196,7 @@ public class ConstructorTest {
     }
 
     @Test
-    @SuppressWarnings({ "deprecation", "null" })
+    @SuppressWarnings("null")
     public void testViaInjectionModel() throws Exception {
         Resource suffixResource = mock(Resource.class);
         when(suffixResource.getPath()).thenReturn("/the/suffix");

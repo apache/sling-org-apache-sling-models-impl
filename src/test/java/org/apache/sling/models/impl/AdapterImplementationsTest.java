@@ -20,6 +20,7 @@ package org.apache.sling.models.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -34,7 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -247,9 +248,9 @@ public class AdapterImplementationsTest {
 
     @Test
     public void testResourceTypeRegistrationForResourceWithoutResourceType() {
-        when(resource.getResourceType()).thenReturn(null);
-        when(resource.getResourceResolver()).thenReturn(resourceResolver);
-        when(resourceResolver.getSearchPath()).thenReturn(new String[] { "/apps/", "/libs/" });
+        lenient().when(resource.getResourceType()).thenReturn(null);
+        lenient().when(resource.getResourceResolver()).thenReturn(resourceResolver);
+        lenient().when(resourceResolver.getSearchPath()).thenReturn(new String[] { "/apps/", "/libs/" });
 
         // ensure we don't have any registrations and no exception is thrown
         assertNull(underTest.getModelClassForResource(resource));

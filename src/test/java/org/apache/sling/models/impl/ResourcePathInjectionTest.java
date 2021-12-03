@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -44,7 +45,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourcePathInjectionTest {
@@ -52,7 +53,7 @@ public class ResourcePathInjectionTest {
 
     @Mock
     private Resource adaptable;
-    
+
     @Mock
     SlingHttpServletRequest nonResourceAdaptable;
 
@@ -79,7 +80,7 @@ public class ResourcePathInjectionTest {
         String[] paths= new String[2];
         paths[0]="/some/other/path";
         paths[1]="/some/other/path2";
-       
+
         String[] invalidPaths= new String[3];
         invalidPaths[0]="/does/not/exist";
         invalidPaths[1]="/does/not/exist2";
@@ -148,30 +149,30 @@ public class ResourcePathInjectionTest {
         assertNotNull(resourcesFromPathAnnotation);
         assertEquals(byPathResource, resourcesFromPathAnnotation.get(0));
         assertEquals(byPathResource2, resourcesFromPathAnnotation.get(1));
-        
+
         List<Resource> resourcesFromResourcePathAnnotation= model.getManyFromPath2();
         assertNotNull(resourcesFromResourcePathAnnotation);
         assertEquals(byPathResource2, resourcesFromResourcePathAnnotation.get(0));
         assertEquals(byPathResource, resourcesFromResourcePathAnnotation.get(1));
-        
+
         assertNotNull(model.getPropertyWithSeveralPaths());
         assertEquals(byPropertyValueResource, model.getPropertyWithSeveralPaths().get(0));
         assertEquals(byPropertyValueResource2, model.getPropertyWithSeveralPaths().get(1));
     }
- 
+
     @Test
     public void testPartialInjectionFailure1() {
         when(resourceResolver.getResource("/some/other/path")).thenReturn(null);
-        
+
         ResourcePathPartialModel model = factory.getAdapter(adaptable, ResourcePathPartialModel.class);
         assertNull(model);
     }
 
     @Test
-    public void testPartialInjectionFailure2() {       
-        when(resourceResolver.getResource("/some/other/path")).thenReturn(null);
-        when(resourceResolver.getResource("/some/other/path2")).thenReturn(null);
-        
+    public void testPartialInjectionFailure2() {
+        lenient().when(resourceResolver.getResource("/some/other/path")).thenReturn(null);
+        lenient().when(resourceResolver.getResource("/some/other/path2")).thenReturn(null);
+
         ResourcePathPartialModel model = factory.getAdapter(adaptable, ResourcePathPartialModel.class);
         assertNull(model);
     }

@@ -20,6 +20,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,7 +38,7 @@ import org.apache.sling.models.testmodels.interfaces.PropertyModelWithDefaults;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultTest {
@@ -119,7 +120,7 @@ public class DefaultTest {
         ValueMap vm = new ValueMapDecorator(Collections.<String, Object>emptyMap());
 
         Resource res = mock(Resource.class);
-        when(res.adaptTo(ValueMap.class)).thenReturn(vm);
+        lenient().when(res.adaptTo(ValueMap.class)).thenReturn(vm);
 
         org.apache.sling.models.testmodels.classes.constructorinjection.DefaultStringModel model
                 = factory.getAdapter(res, org.apache.sling.models.testmodels.classes.constructorinjection.DefaultStringModel.class);
@@ -133,7 +134,7 @@ public class DefaultTest {
         ValueMap vm = new ValueMapDecorator(Collections.<String, Object>emptyMap());
 
         Resource res = mock(Resource.class);
-        when(res.adaptTo(ValueMap.class)).thenReturn(vm);
+        lenient().when(res.adaptTo(ValueMap.class)).thenReturn(vm);
 
         org.apache.sling.models.testmodels.classes.constructorinjection.DefaultPrimitivesModel model
                 = factory.getAdapter(res, org.apache.sling.models.testmodels.classes.constructorinjection.DefaultPrimitivesModel.class);
@@ -152,7 +153,7 @@ public class DefaultTest {
         ValueMap vm = new ValueMapDecorator(Collections.<String, Object>emptyMap());
 
         Resource res = mock(Resource.class);
-        when(res.adaptTo(ValueMap.class)).thenReturn(vm);
+        lenient().when(res.adaptTo(ValueMap.class)).thenReturn(vm);
 
         org.apache.sling.models.testmodels.classes.constructorinjection.DefaultWrappersModel model
                 = factory.getAdapter(res, org.apache.sling.models.testmodels.classes.constructorinjection.DefaultWrappersModel.class);

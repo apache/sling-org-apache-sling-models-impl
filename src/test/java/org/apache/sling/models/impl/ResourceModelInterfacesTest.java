@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -47,7 +48,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -135,8 +136,8 @@ public class ResourceModelInterfacesTest {
         ValueMap map = new ValueMapDecorator(props);
 
         final Resource firstChild = mock(Resource.class);
-        when(firstChild.adaptTo(ValueMap.class)).thenReturn(map);
-        when(firstChild.adaptTo(ChildModel.class)).thenAnswer(new AdaptToChildModel());
+        lenient().when(firstChild.adaptTo(ValueMap.class)).thenReturn(map);
+        lenient().when(firstChild.adaptTo(ChildModel.class)).thenAnswer(new AdaptToChildModel());
 
         Object firstGrandChildValue = RandomStringUtils.randomAlphabetic(10);
         ValueMap firstGrandChildMap = new ValueMapDecorator(Collections.singletonMap("property", firstGrandChildValue));
@@ -144,23 +145,23 @@ public class ResourceModelInterfacesTest {
         ValueMap secondGrandChildMap = new ValueMapDecorator(Collections.singletonMap("property", secondGrandChildValue));
 
         final Resource firstGrandChild = mock(Resource.class);
-        when(firstGrandChild.adaptTo(ValueMap.class)).thenReturn(firstGrandChildMap);
-        when(firstGrandChild.adaptTo(ChildModel.class)).thenAnswer(new AdaptToChildModel());
+        lenient().when(firstGrandChild.adaptTo(ValueMap.class)).thenReturn(firstGrandChildMap);
+        lenient().when(firstGrandChild.adaptTo(ChildModel.class)).thenAnswer(new AdaptToChildModel());
 
         final Resource secondGrandChild = mock(Resource.class);
-        when(secondGrandChild.adaptTo(ValueMap.class)).thenReturn(secondGrandChildMap);
-        when(secondGrandChild.adaptTo(ChildModel.class)).thenAnswer(new AdaptToChildModel());
+        lenient().when(secondGrandChild.adaptTo(ValueMap.class)).thenReturn(secondGrandChildMap);
+        lenient().when(secondGrandChild.adaptTo(ChildModel.class)).thenAnswer(new AdaptToChildModel());
 
         Resource secondChild = mock(Resource.class);
-        when(secondChild.listChildren()).thenReturn(Arrays.asList(firstGrandChild, secondGrandChild).iterator());
+        lenient().when(secondChild.listChildren()).thenReturn(Arrays.asList(firstGrandChild, secondGrandChild).iterator());
 
         Resource emptyChild = mock(Resource.class);
-        when(emptyChild.listChildren()).thenReturn(Collections.<Resource>emptySet().iterator());
+        lenient().when(emptyChild.listChildren()).thenReturn(Collections.<Resource>emptySet().iterator());
 
         Resource res = mock(Resource.class);
-        when(res.getChild("firstChild")).thenReturn(firstChild);
-        when(res.getChild("secondChild")).thenReturn(secondChild);
-        when(res.getChild("emptyChild")).thenReturn(emptyChild);
+        lenient().when(res.getChild("firstChild")).thenReturn(firstChild);
+        lenient().when(res.getChild("secondChild")).thenReturn(secondChild);
+        lenient().when(res.getChild("emptyChild")).thenReturn(emptyChild);
 
         ParentModel model = factory.getAdapter(res, ParentModel.class);
         assertNotNull(model);
