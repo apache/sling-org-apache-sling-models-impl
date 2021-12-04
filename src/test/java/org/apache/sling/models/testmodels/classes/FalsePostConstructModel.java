@@ -18,17 +18,17 @@
  */
 package org.apache.sling.models.testmodels.classes;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 
+import javax.annotation.PostConstruct;
+
 @Model(adaptables=Resource.class)
-public class FailingPostConstuctModel {
+public class FalsePostConstructModel {
 
     @PostConstruct
-    protected void pc() throws Exception {
-        throw new Exception("FAIL");
+    protected boolean pc() throws Exception {
+        return false;
     }
 
 }

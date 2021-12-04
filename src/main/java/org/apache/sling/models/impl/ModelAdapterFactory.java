@@ -265,7 +265,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     public <AdapterType> AdapterType getAdapter(Object adaptable, Class<AdapterType> type) {
         Result<AdapterType> result = internalCreateModel(adaptable, type);
         if (!result.wasSuccessful()) {
-            log.warn("Could not adapt to model", result.getThrowable());
+            if (result == Result.POST_CONSTRUCT_PREVENTED_MODEL_CONSTRUCTION) {
+                log.debug("Could not adapt to model as PostConstruct method returned false"); // do no construct runtime exception in this case
+            } else {
+                log.warn("Could not adapt to model", result.getThrowable());
+            }
             return null;
         } else {
             return result.getValue();
@@ -359,7 +363,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @SuppressWarnings("unchecked")
-    private <ModelType> Result<ModelType> internalCreateModel(final Object adaptable, final Class<ModelType> requestedType) {
+    <ModelType> Result<ModelType> internalCreateModel(final Object adaptable, final Class<ModelType> requestedType) {
         Result<ModelType> result;
         ThreadInvocationCounter threadInvocationCounter = invocationCountThreadLocal.get();
         if (threadInvocationCounter.isMaximumReached()) {
@@ -749,6 +753,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         }
         try {
             object = invokePostConstruct(object);
+            if (object == null) {
+                return (Result<ModelType>) Result.POST_CONSTRUCT_PREVENTED_MODEL_CONSTRUCTION;
+            }
         } catch (InvocationTargetException e) {
             return new Result<>(new PostConstructException("Post-construct method has thrown an exception for model " + modelClass.getType(), e.getCause()));
         } catch (IllegalAccessException e) {
