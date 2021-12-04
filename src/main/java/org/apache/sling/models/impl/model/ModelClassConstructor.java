@@ -19,6 +19,7 @@
 package org.apache.sling.models.impl.model;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 
 import javax.inject.Inject;
@@ -27,13 +28,13 @@ import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.impl.ReflectionUtil;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 
-public class ModelClassConstructor<ModelType> {
+public class ModelClassConstructor<M> {
 
-    private final Constructor<ModelType> constructor;
+    private final Constructor<M> constructor;
     private final boolean hasInjectAnnotation;
     private final ConstructorParameter[] constructorParametersArray;
 
-    public ModelClassConstructor(Constructor<ModelType> constructor, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
+    public ModelClassConstructor(Constructor<M> constructor, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
         this.constructor = constructor;
         this.hasInjectAnnotation = constructor.isAnnotationPresent(Inject.class);
 
@@ -49,10 +50,43 @@ public class ModelClassConstructor<ModelType> {
         }
     }
 
-    public Constructor<ModelType> getConstructor() {
+    /**
+     * Proxies the call to {@link Constructor#newInstance(Object...)}, checking (and
+     * setting) accessibility first.
+     * 
+     * @param parameters
+     *            the constructor parameters that are passed to
+     *            {@link Constructor#newInstance(Object...)}
+     * @return The constructed object
+     * 
+     * @throws InstantiationException when {@link Constructor#newInstance(Object...)} would throw
+     * @throws IllegalAccessException when {@link Constructor#newInstance(Object...)} would throw
+     * @throws IllegalArgumentException when {@link Constructor#newInstance(Object...)} would throw
+     * @throws InvocationTargetException when {@link Constructor#newInstance(Object...)} would throw
+     * 
+     * @see Constructor#newInstance(Object...)
+     */
+    @SuppressWarnings({"java:S3011","java:S1874"})
+    public M newInstance(Object... parameters) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        synchronized (constructor) {
+            boolean accessible = constructor.isAccessible();
+            try {
+                if (!accessible) {
+                    constructor.setAccessible(true);
+                }
+                return constructor.newInstance(parameters);
+            } finally {
+                if (!accessible) {
+                    constructor.setAccessible(false);
+                }
+            }
+        }
+    }
+
+    public Constructor<M> getConstructor() {
         return constructor;
     }
-    
+
     public boolean hasInjectAnnotation() {
         return hasInjectAnnotation;
     }
@@ -60,5 +94,5 @@ public class ModelClassConstructor<ModelType> {
     public ConstructorParameter[] getConstructorParameters() {
         return constructorParametersArray;
     };
-    
+
 }
