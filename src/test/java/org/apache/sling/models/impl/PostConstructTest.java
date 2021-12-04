@@ -24,11 +24,11 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.factory.PostConstructException;
-import org.apache.sling.models.testmodels.classes.FailingPostConstuctModel;
+import org.apache.sling.models.testmodels.classes.FailingPostConstructModel;
 import org.apache.sling.models.testmodels.classes.FalsePostConstructModel;
 import org.apache.sling.models.testmodels.classes.SubClass;
 import org.apache.sling.models.testmodels.classes.SubClassOverriddenPostConstruct;
-import org.apache.sling.models.testmodels.classes.TruePostConstuctModel;
+import org.apache.sling.models.testmodels.classes.TruePostConstructModel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +47,7 @@ public class PostConstructTest {
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         // no injectors are necessary
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(SubClass.class, SubClassOverriddenPostConstruct.class, FailingPostConstuctModel.class, FalsePostConstructModel.class, TruePostConstuctModel.class);
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(SubClass.class, SubClassOverriddenPostConstruct.class, FailingPostConstructModel.class, FalsePostConstructModel.class, TruePostConstructModel.class);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class PostConstructTest {
 
     @Test
     public void testPostConstructMethodWhichThrowsException() {
-        FailingPostConstuctModel model = factory.getAdapter(resource, FailingPostConstuctModel.class);
+        FailingPostConstructModel model = factory.getAdapter(resource, FailingPostConstructModel.class);
         assertNull(model);
     }
 
@@ -78,7 +78,7 @@ public class PostConstructTest {
 
     @Test
     public void testPostConstructMethodWhichReturnsTrue() {
-        TruePostConstuctModel model = factory.getAdapter(resource, TruePostConstuctModel.class);
+        TruePostConstructModel model = factory.getAdapter(resource, TruePostConstructModel.class);
         assertNotNull(model);
     }
 
@@ -93,7 +93,7 @@ public class PostConstructTest {
 
     @Test
     public void testPostConstructMethodWhichReturnsTrueCreateModel() {
-        TruePostConstuctModel model = factory.createModel(resource, TruePostConstuctModel.class);
+        TruePostConstructModel model = factory.createModel(resource, TruePostConstructModel.class);
         assertNotNull(model);
     }
 
@@ -101,7 +101,7 @@ public class PostConstructTest {
     public void testPostConstructMethodWhichThrowsExceptionThrowingException() {
         boolean thrown = false;
         try {
-            factory.createModel(resource, FailingPostConstuctModel.class);
+            factory.createModel(resource, FailingPostConstructModel.class);
         } catch (PostConstructException e) {
             assertTrue(e.getMessage().contains("Post-construct"));
             assertEquals("FAIL", e.getCause().getMessage());

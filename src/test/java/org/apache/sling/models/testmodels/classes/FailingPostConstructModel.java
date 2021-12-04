@@ -24,7 +24,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 
 @Model(adaptables=Resource.class)
-public class FailingPostConstuctModel {
+public class FailingPostConstructModel {
 
     @PostConstruct
     protected void pc() throws Exception {
