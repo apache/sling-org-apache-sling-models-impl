@@ -952,20 +952,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         }
         Collections.reverse(postConstructMethods);
         for (Method method : postConstructMethods) {
-            boolean accessible = method.isAccessible();
-            try {
-                if (!accessible) {
-                    method.setAccessible(true);
-                }
-                Object result = method.invoke(object);
-                if (result instanceof Boolean && !((Boolean) result).booleanValue()) {
-                    log.debug("PostConstruct method {}.{} returned false. Returning null model.", method.getDeclaringClass().getName(), method.getName());
-                    return null;
-                }
-            } finally {
-                if (!accessible) {
-                    method.setAccessible(false);
-                }
+            method.setAccessible(true);
+            Object result = method.invoke(object);
+            if (result instanceof Boolean && !((Boolean) result).booleanValue()) {
+                log.debug("PostConstruct method {}.{} returned false. Returning null model.", method.getDeclaringClass().getName(), method.getName());
+                return null;
             }
         }
         return object;

@@ -37,20 +37,11 @@ public class InjectableField extends AbstractInjectableElement {
     }
 
     public RuntimeException set(Object createdObject, Result<Object> result) {
-        synchronized (field) {
-            boolean accessible = field.isAccessible();
-            try {
-                if (!accessible) {
-                    field.setAccessible(true);
-                }
-                field.set(createdObject, result.getValue());
-            } catch (Exception e) {
-                return new ModelClassException("Could not inject field due to reflection issues", e);
-            } finally {
-                if (!accessible) {
-                    field.setAccessible(false);
-                }
-            }
+        try {
+            field.setAccessible(true);
+            field.set(createdObject, result.getValue());
+        } catch (Exception e) {
+            return new ModelClassException("Could not inject field due to reflection issues", e);
         }
         return null;
     }

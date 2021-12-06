@@ -68,19 +68,8 @@ public class ModelClassConstructor<M> {
      */
     @SuppressWarnings({"java:S3011","java:S1874"})
     public M newInstance(Object... parameters) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        synchronized (constructor) {
-            boolean accessible = constructor.isAccessible();
-            try {
-                if (!accessible) {
-                    constructor.setAccessible(true);
-                }
-                return constructor.newInstance(parameters);
-            } finally {
-                if (!accessible) {
-                    constructor.setAccessible(false);
-                }
-            }
-        }
+        constructor.setAccessible(true);
+        return constructor.newInstance(parameters);
     }
 
     public Constructor<M> getConstructor() {
