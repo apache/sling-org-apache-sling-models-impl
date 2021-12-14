@@ -685,6 +685,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         return request;
     }
 
+    @SuppressWarnings("unchecked")
     private <ModelType> Result<ModelType> createObject(final Object adaptable, final ModelClass<ModelType> modelClass)
             throws InstantiationException, InvocationTargetException, IllegalAccessException {
         DisposalCallbackRegistryImpl registry = new DisposalCallbackRegistryImpl();
@@ -699,7 +700,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         ModelType object;
         if (constructorToUse.getConstructor().getParameterTypes().length == 0) {
             // no parameters for constructor injection? instantiate it right away
-          
+
             object = constructorToUse.newInstance();
         } else {
             // instantiate with constructor injection
@@ -770,7 +771,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
      * @param type Model type
      * @return Constructor or null if none found
      */
-    @SuppressWarnings("unchecked")
     private <ModelType> ModelClassConstructor<ModelType> getBestMatchingConstructor(Object adaptable, ModelClass<ModelType> type) {
         ModelClassConstructor<ModelType>[] constructors = type.getConstructors();
 
