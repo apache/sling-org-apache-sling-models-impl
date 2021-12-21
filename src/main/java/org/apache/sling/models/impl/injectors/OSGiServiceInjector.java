@@ -104,19 +104,22 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
         // cannot use SlingScriptHelper since it does not support ordering by service ranking due to https://issues.apache.org/jira/browse/SLING-5665
         try {
             ServiceReference<?>[] refs = modelContext.getServiceReferences(type.getName(), filter);
-            if (refs == null || refs.length == 0) {
-                return null;
-            } else {
-                // sort by service ranking (lowest first) (see ServiceReference.compareTo)
+            if (refs != null && refs.length > 0) {
+                // sort by reverse service ranking (highest first) (see ServiceReference.compareTo)
                 List<ServiceReference<?>> references = Arrays.asList(refs);
-                Collections.sort(references);
-                callbackRegistry.addDisposalCallback(new Callback(refs, modelContext));
-                return modelContext.getService(references.get(references.size() - 1));
+                Collections.sort(references, Collections.reverseOrder());
+                for(final ServiceReference<?> ref : references) {
+                    final Object obj = modelContext.getService(ref);
+                    if ( obj != null ) {
+                        callbackRegistry.addDisposalCallback(new Callback(new ServiceReference[] {ref}, modelContext));
+                        return obj;
+                    }
+                }
             }
         } catch (InvalidSyntaxException e) {
             log.error("invalid filter expression", e);
-            return null;
         }
+        return null;
     }
 
     private <T> Object[] getServices(Object adaptable, Class<T> type, String filter,
@@ -124,28 +127,28 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
         // cannot use SlingScriptHelper since it does not support ordering by service ranking due to https://issues.apache.org/jira/browse/SLING-5665
         try {
             ServiceReference<?>[] refs = modelContext.getServiceReferences(type.getName(), filter);
-            if (refs == null || refs.length == 0) {
-                return null;
-            } else {
-                // sort by service ranking (lowest first) (see ServiceReference.compareTo)
+            if (refs != null && refs.length > 0) {
+                // sort by reverse service ranking (highest first) (see ServiceReference.compareTo)
                 List<ServiceReference<?>> references = Arrays.asList(refs);
-                Collections.sort(references);
-                // make highest service ranking being returned first
-                Collections.reverse(references);
-                callbackRegistry.addDisposalCallback(new Callback(refs, modelContext));
+                Collections.sort(references, Collections.reverseOrder());
                 List<Object> services = new ArrayList<>();
+                List<ServiceReference<?>> usedRefs = new ArrayList<>();
                 for (ServiceReference<?> ref : references) {
                     Object service = modelContext.getService(ref);
                     if (service != null) {
                         services.add(service);
+                        usedRefs.add(ref);
                     }
                 }
-                return services.toArray();
+                if ( !services.isEmpty() ) {
+                    callbackRegistry.addDisposalCallback(new Callback(usedRefs.toArray(new ServiceReference[usedRefs.size()]), modelContext));
+                    return services.toArray(new Object[services.size()]);
+                }
             }
         } catch (InvalidSyntaxException e) {
             log.error("invalid filter expression", e);
-            return null;
         }
+        return null;
     }
 
     private Object getValue(Object adaptable, Type type, String filterString, DisposalCallbackRegistry callbackRegistry,
