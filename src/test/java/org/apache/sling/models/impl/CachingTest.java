@@ -33,7 +33,10 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.apache.sling.models.testmodels.classes.CachedModel;
+import org.apache.sling.models.testmodels.classes.CachedModelWithMultipleAdapters;
 import org.apache.sling.models.testmodels.classes.UncachedModel;
+import org.apache.sling.models.testmodels.interfaces.CachedModelWithMultipleAdaptersA;
+import org.apache.sling.models.testmodels.interfaces.CachedModelWithMultipleAdaptersB;
 import org.apache.sling.servlethelpers.MockSlingHttpServletRequest;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,8 +63,17 @@ public class CachingTest {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindInjector(new RequestAttributeInjector(), new ServicePropertiesMap(0, 0));
         factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(1, 1));
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(CachedModel.class, UncachedModel.class,
-                org.apache.sling.models.testmodels.interfaces.CachedModel.class, org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
+        factory.bindImplementationPicker(new FirstImplementationPicker(), new ServicePropertiesMap(2,Integer.MAX_VALUE));
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(
+            CachedModel.class,
+            UncachedModel.class,
+            org.apache.sling.models.testmodels.interfaces.CachedModel.class,
+            org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
+        factory.adapterImplementations.addAll(
+            CachedModelWithMultipleAdapters.class,
+            CachedModelWithMultipleAdapters.class,
+            CachedModelWithMultipleAdaptersA.class,
+            CachedModelWithMultipleAdaptersB.class);
 
         when(request.getAttribute("testValue")).thenReturn("test");
         requestWrapper = new SlingHttpServletRequestWrapper(request);
@@ -172,6 +184,16 @@ public class CachingTest {
         assertEquals("test", cached2.getTestValue());
 
         verify(request, times(1)).getAttribute("testValue");
+    }
+
+    @Test
+    public void testCachedWithMultipleAdapters() {
+        CachedModelWithMultipleAdapters cached1 = factory.getAdapter(request, CachedModelWithMultipleAdapters.class);
+        CachedModelWithMultipleAdaptersA cached2 = factory.getAdapter(request, CachedModelWithMultipleAdaptersA.class);
+        CachedModelWithMultipleAdaptersB cached3 = factory.getAdapter(request, CachedModelWithMultipleAdaptersB.class);
+
+        assertSame(cached1, cached2);
+        assertSame(cached2, cached3);
     }
 }
 

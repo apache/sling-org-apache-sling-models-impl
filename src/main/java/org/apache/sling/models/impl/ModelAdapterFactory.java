@@ -416,7 +416,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                         ModelType model = (ModelType) Proxy.newProxyInstance(modelClass.getType().getClassLoader(), new Class<?>[] { modelClass.getType() }, handlerResult.getValue());
 
                         if (modelAnnotation.cache() && adaptableCache != null) {
-                            adaptableCache.put(requestedType, new SoftReference<Object>(model));
+                            addToAdaptableCache(adaptableCache, model, requestedType, modelAnnotation);
                         }
 
                         result = new Result<>(model);
@@ -428,7 +428,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                         result = createObject(adaptable, modelClass);
 
                         if (result.wasSuccessful() && modelAnnotation.cache() && adaptableCache != null) {
-                            adaptableCache.put(requestedType, new SoftReference<Object>(result.getValue()));
+                            addToAdaptableCache(adaptableCache, result.getValue(), requestedType, modelAnnotation);
                         }
                     } catch (Exception e) {
                         String msg = String.format("Unable to create model %s", modelClass.getType());
@@ -450,6 +450,19 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             return modelValidation.validate(adaptable, modelType, modelAnnotation.validation() == ValidationStrategy.REQUIRED);
         }
         return null;
+    }
+
+    private void addToAdaptableCache(Map<Class<?>, SoftReference<Object>> adaptableCache, Object model, Class<?> requestedType,
+        Model modelAnnotation) {
+        SoftReference<Object> ref = new SoftReference<>(model);
+        // cache for the requested type
+        adaptableCache.put(requestedType, ref);
+        // and cache for any additional adapter types
+        if (modelAnnotation.adapters() != null) {
+            for (Class<?> adapterType : modelAnnotation.adapters()) {
+                adaptableCache.put(adapterType, ref);
+            }
+        }
     }
 
     private interface InjectCallback {
