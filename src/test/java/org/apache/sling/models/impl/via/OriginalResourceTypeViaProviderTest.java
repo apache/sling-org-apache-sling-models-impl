@@ -20,7 +20,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceWrapper;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
-import org.apache.sling.models.annotations.via.OriginalResource;
+import org.apache.sling.models.annotations.via.OriginalResourceType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -30,9 +30,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OriginalResourceViaProviderTest {
+public class OriginalResourceTypeViaProviderTest {
 
-    private OriginalResourceViaProvider provider = new OriginalResourceViaProvider();
+    private OriginalResourceTypeViaProvider provider = new OriginalResourceTypeViaProvider();
 
     @Mock
     private Resource resource;
@@ -42,7 +42,7 @@ public class OriginalResourceViaProviderTest {
 
     @Test
     public void testReturnsCorrectMarkerInterface() {
-        assertEquals(OriginalResource.class, provider.getType());
+        assertEquals(OriginalResourceType.class, provider.getType());
     }
 
     @Test

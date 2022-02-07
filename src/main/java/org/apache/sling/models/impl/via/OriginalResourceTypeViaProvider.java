@@ -19,26 +19,26 @@ package org.apache.sling.models.impl.via;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.ViaProviderType;
-import org.apache.sling.models.annotations.via.OriginalResource;
+import org.apache.sling.models.annotations.via.OriginalResourceType;
 import org.apache.sling.models.spi.ViaProvider;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * This {@link ViaProvider} implements the counterpart of the {@link ForcedResourceTypeViaProvider} and
+ * This {@link ViaProvider} implements the counterpart of the {@link ForcedResourceTypeViaProvider} and the
  * {@link ResourceSuperTypeViaProvider}. It is in particular helpful in models that want to inject another model using the original
- * {@link Resource}'s or {@link SlingHttpServletRequest}'s resource type instead of the one forced by either of the above-mentioned via
- * providers.
+ * {@link Resource}'s or {@link SlingHttpServletRequest}'s resource type instead of the one forced by either of the above-mentioned
+ * {@link ViaProvider}s
  * <p>
  * The implementation simply unwraps the {@link org.apache.sling.api.resource.ResourceWrapper} or
  * {@link org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper} used by the {@link ForcedResourceTypeViaProvider} and
  * {@link ResourceSuperTypeViaProvider}.
  */
 @Component
-public class OriginalResourceViaProvider implements ViaProvider {
+public class OriginalResourceTypeViaProvider implements ViaProvider {
 
     @Override
     public Class<? extends ViaProviderType> getType() {
-        return OriginalResource.class;
+        return OriginalResourceType.class;
     }
 
     @Override
