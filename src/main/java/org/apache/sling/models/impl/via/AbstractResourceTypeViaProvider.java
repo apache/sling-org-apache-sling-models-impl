@@ -18,8 +18,6 @@ package org.apache.sling.models.impl.via;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceWrapper;
-import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.models.spi.ViaProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -65,33 +63,4 @@ public abstract class AbstractResourceTypeViaProvider implements ViaProvider {
 
     protected abstract @Nullable String getResourceType(@NotNull Resource resource, @NotNull String value);
 
-    private class ResourceTypeForcingResourceWrapper extends ResourceWrapper {
-
-        private final String resourceType;
-
-        private ResourceTypeForcingResourceWrapper(Resource resource, String resourceType) {
-            super(resource);
-            this.resourceType = resourceType;
-        }
-
-        @Override
-        public String getResourceType() {
-            return resourceType;
-        }
-    }
-
-    private class ResourceTypeForcingRequestWrapper extends SlingHttpServletRequestWrapper {
-
-        private final Resource resource;
-
-        private ResourceTypeForcingRequestWrapper(SlingHttpServletRequest request, Resource resource, String resourceType) {
-            super(request);
-            this.resource = new ResourceTypeForcingResourceWrapper(resource, resourceType);
-        }
-
-        @Override
-        public Resource getResource() {
-            return resource;
-        }
-    }
 }
