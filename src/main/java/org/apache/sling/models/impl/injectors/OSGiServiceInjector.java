@@ -204,7 +204,11 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
         public void onDisposed() {
             if (refs != null) {
                 for (ServiceReference<?> ref : refs) {
-                    context.ungetService(ref);
+                    try {
+                        context.ungetService(ref);
+                    } catch (IllegalStateException | IllegalArgumentException | NullPointerException exception) {
+                        log.error("Failed to unget service ref {}", ref, exception);
+                    }
                 }
             }
         }
