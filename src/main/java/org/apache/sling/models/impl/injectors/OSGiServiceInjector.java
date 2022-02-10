@@ -207,7 +207,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
                     try {
                         context.ungetService(ref);
                     } catch (IllegalStateException exception) {
-                        log.error("Failed to unget service ref {}", ref, exception);
+                        // SLING-11132 - This exception is expected when BundleContext is no longer valid.
                     }
                 }
             }
