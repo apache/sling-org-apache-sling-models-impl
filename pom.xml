@@ -221,9 +221,9 @@
         </dependency>
         <!-- for testing the annotations -->
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.converter</artifactId>
-            <version>1.0.8</version>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.util.converter</artifactId>
+            <version>1.0.9</version>
             <scope>test</scope>
         </dependency>
         <dependency>
