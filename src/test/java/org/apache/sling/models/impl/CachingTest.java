@@ -32,9 +32,17 @@ import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
+import org.apache.sling.models.spi.ImplementationPicker;
 import org.apache.sling.models.testmodels.classes.CachedModel;
+import org.apache.sling.models.testmodels.classes.CachedModelWithAdapterTypes12;
+import org.apache.sling.models.testmodels.classes.CachedModelWithAdapterTypes23;
 import org.apache.sling.models.testmodels.classes.UncachedModel;
+import org.apache.sling.models.testmodels.interfaces.AdapterType1;
+import org.apache.sling.models.testmodels.interfaces.AdapterType2;
+import org.apache.sling.models.testmodels.interfaces.AdapterType3;
 import org.apache.sling.servlethelpers.MockSlingHttpServletRequest;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,8 +68,17 @@ public class CachingTest {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindInjector(new RequestAttributeInjector(), new ServicePropertiesMap(0, 0));
         factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(1, 1));
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(CachedModel.class, UncachedModel.class,
-                org.apache.sling.models.testmodels.interfaces.CachedModel.class, org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(
+            CachedModel.class,
+            UncachedModel.class,
+            org.apache.sling.models.testmodels.interfaces.CachedModel.class,
+            org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
+        factory.adapterImplementations.addAll(
+            CachedModelWithAdapterTypes12.class,
+            CachedModelWithAdapterTypes12.class, AdapterType1.class, AdapterType2.class);
+        factory.adapterImplementations.addAll(
+            CachedModelWithAdapterTypes23.class,
+            CachedModelWithAdapterTypes23.class, AdapterType2.class, AdapterType3.class);
 
         when(request.getAttribute("testValue")).thenReturn("test");
         requestWrapper = new SlingHttpServletRequestWrapper(request);
@@ -120,8 +137,10 @@ public class CachingTest {
 
     @Test
     public void testCachedInterface() {
-        org.apache.sling.models.testmodels.interfaces.CachedModel cached1 = factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.CachedModel.class);
-        org.apache.sling.models.testmodels.interfaces.CachedModel cached2 = factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.CachedModel.class);
+        org.apache.sling.models.testmodels.interfaces.CachedModel cached1 = factory.getAdapter(request,
+            org.apache.sling.models.testmodels.interfaces.CachedModel.class);
+        org.apache.sling.models.testmodels.interfaces.CachedModel cached2 = factory.getAdapter(request,
+            org.apache.sling.models.testmodels.interfaces.CachedModel.class);
 
         assertSame(cached1, cached2);
         assertEquals("test", cached1.getTestValue());
@@ -132,8 +151,10 @@ public class CachingTest {
 
     @Test
     public void testNoCachedInterface() {
-        org.apache.sling.models.testmodels.interfaces.UncachedModel uncached1 = factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
-        org.apache.sling.models.testmodels.interfaces.UncachedModel uncached2 = factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
+        org.apache.sling.models.testmodels.interfaces.UncachedModel uncached1 = factory.getAdapter(request,
+            org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
+        org.apache.sling.models.testmodels.interfaces.UncachedModel uncached2 = factory.getAdapter(request,
+            org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
 
         assertNotSame(uncached1, uncached2);
         assertEquals("test", uncached1.getTestValue());
@@ -164,14 +185,43 @@ public class CachingTest {
 
     @Test
     public void testCachedInterfaceWithRequestWrapper() {
-        org.apache.sling.models.testmodels.interfaces.CachedModel cached1 = factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.CachedModel.class);
-        org.apache.sling.models.testmodels.interfaces.CachedModel cached2 = factory.getAdapter(requestWrapper, org.apache.sling.models.testmodels.interfaces.CachedModel.class);
+        org.apache.sling.models.testmodels.interfaces.CachedModel cached1 = factory.getAdapter(request,
+            org.apache.sling.models.testmodels.interfaces.CachedModel.class);
+        org.apache.sling.models.testmodels.interfaces.CachedModel cached2 = factory.getAdapter(requestWrapper,
+            org.apache.sling.models.testmodels.interfaces.CachedModel.class);
 
         assertSame(cached1, cached2);
         assertEquals("test", cached1.getTestValue());
         assertEquals("test", cached2.getTestValue());
 
         verify(request, times(1)).getAttribute("testValue");
+    }
+
+    @Test
+    public void testCachedModelWithAdapterTypes() {
+        // test 2 model implementations that share a common adapter type, with an implementation picker that selects exactly one of the
+        // implementations for the common adapter type. verify that the models are cached accordingly
+        factory.bindImplementationPicker(
+            (adapterType, impls, adaptable) -> {
+                if (AdapterType1.class.equals(adapterType)) {
+                    return CachedModelWithAdapterTypes12.class;
+                } else if (AdapterType2.class.equals(adapterType) || AdapterType3.class.equals(adapterType)) {
+                    return CachedModelWithAdapterTypes23.class;
+                } else {
+                    return null;
+                }
+            },
+            new ServicePropertiesMap(2, 0));
+
+        CachedModelWithAdapterTypes12 byImpl12 = factory.getAdapter(request, CachedModelWithAdapterTypes12.class);
+        CachedModelWithAdapterTypes23 byImpl23 = factory.getAdapter(request, CachedModelWithAdapterTypes23.class);
+        AdapterType1 byAdapterType1 = factory.getAdapter(request, AdapterType1.class);
+        AdapterType2 byAdapterType2 = factory.getAdapter(request, AdapterType2.class);
+        AdapterType3 byAdapterType3 = factory.getAdapter(request, AdapterType3.class);
+
+        assertSame(byImpl12, byAdapterType1);
+        assertSame(byImpl23, byAdapterType2);
+        assertSame(byImpl23, byAdapterType3);
     }
 }
 

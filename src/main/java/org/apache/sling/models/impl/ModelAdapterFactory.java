@@ -387,7 +387,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
             if (modelAnnotation.cache()) {
                 adaptableCache = getOrCreateCache(adaptable);
-                SoftReference<Object> softReference = adaptableCache.get(requestedType);
+                SoftReference<Object> softReference = adaptableCache.get(modelClass.getType());
                 if (softReference != null) {
                     ModelType cachedObject = (ModelType) softReference.get();
                     if (cachedObject != null) {
@@ -416,7 +416,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                         ModelType model = (ModelType) Proxy.newProxyInstance(modelClass.getType().getClassLoader(), new Class<?>[] { modelClass.getType() }, handlerResult.getValue());
 
                         if (modelAnnotation.cache() && adaptableCache != null) {
-                            adaptableCache.put(requestedType, new SoftReference<Object>(model));
+                            adaptableCache.put(modelClass.getType(), new SoftReference<>(model));
                         }
 
                         result = new Result<>(model);
@@ -428,7 +428,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                         result = createObject(adaptable, modelClass);
 
                         if (result.wasSuccessful() && modelAnnotation.cache() && adaptableCache != null) {
-                            adaptableCache.put(requestedType, new SoftReference<Object>(result.getValue()));
+                            adaptableCache.put(modelClass.getType(), new SoftReference<>(result.getValue()));
                         }
                     } catch (Exception e) {
                         String msg = String.format("Unable to create model %s", modelClass.getType());
