@@ -204,7 +204,11 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
         public void onDisposed() {
             if (refs != null) {
                 for (ServiceReference<?> ref : refs) {
-                    context.ungetService(ref);
+                    try {
+                        context.ungetService(ref);
+                    } catch (IllegalStateException exception) {
+                        // SLING-11132 - This exception is expected when BundleContext is no longer valid.
+                    }
                 }
             }
         }
