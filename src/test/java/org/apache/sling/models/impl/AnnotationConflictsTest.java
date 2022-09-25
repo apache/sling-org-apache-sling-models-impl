@@ -239,6 +239,28 @@ public class AnnotationConflictsTest {
         }
     }
 
+    // @Optional overrides REQUIRED strategy
+    @Model(adaptables = Resource.class)
+    public static class SuccessfulSingleOptionalBySeparateAnnotationOverridingStrategyFieldModel implements Methods {
+
+        @ValueMapValue
+        private String otherText;
+
+        @Override
+        public String getOtherText() {
+            return otherText;
+        }
+
+        @ValueMapValue(injectionStrategy = InjectionStrategy.REQUIRED)
+        @Optional
+        private String emptyText;
+
+        @Override
+        public String getEmptyText() {
+            return emptyText;
+        }
+    }
+
     private interface Methods {
         String getOtherText();
         String getEmptyText();
