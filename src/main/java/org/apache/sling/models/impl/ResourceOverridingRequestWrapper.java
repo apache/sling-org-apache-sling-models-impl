@@ -24,11 +24,12 @@ import static org.apache.sling.api.scripting.SlingBindings.RESOURCE;
 import static org.apache.sling.api.scripting.SlingBindings.RESPONSE;
 import static org.apache.sling.api.scripting.SlingBindings.SLING;
 
-import javax.script.SimpleBindings;
+import javax.script.Bindings;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.scripting.LazyBindings;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
@@ -51,7 +52,7 @@ class ResourceOverridingRequestWrapper extends SlingHttpServletRequestWrapper {
 
         SlingBindings existingBindings = (SlingBindings) wrappedRequest.getAttribute(SlingBindings.class.getName());
 
-        SimpleBindings bindings = new SimpleBindings();
+        Bindings bindings = new LazyBindings();
         if (existingBindings != null) {
             bindings.put(SLING, existingBindings.getSling());
             bindings.put(RESPONSE, existingBindings.getResponse());
