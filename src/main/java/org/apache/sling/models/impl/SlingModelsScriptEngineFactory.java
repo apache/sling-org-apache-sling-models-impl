@@ -23,9 +23,9 @@ import org.apache.sling.scripting.core.impl.helper.ProtectedBindings;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
+import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
-import javax.script.SimpleBindings;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -74,7 +74,7 @@ class SlingModelsScriptEngineFactory extends AbstractScriptEngineFactory impleme
         return null;
     }
 
-    void invokeBindingsValuesProviders(BindingsValuesProvidersByContext bindingsValuesProvidersByContext, SimpleBindings bindings) {
+    void invokeBindingsValuesProviders(BindingsValuesProvidersByContext bindingsValuesProvidersByContext, Bindings bindings) {
         final Collection<BindingsValuesProvider> bindingsValuesProviders =
                 bindingsValuesProvidersByContext.getBindingsValuesProviders(this, SlingModelsScriptEngineFactory.BINDINGS_CONTEXT);
 

@@ -24,7 +24,7 @@ import static org.apache.sling.api.scripting.SlingBindings.RESOURCE;
 import static org.apache.sling.api.scripting.SlingBindings.RESPONSE;
 import static org.apache.sling.api.scripting.SlingBindings.SLING;
 
-import javax.script.SimpleBindings;
+import javax.script.Bindings;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
@@ -40,7 +40,7 @@ class ResourceOverridingRequestWrapper extends SlingHttpServletRequestWrapper {
 
     private final Resource resource;
     private final AdapterManager adapterManager;
-    private final SlingBindings bindings;
+    private final Bindings bindings;
 
     ResourceOverridingRequestWrapper(SlingHttpServletRequest wrappedRequest, Resource resource,
                                             AdapterManager adapterManager, SlingModelsScriptEngineFactory scriptEngineFactory,
@@ -51,7 +51,7 @@ class ResourceOverridingRequestWrapper extends SlingHttpServletRequestWrapper {
 
         SlingBindings existingBindings = (SlingBindings) wrappedRequest.getAttribute(SlingBindings.class.getName());
 
-        SimpleBindings bindings = new SimpleBindings();
+        bindings = new SlingBindings();
         if (existingBindings != null) {
             bindings.put(SLING, existingBindings.getSling());
             bindings.put(RESPONSE, existingBindings.getResponse());
@@ -64,12 +64,6 @@ class ResourceOverridingRequestWrapper extends SlingHttpServletRequestWrapper {
         bindings.put(SlingModelsScriptEngineFactory.RESOLVER, resource.getResourceResolver());
 
         scriptEngineFactory.invokeBindingsValuesProviders(bindingsValuesProvidersByContext, bindings);
-
-        SlingBindings slingBindings = new SlingBindings();
-        slingBindings.putAll(bindings);
-
-        this.bindings = slingBindings;
-
     }
 
     @Override

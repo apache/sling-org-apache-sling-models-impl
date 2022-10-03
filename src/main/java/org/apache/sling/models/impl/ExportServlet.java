@@ -32,12 +32,13 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.script.SimpleBindings;
+import javax.script.Bindings;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.scripting.LazyBindings;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
@@ -125,7 +126,7 @@ class ExportServlet extends SlingSafeMethodsServlet {
 
     private void addScriptBindings(SlingScriptHelper scriptHelper, SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException {
-        SimpleBindings bindings = new SimpleBindings();
+        Bindings bindings = new LazyBindings();
         bindings.put(SLING, scriptHelper);
         bindings.put(RESOURCE, request.getResource());
         bindings.put(SlingModelsScriptEngineFactory.RESOLVER, request.getResource().getResourceResolver());
