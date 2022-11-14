@@ -83,8 +83,7 @@ public class OSGiInjectionTest {
     public void testSimpleOSGiModelField() throws Exception {
         ServiceReference ref = mock(ServiceReference.class);
         ServiceInterface service = mock(ServiceInterface.class);
-        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null)).thenReturn(
-                new ServiceReference[] { ref });
+        when(bundleContext.getServiceReference(ServiceInterface.class.getName())).thenReturn(ref);
         when(bundleContext.getService(ref)).thenReturn(service);
 
         Resource res = mock(Resource.class);
@@ -228,8 +227,7 @@ public class OSGiInjectionTest {
     public void testSimpleOSGiModelConstructor() throws Exception {
         ServiceReference ref = mock(ServiceReference.class);
         ServiceInterface service = mock(ServiceInterface.class);
-        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null)).thenReturn(
-                new ServiceReference[] { ref });
+        when(bundleContext.getServiceReference(ServiceInterface.class.getName())).thenReturn(ref);
         when(bundleContext.getService(ref)).thenReturn(service);
 
         Resource res = mock(Resource.class);

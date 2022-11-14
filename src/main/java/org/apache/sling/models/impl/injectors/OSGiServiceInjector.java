@@ -101,23 +101,35 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
 
     private <T> Object getService(Object adaptable, Class<T> type, String filter,
             DisposalCallbackRegistry callbackRegistry, BundleContext modelContext) {
-        // cannot use SlingScriptHelper since it does not support ordering by service ranking due to https://issues.apache.org/jira/browse/SLING-5665
-        try {
-            ServiceReference<?>[] refs = modelContext.getServiceReferences(type.getName(), filter);
-            if (refs != null && refs.length > 0) {
-                // sort by reverse service ranking (highest first) (see ServiceReference.compareTo)
-                List<ServiceReference<?>> references = Arrays.asList(refs);
-                Collections.sort(references, Collections.reverseOrder());
-                for(final ServiceReference<?> ref : references) {
-                    final Object obj = modelContext.getService(ref);
-                    if ( obj != null ) {
-                        callbackRegistry.addDisposalCallback(new Callback(new ServiceReference[] {ref}, modelContext));
-                        return obj;
-                    }
+        
+        // if there's not filter we can use a simplified version
+        if (filter == null) {
+            ServiceReference<?> ref = modelContext.getServiceReference(type.getName());
+            if (ref != null) {
+                final Object obj = modelContext.getService(ref);
+                if ( obj != null ) {
+                    callbackRegistry.addDisposalCallback(new Callback(new ServiceReference[] {ref}, modelContext));
+                    return obj;
                 }
             }
-        } catch (InvalidSyntaxException e) {
-            log.error("invalid filter expression", e);
+        } else {      
+            try {
+                ServiceReference<?>[] refs = modelContext.getServiceReferences(type.getName(), filter);
+                if (refs != null && refs.length > 0) {
+                    // sort by reverse service ranking (highest first) (see ServiceReference.compareTo)
+                    List<ServiceReference<?>> references = Arrays.asList(refs);
+                    Collections.sort(references, Collections.reverseOrder());
+                    for(final ServiceReference<?> ref : references) {
+                        final Object obj = modelContext.getService(ref);
+                        if ( obj != null ) {
+                            callbackRegistry.addDisposalCallback(new Callback(new ServiceReference[] {ref}, modelContext));
+                            return obj;
+                        }
+                    }
+                }
+            } catch (InvalidSyntaxException e) {
+                log.error("invalid filter expression", e);
+            }
         }
         return null;
     }

@@ -153,8 +153,7 @@ public class InjectorSpecificAnnotationTest {
     public void testOSGiServiceField() throws InvalidSyntaxException {
         ServiceReference ref = mock(ServiceReference.class);
         Logger log = mock(Logger.class);
-        when(bundleContext.getServiceReferences(Logger.class.getName(), null)).thenReturn(
-                new ServiceReference[] { ref });
+        when(bundleContext.getServiceReference(Logger.class.getName())).thenReturn(ref);
         when(bundleContext.getService(ref)).thenReturn(log);
 
         InjectorSpecificAnnotationModel model = factory.getAdapter(request, InjectorSpecificAnnotationModel.class);
@@ -242,8 +241,7 @@ public class InjectorSpecificAnnotationTest {
     public void testOSGiServiceConstructor() throws InvalidSyntaxException {
         ServiceReference ref = mock(ServiceReference.class);
         Logger log = mock(Logger.class);
-        when(bundleContext.getServiceReferences(Logger.class.getName(), null)).thenReturn(
-                new ServiceReference[] { ref });
+        when(bundleContext.getServiceReference(Logger.class.getName())).thenReturn(ref);
         when(bundleContext.getService(ref)).thenReturn(log);
 
         org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel model

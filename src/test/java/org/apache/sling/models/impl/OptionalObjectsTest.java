@@ -215,8 +215,7 @@ public class OptionalObjectsTest {
     public void testFieldInjectionsOSGiService() throws InvalidSyntaxException {
         ServiceReference ref = mock(ServiceReference.class);
         Logger log = mock(Logger.class);
-        when(bundleContext.getServiceReferences(Logger.class.getName(), null)).thenReturn(
-                new ServiceReference[]{ref});
+        when(bundleContext.getServiceReference(Logger.class.getName())).thenReturn(ref);
         when(bundleContext.getService(ref)).thenReturn(log);
 
         OptionalObjectsModel model = factory.getAdapter(request, OptionalObjectsModel.class);
