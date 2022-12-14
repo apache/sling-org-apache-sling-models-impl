@@ -389,7 +389,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                 }
             }
             if (!isAdaptable) {
-                String msg = String.format("Adaptables (%s) are not acceptable for the model class: %s", StringUtils.join(declaredAdaptable), modelClass.getType());
+                String msg = String.format("Given adaptable (%s) is not acceptable for the model class: %s which only supports adaptables %s", adaptable.getClass(), modelClass.getType(), StringUtils.join(declaredAdaptable));
                 return new Result<>(new InvalidAdaptableException(msg));
             } else {
                 RuntimeException t = validateModel(adaptable, modelClass.getType(), modelAnnotation);
