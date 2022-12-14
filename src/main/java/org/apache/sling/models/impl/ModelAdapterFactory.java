@@ -273,6 +273,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @Override
+    public @NotNull<T>  T createModelFromWrappedRequest(@NotNull SlingHttpServletRequest request, @NotNull Resource resource, @NotNull Class<T> targetClass) {
+        return createModel(new ResourceOverridingRequestWrapper(request, resource, adapterManager, scriptEngineFactory, bindingsValuesProvidersByContext), targetClass);
+    }
+ 
+    @Override
     public boolean canCreateFromAdaptable(@NotNull Object adaptable, @NotNull Class<?> modelClass) throws ModelClassException {
         return internalCanCreateFromAdaptable(adaptable, modelClass);
     }
@@ -1386,4 +1391,5 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     public void requestInitialized(ServletRequestEvent sre) {
         sre.getServletRequest().setAttribute(REQUEST_MARKER_ATTRIBUTE, REQUEST_MARKER_VALUE);
     }
+
 }
