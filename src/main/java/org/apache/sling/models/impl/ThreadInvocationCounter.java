@@ -21,11 +21,26 @@ package org.apache.sling.models.impl;
 class ThreadInvocationCounter {
 
     private int count;
+    private int max;
+    private int overallCount;
 
     final int maxRecursionDepth;
 
     public ThreadInvocationCounter(int maxRecursionDepth) {
         this.maxRecursionDepth = maxRecursionDepth;
+    }
+
+    public void resetStats() {
+        max = 0;
+        overallCount = 0;
+    }
+
+    public int getMaxRecursion() {
+        return max;
+    }
+
+    public int getOverallCount() {
+        return overallCount;
     }
 
     public boolean isMaximumReached() {
@@ -34,6 +49,10 @@ class ThreadInvocationCounter {
 
     public void increase() {
         this.count++;
+        this.overallCount++;
+        if (count > max) {
+            max = count;
+        }
     }
 
     public void decrease() {
