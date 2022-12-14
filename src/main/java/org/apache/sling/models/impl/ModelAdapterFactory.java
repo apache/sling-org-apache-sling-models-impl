@@ -203,6 +203,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     private static final Logger log = LoggerFactory.getLogger(ModelAdapterFactory.class);
+    private static final Logger perfLog = LoggerFactory.getLogger(ModelAdapterFactory.class.getName() + "-perf");
 
     private final ConcurrentMap<String, RankedServices<Injector>> injectors = new ConcurrentHashMap<>();
     private final RankedServices<Injector> sortedInjectors = new RankedServices<>();
@@ -249,7 +250,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     @Override
     @SuppressWarnings("null")
     public <AdapterType> AdapterType getAdapter(Object adaptable, Class<AdapterType> type) {
-        Result<AdapterType> result = internalCreateModel(adaptable, type);
+        Result<AdapterType> result = internalCreateModelMeasured(adaptable, type);
         if (!result.wasSuccessful()) {
             if (result == Result.POST_CONSTRUCT_PREVENTED_MODEL_CONSTRUCTION) {
                 log.debug("Could not adapt to model as PostConstruct method returned false"); // do no construct runtime exception in this case
@@ -265,7 +266,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     @Override
     public @NotNull <ModelType> ModelType createModel(@NotNull Object adaptable, @NotNull Class<ModelType> type) throws MissingElementsException,
             InvalidAdaptableException, ValidationException, InvalidModelException {
-        Result<ModelType> result = internalCreateModel(adaptable, type);
+        Result<ModelType> result = internalCreateModelMeasured(adaptable, type);
         if (!result.wasSuccessful()) {
             throw result.getThrowable();
         }
@@ -346,6 +347,31 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             adaptableCache = adapterCache.computeIfAbsent(adaptable, k -> Collections.synchronizedMap(new WeakHashMap<>()));
         }
         return adaptableCache;
+    }
+
+
+    private <ModelType> Result<ModelType> internalCreateModelMeasured(@NotNull Object adaptable, @NotNull Class<ModelType> type) {
+        Result<ModelType> result;
+        if (perfLog.isDebugEnabled()) {
+            long startTime = perfLog.isDebugEnabled() ? System.nanoTime() : -1;
+            ThreadInvocationCounter threadInvocationCounter = invocationCountThreadLocal.get();
+            threadInvocationCounter.resetStats();
+
+            result = internalCreateModel(adaptable, type);
+
+            double duration = ((double) System.nanoTime() - startTime) / 1000000.0;
+
+            perfLog.debug("createdModel({},{}) took {}ms, instantiations {}, max recursion {}",
+                adaptable.getClass().getName(),
+                type.getName(),
+                duration,
+                threadInvocationCounter.getOverallCount(),
+                threadInvocationCounter.getMaxRecursion());
+        } else {
+            result = internalCreateModel(adaptable, type);
+        }
+
+        return result;
     }
 
     @SuppressWarnings("unchecked")
@@ -1304,7 +1330,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         if (clazz == null) {
             throw new ModelClassException("Could find model registered for resource type: " + resource.getResourceType());
         }
-        return handleBoundModelResult(internalCreateModel(resource, clazz));
+        return handleBoundModelResult(internalCreateModelMeasured(resource, clazz));
     }
 
     @Override
@@ -1313,7 +1339,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         if (clazz == null) {
             throw new ModelClassException("Could find model registered for request path: " + request.getServletPath());
         }
-        return handleBoundModelResult(internalCreateModel(request, clazz));
+        return handleBoundModelResult(internalCreateModelMeasured(request, clazz));
     }
 
     private Object handleBoundModelResult(Result<?> result) {
@@ -1344,7 +1370,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         if (clazz == null) {
             throw new ModelClassException("Could find model registered for resource type: " + resource.getResourceType());
         }
-        Result<?> result = internalCreateModel(resource, clazz);
+        Result<?> result = internalCreateModelMeasured(resource, clazz);
         return handleAndExportResult(result, name, targetClass, options);
     }
 
@@ -1355,7 +1381,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         if (clazz == null) {
             throw new ModelClassException("Could find model registered for request path: " + request.getServletPath());
         }
-        Result<?> result = internalCreateModel(request, clazz);
+        Result<?> result = internalCreateModelMeasured(request, clazz);
         return handleAndExportResult(result, name, targetClass, options);
     }
 
