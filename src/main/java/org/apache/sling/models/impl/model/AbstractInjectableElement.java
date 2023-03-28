@@ -156,17 +156,30 @@ abstract class AbstractInjectableElement implements InjectableElement {
 
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType)type;
-            if (parameterizedType.getRawType() == Collection.class || parameterizedType.getRawType() == List.class) {
-                value = getFirstNonEmptyArrayAsList(
-                        defaultAnnotation.values(),
-                        defaultAnnotation.intValues(),
-                        defaultAnnotation.longValues(),
-                        defaultAnnotation.floatValues(),
-                        defaultAnnotation.doubleValues(),
-                        defaultAnnotation.booleanValues());
+            Type rawType = parameterizedType.getRawType();
+            if ((rawType == Collection.class || rawType == List.class)
+                    && parameterizedType.getActualTypeArguments().length > 0) {
+                Type itemType = parameterizedType.getActualTypeArguments()[0];
+                if (itemType == String.class) {
+                    value = arrayToTypedList(defaultAnnotation.values());
+                } else if (itemType == Integer.class) {
+                    value = arrayToTypedList(defaultAnnotation.intValues());
+                } else if (itemType == Long.class) {
+                    value = arrayToTypedList(defaultAnnotation.longValues());
+                } else if (itemType == Boolean.class) {
+                    value = arrayToTypedList(defaultAnnotation.booleanValues());
+                } else if (itemType == Short.class) {
+                    value = arrayToTypedList(defaultAnnotation.shortValues());
+                } else if (itemType == Float.class) {
+                    value = arrayToTypedList(defaultAnnotation.floatValues());
+                } else if (itemType == Double.class) {
+                    value = arrayToTypedList(defaultAnnotation.doubleValues());
+                } else {
+                    log.warn("Default values for {} List/Collection are not supported", itemType);
+                }
             }
             else {
-                log.debug("Cannot provide default for {}", type);
+                log.warn("Cannot provide default for {}", type);
             }
         }
         else if (type instanceof Class) {
@@ -228,23 +241,23 @@ abstract class AbstractInjectableElement implements InjectableElement {
     }
 
     /**
-     * Gets the first non-empty array from the given list of arrays, and returns its values as list.
-     * @param arrays Arrays
-     * @return List with values of first non-empty array, or null.
+     * Converts array to typed list of values.
+     * @param <T> Array/List type
+     * @param array Array
+     * @return Typed list or null if array is empty
      */
-    private static @Nullable List<Object> getFirstNonEmptyArrayAsList(Object... arrays) {
-        for (Object array : arrays) {
-            if (array != null && array.getClass().isArray()) {
-                int arrayLength = Array.getLength(array);
-                if (arrayLength > 0) {
-                    List<Object> result = new ArrayList<>();
-                    for (int i=0; i<arrayLength; i++) {
-                        result.add(Array.get(array, i));
-                    }
-                    return result;
+    @SuppressWarnings("unchecked")
+    private static <T> @Nullable List<T> arrayToTypedList(Object array) {
+        if (array != null && array.getClass().isArray()) {
+            int arrayLength = Array.getLength(array);
+            if (arrayLength > 0) {
+                List<T> result = new ArrayList<>();
+                for (int i=0; i<arrayLength; i++) {
+                    result.add((T)Array.get(array, i));
                 }
-
+                return result;
             }
+
         }
         return null;
     }

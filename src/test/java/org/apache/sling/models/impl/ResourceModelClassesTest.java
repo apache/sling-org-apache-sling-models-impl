@@ -191,8 +191,13 @@ public class ResourceModelClassesTest {
         ListDefaultsModel model = factory.getAdapter(res, ListDefaultsModel.class);
         assertNotNull(model);
 
-        assertEquals(Arrays.asList(1,2,3), model.getIntList());
         assertEquals(Arrays.asList("v1", "v2"), model.getStringList());
+        assertEquals(Arrays.asList(1,2,3), model.getIntList());
+        assertEquals(Arrays.asList(1L,2L), model.getLongList());
+        assertEquals(Arrays.asList(true,false), model.getBooleanList());
+        assertEquals(Arrays.asList((short)1), model.getShortList());
+        assertEquals(Arrays.asList(1.1f,1.2f), model.getFloatList());
+        assertEquals(Arrays.asList(1.1d,1.2d,1.3d), model.getDoubleList());
     }
 
     @Test

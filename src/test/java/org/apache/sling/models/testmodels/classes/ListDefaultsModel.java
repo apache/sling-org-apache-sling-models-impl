@@ -28,19 +28,59 @@ import org.apache.sling.models.annotations.Model;
 public class ListDefaultsModel {
 
     @Inject
+    @Default(values = {"v1","v2"})
+    private List<String> stringList;
+
+    @Inject
     @Default(intValues = {1,2,3})
     private List<Integer> intList;
 
     @Inject
-    @Default(values = {"v1","v2"})
-    private List<String> stringList;
+    @Default(longValues = {1,2})
+    private List<Long> longList;
+
+    @Inject
+    @Default(booleanValues = {true,false})
+    private List<Boolean> booleanList;
+
+    @Inject
+    @Default(shortValues = {1})
+    private List<Short> shortList;
+
+    @Inject
+    @Default(floatValues = {1.1f,1.2f})
+    private List<Float> floatList;
+
+    @Inject
+    @Default(doubleValues = {1.1d,1.2d,1.3d})
+    private List<Double> doubleList;
+
+    public List<String> getStringList() {
+        return stringList;
+    }
 
     public List<Integer> getIntList() {
         return intList;
     }
 
-    public List<String> getStringList() {
-        return stringList;
+    public List<Long> getLongList() {
+        return longList;
+    }
+
+    public List<Boolean> getBooleanList() {
+        return booleanList;
+    }
+
+    public List<Short> getShortList() {
+        return shortList;
+    }
+
+    public List<Float> getFloatList() {
+        return floatList;
+    }
+
+    public List<Double> getDoubleList() {
+        return doubleList;
     }
 
 }
