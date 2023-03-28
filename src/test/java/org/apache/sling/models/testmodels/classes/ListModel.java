@@ -16,11 +16,13 @@
  */
 package org.apache.sling.models.testmodels.classes;
 
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.models.annotations.Model;
+import java.util.List;
 
 import javax.inject.Inject;
-import java.util.List;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.Optional;
 
 @Model(adaptables = Resource.class)
 public class ListModel {
@@ -31,6 +33,10 @@ public class ListModel {
     @Inject
     private List<String> stringList;
 
+    @Inject
+    @Optional
+    private List<String> emptyStringList;
+
     public List<Integer> getIntList() {
         return intList;
     }
@@ -38,4 +44,9 @@ public class ListModel {
     public List<String> getStringList() {
         return stringList;
     }
+
+    public List<String> getEmptyStringList() {
+        return emptyStringList;
+    }
+
 }

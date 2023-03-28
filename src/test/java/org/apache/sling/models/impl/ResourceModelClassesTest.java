@@ -178,6 +178,8 @@ public class ResourceModelClassesTest {
 
         assertEquals(2, model.getStringList().size());
         assertEquals("hello", model.getStringList().get(0));
+
+        assertNull(model.getEmptyStringList());
     }
 
     @Test
