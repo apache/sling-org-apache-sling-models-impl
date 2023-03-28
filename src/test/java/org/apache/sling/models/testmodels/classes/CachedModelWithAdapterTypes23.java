@@ -17,9 +17,7 @@
 package org.apache.sling.models.testmodels.classes;
 
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
-import org.apache.sling.models.testmodels.interfaces.AdapterType1;
 import org.apache.sling.models.testmodels.interfaces.AdapterType2;
 import org.apache.sling.models.testmodels.interfaces.AdapterType3;
 

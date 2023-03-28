@@ -45,7 +45,7 @@ abstract class AbstractInjector {
         return resolver;
     }
 
-    /** 
+    /**
      * Retrieve the ValueMap from the given adaptable. This succeeds, if the adaptable is either
      * <ul>
      * <li>a {@link ValueMap},</li>
@@ -53,7 +53,7 @@ abstract class AbstractInjector {
      * <li>adaptable to a {@link ValueMap}.</li>
      * </ul>
      * Otherwise {@code null} is returned.
-     * @param adaptable
+     * @param adaptable Adaptable
      * @return a ValueMap or {@code null}.
      */
     protected @Nullable ValueMap getValueMap(Object adaptable) {
@@ -73,7 +73,7 @@ abstract class AbstractInjector {
             return null;
         }
     }
-    
+
     protected boolean isDeclaredTypeCollection(Type declaredType) {
         boolean isCollection = false;
         if (declaredType instanceof ParameterizedType) {

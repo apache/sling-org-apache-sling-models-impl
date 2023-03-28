@@ -72,14 +72,13 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
     }
 
     /**
-     *
-     * @param adaptable
-     * @param name
-     * @param type
-     * @param element
-     * @param callbackRegistry
-     * @param modelContext
-     * @return
+     * @param adaptable Adaptable
+     * @param name Name
+     * @param type Type
+     * @param element Element
+     * @param callbackRegistry Callback registry
+     * @param modelContext Model context
+     * @return Object
      */
     @SuppressWarnings({ "null", "unused" })
     public Object getValue(@NotNull Object adaptable, String name, @NotNull Type type, @NotNull AnnotatedElement element,

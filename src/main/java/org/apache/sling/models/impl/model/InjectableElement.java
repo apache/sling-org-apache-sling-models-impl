@@ -70,6 +70,7 @@ public interface InjectableElement {
     Object getDefaultValue();
 
     /**
+     * @param annotationProcessor Annotation processor
      * @return {@code true} if the element is optional otherwise {@code false}
      */
     boolean isOptional(InjectAnnotationProcessor annotationProcessor);
