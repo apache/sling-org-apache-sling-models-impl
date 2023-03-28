@@ -46,6 +46,8 @@ import org.apache.sling.models.testmodels.classes.ArrayWrappersModel;
 import org.apache.sling.models.testmodels.classes.ChildModel;
 import org.apache.sling.models.testmodels.classes.ChildResourceModel;
 import org.apache.sling.models.testmodels.classes.ChildValueMapModel;
+import org.apache.sling.models.testmodels.classes.CollectionDefaultsModel;
+import org.apache.sling.models.testmodels.classes.ListDefaultsModel;
 import org.apache.sling.models.testmodels.classes.ListModel;
 import org.apache.sling.models.testmodels.classes.ParentModel;
 import org.apache.sling.models.testmodels.classes.ResourceModelWithRequiredField;
@@ -72,7 +74,18 @@ public class ResourceModelClassesTest {
         factory.bindInjector(new ChildResourceInjector(), new ServicePropertiesMap(1, 1));
 
         factory.injectAnnotationProcessorFactories = factory.injectAnnotationProcessorFactories = Collections.<InjectAnnotationProcessorFactory>singletonList(new ValueMapInjector());
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(SimplePropertyModel.class, ArrayWrappersModel.class, ResourceModelWithRequiredField.class, ChildValueMapModel.class, ArrayPrimitivesModel.class, ChildResourceModel.class, ResourceModelWithRequiredFieldOptionalStrategy.class, ParentModel.class, ChildModel.class, ListModel.class);
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(SimplePropertyModel.class,
+                ArrayWrappersModel.class,
+                ResourceModelWithRequiredField.class,
+                ChildValueMapModel.class,
+                ArrayPrimitivesModel.class,
+                ChildResourceModel.class,
+                ResourceModelWithRequiredFieldOptionalStrategy.class,
+                ParentModel.class,
+                ChildModel.class,
+                ListModel.class,
+                ListDefaultsModel.class,
+                CollectionDefaultsModel.class);
     }
 
     @Test
@@ -165,6 +178,43 @@ public class ResourceModelClassesTest {
 
         assertEquals(2, model.getStringList().size());
         assertEquals("hello", model.getStringList().get(0));
+
+        assertNull(model.getEmptyStringList());
+    }
+
+    @Test
+    public void testListDefaultsModel() {
+        Map<String, Object> map = new HashMap<>();
+
+        ValueMap vm = new ValueMapDecorator(map);
+        Resource res = mock(Resource.class);
+        when(res.adaptTo(ValueMap.class)).thenReturn(vm);
+
+        ListDefaultsModel model = factory.getAdapter(res, ListDefaultsModel.class);
+        assertNotNull(model);
+
+        assertEquals(Arrays.asList("v1", "v2"), model.getStringList());
+        assertEquals(Arrays.asList(1,2,3), model.getIntList());
+        assertEquals(Arrays.asList(1L,2L), model.getLongList());
+        assertEquals(Arrays.asList(true,false), model.getBooleanList());
+        assertEquals(Arrays.asList((short)1), model.getShortList());
+        assertEquals(Arrays.asList(1.1f,1.2f), model.getFloatList());
+        assertEquals(Arrays.asList(1.1d,1.2d,1.3d), model.getDoubleList());
+    }
+
+    @Test
+    public void testCollectionDefaultsModel() {
+        Map<String, Object> map = new HashMap<>();
+
+        ValueMap vm = new ValueMapDecorator(map);
+        Resource res = mock(Resource.class);
+        when(res.adaptTo(ValueMap.class)).thenReturn(vm);
+
+        CollectionDefaultsModel model = factory.getAdapter(res, CollectionDefaultsModel.class);
+        assertNotNull(model);
+
+        assertEquals(Arrays.asList(1,2,3), model.getIntCollection());
+        assertEquals(Arrays.asList("v1", "v2"), model.getStringCollection());
     }
 
     @SuppressWarnings({ "unused", "null" })

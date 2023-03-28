@@ -16,37 +16,31 @@
  */
 package org.apache.sling.models.testmodels.classes;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.inject.Inject;
 
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.models.annotations.Default;
 import org.apache.sling.models.annotations.Model;
-import org.apache.sling.models.annotations.Optional;
 
 @Model(adaptables = Resource.class)
-public class ListModel {
+public class CollectionDefaultsModel {
 
     @Inject
-    private List<Integer> intList;
+    @Default(intValues = {1,2,3})
+    private Collection<Integer> intList;
 
     @Inject
-    private List<String> stringList;
+    @Default(values = {"v1","v2"})
+    private Collection<String> stringList;
 
-    @Inject
-    @Optional
-    private List<String> emptyStringList;
-
-    public List<Integer> getIntList() {
+    public Collection<Integer> getIntCollection() {
         return intList;
     }
 
-    public List<String> getStringList() {
+    public Collection<String> getStringCollection() {
         return stringList;
-    }
-
-    public List<String> getEmptyStringList() {
-        return emptyStringList;
     }
 
 }

@@ -19,7 +19,12 @@
 package org.apache.sling.models.impl.model;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Named;
 
@@ -37,6 +42,7 @@ import org.apache.sling.models.impl.ReflectionUtil;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,7 +154,35 @@ abstract class AbstractInjectableElement implements InjectableElement {
 
         Object value = null;
 
-        if (type instanceof Class) {
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType)type;
+            Type rawType = parameterizedType.getRawType();
+            if ((rawType == Collection.class || rawType == List.class)
+                    && parameterizedType.getActualTypeArguments().length > 0) {
+                Type itemType = parameterizedType.getActualTypeArguments()[0];
+                if (itemType == String.class) {
+                    value = arrayToTypedList(defaultAnnotation.values());
+                } else if (itemType == Integer.class) {
+                    value = arrayToTypedList(defaultAnnotation.intValues());
+                } else if (itemType == Long.class) {
+                    value = arrayToTypedList(defaultAnnotation.longValues());
+                } else if (itemType == Boolean.class) {
+                    value = arrayToTypedList(defaultAnnotation.booleanValues());
+                } else if (itemType == Short.class) {
+                    value = arrayToTypedList(defaultAnnotation.shortValues());
+                } else if (itemType == Float.class) {
+                    value = arrayToTypedList(defaultAnnotation.floatValues());
+                } else if (itemType == Double.class) {
+                    value = arrayToTypedList(defaultAnnotation.doubleValues());
+                } else {
+                    log.warn("Default values for {} List/Collection are not supported", itemType);
+                }
+            }
+            else {
+                log.warn("Cannot provide default for {}", type);
+            }
+        }
+        else if (type instanceof Class) {
             Class<?> injectedClass = (Class<?>) type;
             if (injectedClass.isArray()) {
                 Class<?> componentType = injectedClass.getComponentType();
@@ -204,6 +238,28 @@ abstract class AbstractInjectableElement implements InjectableElement {
             log.warn("Cannot provide default for {}", type);
         }
         return value;
+    }
+
+    /**
+     * Converts array to typed list of values.
+     * @param <T> Array/List type
+     * @param array Array
+     * @return Typed list or null if array is empty
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> @Nullable List<T> arrayToTypedList(Object array) {
+        if (array != null && array.getClass().isArray()) {
+            int arrayLength = Array.getLength(array);
+            if (arrayLength > 0) {
+                List<T> result = new ArrayList<>();
+                for (int i=0; i<arrayLength; i++) {
+                    result.add((T)Array.get(array, i));
+                }
+                return result;
+            }
+
+        }
+        return null;
     }
 
     private static boolean getOptional(AnnotatedElement element, InjectAnnotationProcessor annotationProcessor) {
