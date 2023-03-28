@@ -156,8 +156,7 @@ abstract class AbstractInjectableElement implements InjectableElement {
 
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType)type;
-            Class<?> rawType = (Class<?>)parameterizedType.getRawType();
-            if (Collection.class.isAssignableFrom(rawType)) {
+            if (parameterizedType.getRawType() == Collection.class || parameterizedType.getRawType() == List.class) {
                 value = getFirstNonEmptyArrayAsList(
                         defaultAnnotation.values(),
                         defaultAnnotation.intValues(),
@@ -165,6 +164,9 @@ abstract class AbstractInjectableElement implements InjectableElement {
                         defaultAnnotation.floatValues(),
                         defaultAnnotation.doubleValues(),
                         defaultAnnotation.booleanValues());
+            }
+            else {
+                log.debug("Cannot provide default for {}", type);
             }
         }
         else if (type instanceof Class) {
