@@ -19,7 +19,12 @@
 package org.apache.sling.models.impl.model;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Named;
 
@@ -37,6 +42,7 @@ import org.apache.sling.models.impl.ReflectionUtil;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,7 +154,20 @@ abstract class AbstractInjectableElement implements InjectableElement {
 
         Object value = null;
 
-        if (type instanceof Class) {
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType)type;
+            Class<?> rawType = (Class<?>)parameterizedType.getRawType();
+            if (Collection.class.isAssignableFrom(rawType)) {
+                value = getFirstNonEmptyArrayAsList(
+                        defaultAnnotation.values(),
+                        defaultAnnotation.intValues(),
+                        defaultAnnotation.longValues(),
+                        defaultAnnotation.floatValues(),
+                        defaultAnnotation.doubleValues(),
+                        defaultAnnotation.booleanValues());
+            }
+        }
+        else if (type instanceof Class) {
             Class<?> injectedClass = (Class<?>) type;
             if (injectedClass.isArray()) {
                 Class<?> componentType = injectedClass.getComponentType();
@@ -204,6 +223,28 @@ abstract class AbstractInjectableElement implements InjectableElement {
             log.warn("Cannot provide default for {}", type);
         }
         return value;
+    }
+
+    /**
+     * Gets the first non-empty array from the given list of arrays, and returns its values as list.
+     * @param arrays Arrays
+     * @return List with values of first non-empty array, or null.
+     */
+    private static @Nullable List<Object> getFirstNonEmptyArrayAsList(Object... arrays) {
+        for (Object array : arrays) {
+            if (array != null && array.getClass().isArray()) {
+                int arrayLength = Array.getLength(array);
+                if (arrayLength > 0) {
+                    List<Object> result = new ArrayList<>();
+                    for (int i=0; i<arrayLength; i++) {
+                        result.add(Array.get(array, i));
+                    }
+                    return result;
+                }
+
+            }
+        }
+        return null;
     }
 
     private static boolean getOptional(AnnotatedElement element, InjectAnnotationProcessor annotationProcessor) {
