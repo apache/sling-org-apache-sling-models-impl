@@ -1017,7 +1017,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     private RuntimeException setConstructorParameter(ConstructorParameter constructorParameter, List<Object> parameterValues, Object value) {
         if (constructorParameter.getParameterType() instanceof Class<?>) {
-            Result<Object> result = adaptIfNecessary(value, (Class<?>) constructorParameter.getParameterType(), constructorParameter.getGenericType());
+            Result<Object> result = adaptIfNecessary(value, (Class<?>) constructorParameter.getParameterType(), constructorParameter.getType());
             if (result.wasSuccessful() ) {
                 parameterValues.set(constructorParameter.getParameterIndex(), result.getValue());
                 return null;

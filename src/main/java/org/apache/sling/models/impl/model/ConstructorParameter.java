@@ -20,10 +20,12 @@ package org.apache.sling.models.impl.model;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
+import org.apache.sling.models.impl.ReflectionUtil;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 
 /**
@@ -34,21 +36,28 @@ import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProces
 public class ConstructorParameter extends AbstractInjectableElement {
 
     private final Type parameterType;
-    private final Type genericType;
     private final boolean isPrimitive;
     private final int parameterIndex;
 
-    public ConstructorParameter(Annotation[] annotations, Type parameterType, Type genericType, boolean isPrimitive,
-            int parameterIndex, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
-        super(new FakeAnnotatedElement(annotations, parameterIndex), genericType, null, processorFactories, defaultInjectionStrategy);
-        this.parameterType = parameterType;
-        this.genericType = genericType;
-        this.isPrimitive = isPrimitive;
-        this.parameterIndex = parameterIndex;
+    /**
+     * Try to extract parameter names according to https://openjdk.org/jeps/118 (requires javac flag -parameters)
+     * @param parameter
+     * @param parameterIndex
+     * @param processorFactories
+     * @param defaultInjectionStrategy
+     */
+    public static ConstructorParameter of(Parameter parameter, int parameterIndex, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
+        Type genericType = ReflectionUtil.mapPrimitiveClasses(parameter.getParameterizedType());
+        boolean isPrimitive = (parameter.getParameterizedType() != genericType);
+        return new ConstructorParameter(parameter.getAnnotations(), parameter.getType(), genericType, isPrimitive, parameterIndex, parameter.getName(), processorFactories, defaultInjectionStrategy);
     }
 
-    public Type getGenericType() {
-        return this.genericType;
+    public ConstructorParameter(Annotation[] annotations, Type parameterType, Type genericType, boolean isPrimitive,
+            int parameterIndex, String name, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
+        super(new FakeAnnotatedElement(annotations, parameterIndex), genericType, name, processorFactories, defaultInjectionStrategy);
+        this.parameterType = parameterType;
+        this.isPrimitive = isPrimitive;
+        this.parameterIndex = parameterIndex;
     }
 
     public Type getParameterType() {
@@ -65,7 +74,7 @@ public class ConstructorParameter extends AbstractInjectableElement {
 
     @Override
     public String toString() {
-        return "Parameter" + this.parameterIndex + "[" + this.genericType.toString() + "]";
+        return "Parameter" + this.parameterIndex + "[" + getType().toString() + "]";
     }
 
     public static class FakeAnnotatedElement implements AnnotatedElement {
