@@ -1,0 +1,25 @@
+{
+  "prototype" : {
+     "id" : "org.apache.sling:org.apache.sling.starter:slingosgifeature:oak_tar:12",
+     "removals" : {
+         "bundles" : [
+                "${project.groupId}:${project.artifactId}:0",
+                "org.apache.sling:org.apache.sling.models.api:0"
+            ]
+     }
+  },
+  "bundles": [
+    {
+        "id":"${project.groupId}:${project.artifactId}:${project.version}",
+        "start-order": 24
+    },
+    {
+        "id":"org.apache.sling:org.apache.sling.models.api:${models.api.version}",
+        "start-order": 24
+    },
+    {
+        "id":"org.apache.sling:org.apache.sling.junit.core:1.1.6",
+        "start-order": 24
+    }
+  ]
+}
