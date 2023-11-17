@@ -175,11 +175,11 @@ abstract class AbstractInjectableElement implements InjectableElement {
                 } else if (itemType == Double.class) {
                     value = arrayToTypedList(defaultAnnotation.doubleValues());
                 } else {
-                    log.warn("Default values for {} List/Collection are not supported", itemType);
+                    log.warn("Default values for {} List/Collection are not supported (used on {})", itemType, element);
                 }
             }
             else {
-                log.warn("Cannot provide default for {}", type);
+                log.warn("Cannot provide default for {} (used on {})", type, element);
             }
         }
         else if (type instanceof Class) {
@@ -213,7 +213,7 @@ abstract class AbstractInjectableElement implements InjectableElement {
                 } else if (componentType == Double.class) {
                     value = ArrayUtils.toObject(defaultAnnotation.doubleValues());
                 } else {
-                    log.warn("Default values for {} are not supported", componentType);
+                    log.warn("Default values for {} are not supported  (used on {})", componentType, element);
                 }
             } else {
                 if (injectedClass == String.class) {
@@ -231,11 +231,11 @@ abstract class AbstractInjectableElement implements InjectableElement {
                 } else if (injectedClass == Double.class) {
                     value = defaultAnnotation.doubleValues().length == 0 ? 0d : defaultAnnotation.doubleValues()[0];
                 } else {
-                    log.warn("Default values for {} are not supported", injectedClass);
+                    log.warn("Default values for {} are not supported  (used on {})", injectedClass, element);
                 }
             }
         } else {
-            log.warn("Cannot provide default for {}", type);
+            log.warn("Cannot provide default for {}  (used on {})", type, element);
         }
         return value;
     }

@@ -41,7 +41,7 @@ public class InjectableField extends AbstractInjectableElement {
             field.setAccessible(true);
             field.set(createdObject, result.getValue());
         } catch (Exception e) {
-            return new ModelClassException("Could not inject field due to reflection issues", e);
+            return new ModelClassException("Could not inject field " + field + " due to reflection issues", e);
         }
         return null;
     }
