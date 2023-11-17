@@ -65,9 +65,9 @@ public class SelfInjectorTest {
     @Before
     public void setup() {
         lenient().when(modelAnnotation.defaultInjectionStrategy()).thenReturn(DefaultInjectionStrategy.REQUIRED);
-        firstConstructorParameter = new ConstructorParameter(new Annotation[0], Object.class, Object.class, true, 0,
+        firstConstructorParameter = new ConstructorParameter(new Annotation[0], Object.class, Object.class, true, 0, null,
                 new StaticInjectAnnotationProcessorFactory[0], null);
-        secondConstructorParameter = new ConstructorParameter(new Annotation[0], Object.class, Object.class, true, 1,
+        secondConstructorParameter = new ConstructorParameter(new Annotation[0], Object.class, Object.class, true, 1, null,
                 new StaticInjectAnnotationProcessorFactory[0], null);
     }
 
