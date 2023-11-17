@@ -39,6 +39,7 @@
     <properties>
         <sling.java.version>8</sling.java.version>
         <project.build.outputTimestamp>2023-05-30T08:54:10Z</project.build.outputTimestamp>
+        <models.api.version>1.5.0</models.api.version>
     </properties>
     <build>
         <plugins>
@@ -93,6 +94,101 @@
                     <attach>false</attach>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>slingfeature-maven-plugin</artifactId>
+                <version>1.7.2</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <skipAddFeatureDependencies>true</skipAddFeatureDependencies>
+                    <skipAddJarToFeature>false</skipAddJarToFeature>
+                    <jarStartOrder>25</jarStartOrder>
+                    <!--
+                        Prepares a feature model aggregate that takes the following features from
+                        the Sling Starter:
+                        - nosample_base - the base Sling Starter
+                        - oak_persistence_sns - SegmentNodeStore persistence for Oak
+                        - composum - The Composum Nodes administration tool
+                        Notably missing are the slingshot and starter samples
+                     -->
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>prepare-features</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>analyse-features</goal>
+                            <goal>attach-features</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>create-app-repository</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>repository</goal>
+                        </goals>
+                    </execution>
+               </executions>
+            </plugin>
+            <!-- reserve network ports for the integration tests -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>reserve-network-port</id>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <portNames>
+                                <portName>starter-its.http.port</portName>
+                            </portNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- launch the Sling instances to test; only oak-tar -->
+            <plugin>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>feature-launcher-maven-plugin</artifactId>
+                <version>0.1.6</version>
+                <configuration>
+                    <!-- newer versions don't work due to https://issues.apache.org/jira/browse/SLING-11158 -->
+                    <featureLauncherVersion>1.1.26</featureLauncherVersion>
+                    <launches>
+                        <launch>
+                            <id>sling-starter-oak-tar</id>
+                            <feature>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>${project.artifactId}</artifactId>
+                                <version>${project.version}</version>
+                                <classifier>app</classifier>
+                                <type>slingosgifeature</type>
+                            </feature>
+                            <repositoryUrls>
+                                <repositoryUrl>file://${project.build.directory}/artifacts</repositoryUrl>
+                            </repositoryUrls>
+                            <launcherArguments>
+                                <frameworkProperties>
+                                    <org.osgi.service.http.port>${starter-its.http.port}</org.osgi.service.http.port>
+                                </frameworkProperties>
+                            </launcherArguments>
+                            <startTimeoutSeconds>${starter-its.startTimeoutSeconds}</startTimeoutSeconds>
+                        </launch>
+                    </launches>
+                    <waitForInput>true</waitForInput>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>start</goal>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -100,7 +196,7 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.models.api</artifactId>
-            <version>1.5.0</version>
+            <version>${models.api.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -198,6 +294,12 @@
             <artifactId>annotations</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -253,11 +355,37 @@
             <version>5.2.9.RELEASE</version>
             <scope>test</scope>
         </dependency>
+        
+        <!-- Additional dependencies needed for ITs -->
         <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>1.3.2</version>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.junit.core</artifactId>
+            <version>1.0.28</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.testing.rules</artifactId>
+            <version>1.0.8</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.testing.clients</artifactId>
+            <version>2.0.12</version>
+            <scope>test</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+              </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.junit.teleporter</artifactId>
+            <version>1.0.20</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
