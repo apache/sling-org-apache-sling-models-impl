@@ -23,7 +23,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.ResourcePath;
 
-@Model(adaptables = { Resource.class, SlingHttpServletRequest.class })
+@Model(adaptables = {Resource.class, SlingHttpServletRequest.class})
 public class ResourcePathModelWrapping {
 
     @ResourcePath(path = "/some/path")
@@ -39,5 +39,4 @@ public class ResourcePathModelWrapping {
     public Resource[] getMultipleResources() {
         return this.multipleResources;
     }
-
 }

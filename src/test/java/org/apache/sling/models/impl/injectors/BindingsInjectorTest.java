@@ -18,12 +18,9 @@
  */
 package org.apache.sling.models.impl.injectors;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import javax.servlet.ServletRequest;
 
 import java.lang.reflect.AnnotatedElement;
-
-import javax.servlet.ServletRequest;
 
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.scripting.SlingBindings;
@@ -34,6 +31,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 @RunWith(MockitoJUnitRunner.class)
 public class BindingsInjectorTest {
 
@@ -41,10 +41,13 @@ public class BindingsInjectorTest {
 
     @Mock
     private ServletRequest request;
+
     @Mock
     private SlingBindings bindings;
+
     @Mock
     private AnnotatedElement element;
+
     @Mock
     private DisposalCallbackRegistry registry;
 
@@ -93,5 +96,4 @@ public class BindingsInjectorTest {
         Object result = injector.getValue(request, STRING_PARAM, String.class, element, registry);
         assertNull(result);
     }
-
 }

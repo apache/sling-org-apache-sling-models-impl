@@ -27,5 +27,4 @@ public interface SampleServiceInterface {
      * @return concatenated string with all properties
      */
     String getAllProperties();
-    
 }

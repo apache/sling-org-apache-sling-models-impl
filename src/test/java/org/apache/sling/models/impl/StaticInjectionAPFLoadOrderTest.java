@@ -18,10 +18,6 @@
  */
 package org.apache.sling.models.impl;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -39,17 +35,22 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
 /**
  * Test load order behavior of StaticInjectionAnnotationProcesssorFactory instances (SLING-5010).
  */
 @RunWith(MockitoJUnitRunner.class)
 public class StaticInjectionAPFLoadOrderTest {
-    
+
     @Rule
     public OsgiContext context = new OsgiContext();
-    
+
     @Mock
     private SlingHttpServletRequest request;
+
     @Mock
     private ResourceResolver resourceResolver;
 
@@ -58,14 +59,14 @@ public class StaticInjectionAPFLoadOrderTest {
 
     @Mock
     private AdapterManager adapterManager;
-    
+
     private ModelAdapterFactory factory;
-    
+
     @Before
     public void setUp() {
         registerServices();
     }
-    
+
     /**
      * Registration order: 1. ModelFactory, 2. custom injector, 3. model
      */
@@ -75,24 +76,24 @@ public class StaticInjectionAPFLoadOrderTest {
 
         registerCustomInjector();
         registerModel();
-        
+
         // this should not throw an exception because resourceResovler is marked as optional
         assertFalse(createModel().hasResourceResolver());
     }
-    
+
     /**
      * Registration order: 1. ModelFactory, 2. custom injector, 3. model
      */
     @Test
     public void testFactory_Injector_Model_WithResourceResolver() {
         when(request.getResourceResolver()).thenReturn(resourceResolver);
-        
+
         registerCustomInjector();
         registerModel();
-        
+
         assertTrue(createModel().hasResourceResolver());
     }
-    
+
     /**
      * Registration order: 1. ModelFactory, 2. model, 3. custom injector
      */
@@ -102,24 +103,24 @@ public class StaticInjectionAPFLoadOrderTest {
 
         registerModel();
         registerCustomInjector();
-        
+
         // this should not throw an exception because resourceResovler is marked as optional
         assertFalse(createModel().hasResourceResolver());
     }
-    
+
     /**
      * Registration order: 1. ModelFactory, 2. model, 3. custom injector
      */
     @Test
     public void testFactory_Model_Injector_WithResourceResolver() {
         when(request.getResourceResolver()).thenReturn(resourceResolver);
-        
+
         registerModel();
         registerCustomInjector();
-        
+
         assertTrue(createModel().hasResourceResolver());
     }
-    
+
     private void registerServices() {
         context.registerService(BindingsValuesProvidersByContext.class, bindingsValuesProvidersByContext);
         context.registerService(AdapterManager.class, adapterManager);
@@ -137,18 +138,15 @@ public class StaticInjectionAPFLoadOrderTest {
     private TestModel createModel() {
         return factory.createModel(request, TestModel.class);
     }
-    
-    
+
     @Model(adaptables = SlingHttpServletRequest.class)
     public static class TestModel {
-        
+
         @SlingObject(injectionStrategy = InjectionStrategy.OPTIONAL)
         private ResourceResolver resourceResolver;
-        
+
         public boolean hasResourceResolver() {
             return resourceResolver != null;
         }
-        
     }
-
 }

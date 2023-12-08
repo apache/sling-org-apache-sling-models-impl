@@ -18,10 +18,6 @@
  */
 package org.apache.sling.models.impl.injectors;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.when;
-
 import java.lang.reflect.AnnotatedElement;
 
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -35,6 +31,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SlingObjectInjectorResourceTest {
@@ -60,8 +60,8 @@ public class SlingObjectInjectorResourceTest {
 
     @Test
     public void testResourceResolver() {
-        Object result = this.injector
-                .getValue(this.resource, null, ResourceResolver.class, this.annotatedElement, registry);
+        Object result =
+                this.injector.getValue(this.resource, null, ResourceResolver.class, this.annotatedElement, registry);
         assertSame(this.resourceResolver, result);
     }
 
@@ -77,22 +77,22 @@ public class SlingObjectInjectorResourceTest {
 
     @Test
     public void testRequest() {
-        Object result = this.injector.getValue(this.resource, null, SlingHttpServletResponse.class,
-                this.annotatedElement, registry);
+        Object result = this.injector.getValue(
+                this.resource, null, SlingHttpServletResponse.class, this.annotatedElement, registry);
         assertNull(result);
     }
 
     @Test
     public void testResponse() {
-        Object result = this.injector.getValue(this.resource, null, SlingHttpServletResponse.class,
-                this.annotatedElement, registry);
+        Object result = this.injector.getValue(
+                this.resource, null, SlingHttpServletResponse.class, this.annotatedElement, registry);
         assertNull(result);
     }
 
     @Test
     public void testScriptHelper() {
-        Object result = this.injector.getValue(this.resource, null, SlingScriptHelper.class, this.annotatedElement,
-                registry);
+        Object result =
+                this.injector.getValue(this.resource, null, SlingScriptHelper.class, this.annotatedElement, registry);
         assertNull(result);
     }
 
@@ -101,5 +101,4 @@ public class SlingObjectInjectorResourceTest {
         Object result = this.injector.getValue(this, null, SlingScriptHelper.class, this.annotatedElement, registry);
         assertNull(result);
     }
-
 }

@@ -22,7 +22,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 
-@Model(adaptables=SlingHttpServletRequest.class)
+@Model(adaptables = SlingHttpServletRequest.class)
 public class IndirectCyclicSelfDependencyModelB {
 
     @Self
@@ -31,5 +31,4 @@ public class IndirectCyclicSelfDependencyModelB {
     public IndirectCyclicSelfDependencyModelA getDependencyA() {
         return dependencyA;
     }
-
 }

@@ -18,14 +18,6 @@
  */
 package org.apache.sling.models.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doReturn;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +39,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourcePathInjectionTest {
@@ -78,15 +78,15 @@ public class ResourcePathInjectionTest {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("propertyContainingAPath", "/some/other/path");
         map.put("anotherPropertyContainingAPath", "/some/other/path2");
-        String[] paths= new String[2];
-        paths[0]="/some/other/path";
-        paths[1]="/some/other/path2";
+        String[] paths = new String[2];
+        paths[0] = "/some/other/path";
+        paths[1] = "/some/other/path2";
 
-        String[] invalidPaths= new String[3];
-        invalidPaths[0]="/does/not/exist";
-        invalidPaths[1]="/does/not/exist2";
-        invalidPaths[2]="/some/other/path";
-        map.put("propertyWithSeveralPaths",paths);
+        String[] invalidPaths = new String[3];
+        invalidPaths[0] = "/does/not/exist";
+        invalidPaths[1] = "/does/not/exist2";
+        invalidPaths[2] = "/some/other/path";
+        map.put("propertyWithSeveralPaths", paths);
         map.put("propertyWithMissingPaths", invalidPaths);
 
         ValueMap properties = new ValueMapDecorator(map);
@@ -106,9 +106,13 @@ public class ResourcePathInjectionTest {
         factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(1, Integer.MAX_VALUE));
         factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(2, 2000));
         factory.bindInjector(new ResourcePathInjector(), new ServicePropertiesMap(3, 2500));
-        factory.bindStaticInjectAnnotationProcessorFactory(new ResourcePathInjector(), new ServicePropertiesMap(3, 2500));
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(ResourcePathModel.class, ResourcePathPartialModel.class,
-                ResourcePathAllOptionalModel.class, ResourcePathModelWrapping.class);
+        factory.bindStaticInjectAnnotationProcessorFactory(
+                new ResourcePathInjector(), new ServicePropertiesMap(3, 2500));
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(
+                ResourcePathModel.class,
+                ResourcePathPartialModel.class,
+                ResourcePathAllOptionalModel.class,
+                ResourcePathModelWrapping.class);
     }
 
     @Test
@@ -149,24 +153,26 @@ public class ResourcePathInjectionTest {
     public void testMultiplePathInjection() {
         ResourcePathModel model = factory.getAdapter(adaptableResource, ResourcePathModel.class);
         assertNotNull(model);
-        List<Resource> resources=model.getMultipleResources();
+        List<Resource> resources = model.getMultipleResources();
         assertNotNull(resources);
-        assertEquals(2,resources.size());
+        assertEquals(2, resources.size());
         assertEquals(byPropertyValueResource, resources.get(0));
         assertEquals(byPropertyValueResource2, resources.get(1));
-        List<Resource> resourcesFromPathAnnotation= model.getManyFromPath();
+        List<Resource> resourcesFromPathAnnotation = model.getManyFromPath();
         assertNotNull(resourcesFromPathAnnotation);
         assertEquals(byPathResource, resourcesFromPathAnnotation.get(0));
         assertEquals(byPathResource2, resourcesFromPathAnnotation.get(1));
 
-        List<Resource> resourcesFromResourcePathAnnotation= model.getManyFromPath2();
+        List<Resource> resourcesFromResourcePathAnnotation = model.getManyFromPath2();
         assertNotNull(resourcesFromResourcePathAnnotation);
         assertEquals(byPathResource2, resourcesFromResourcePathAnnotation.get(0));
         assertEquals(byPathResource, resourcesFromResourcePathAnnotation.get(1));
 
         assertNotNull(model.getPropertyWithSeveralPaths());
-        assertEquals(byPropertyValueResource, model.getPropertyWithSeveralPaths().get(0));
-        assertEquals(byPropertyValueResource2, model.getPropertyWithSeveralPaths().get(1));
+        assertEquals(
+                byPropertyValueResource, model.getPropertyWithSeveralPaths().get(0));
+        assertEquals(
+                byPropertyValueResource2, model.getPropertyWithSeveralPaths().get(1));
     }
 
     @Test
@@ -193,5 +199,4 @@ public class ResourcePathInjectionTest {
         assertTrue(model.getFromPath().length > 0);
         assertTrue(model.getMultipleResources().length > 0);
     }
-
 }

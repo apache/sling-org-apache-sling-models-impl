@@ -18,9 +18,6 @@
  */
 package org.apache.sling.models.impl.injectors;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import java.lang.reflect.AnnotatedElement;
 
 import org.apache.sling.api.resource.Resource;
@@ -33,6 +30,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 @RunWith(MockitoJUnitRunner.class)
 public class ValueMapInjectorTest {
 
@@ -40,8 +40,10 @@ public class ValueMapInjectorTest {
 
     @Mock
     private ValueMap valueMap;
+
     @Mock
     private AnnotatedElement element;
+
     @Mock
     private DisposalCallbackRegistry registry;
 
@@ -88,5 +90,4 @@ public class ValueMapInjectorTest {
         Object result = injector.getValue(mock(ResourceResolver.class), STRING_PARAM, String.class, element, registry);
         assertNull(result);
     }
-
 }

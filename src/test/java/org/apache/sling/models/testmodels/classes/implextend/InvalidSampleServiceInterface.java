@@ -27,5 +27,4 @@ public interface InvalidSampleServiceInterface {
      * @return concanated string with all properties
      */
     String getAllProperties();
-    
 }

@@ -40,16 +40,16 @@ public class ResourcePathAllOptionalModel {
     @Named("propertyContainingAPath")
     @Optional
     private Resource derefProperty;
-    
+
     @Inject
-    @Path(paths={"/some/invalidpath", "/some/invalidpath2"})
+    @Path(paths = {"/some/invalidpath", "/some/invalidpath2"})
     @Optional
     private Resource manyFromPathNonList;
 
-    @ResourcePath(path = "/some/invalidpath2", optional=true)
+    @ResourcePath(path = "/some/invalidpath2", optional = true)
     private Resource fromPath2;
 
-    @ResourcePath(name = "anotherPropertyContainingAPath", optional=true)
+    @ResourcePath(name = "anotherPropertyContainingAPath", optional = true)
     private Resource derefProperty2;
 
     public Resource getFromPath() {
@@ -67,5 +67,4 @@ public class ResourcePathAllOptionalModel {
     public Resource getByDerefProperty2() {
         return derefProperty2;
     }
-
 }

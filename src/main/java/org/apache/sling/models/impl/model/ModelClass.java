@@ -48,7 +48,7 @@ public class ModelClass<ModelType> {
         }
         updateProcessorFactories(processorFactories);
     }
-    
+
     /**
      * Updates processor factories after the model class was instantiated.
      * @param processorFactories Static injector annotation processor factories
@@ -58,43 +58,53 @@ public class ModelClass<ModelType> {
         this.injectableFields = getInjectableFields(type, processorFactories, defaultInjectionStrategy);
         this.injectableMethods = getInjectableMethods(type, processorFactories, defaultInjectionStrategy);
     }
-    
+
     @SuppressWarnings("unchecked")
-    private static <T> ModelClassConstructor<T>[] getConstructors(Class<T> type, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
+    private static <T> ModelClassConstructor<T>[] getConstructors(
+            Class<T> type,
+            StaticInjectAnnotationProcessorFactory[] processorFactories,
+            DefaultInjectionStrategy defaultInjectionStrategy) {
         if (type.isInterface()) {
             return new ModelClassConstructor[0];
         }
         Constructor<T>[] constructors = (Constructor<T>[]) type.getDeclaredConstructors();
-        
-        // sort the constructor list in order from most params to least params, and constructors with @Inject annotation first
+
+        // sort the constructor list in order from most params to least params, and constructors with @Inject annotation
+        // first
         Arrays.sort(constructors, new ParameterCountInjectComparator());
 
         ModelClassConstructor<T>[] array = new ModelClassConstructor[constructors.length];
-        for (int i=0; i<array.length; i++) {
+        for (int i = 0; i < array.length; i++) {
             array[i] = new ModelClassConstructor<>(constructors[i], processorFactories, defaultInjectionStrategy);
         }
         return array;
     }
 
-    private static InjectableField[] getInjectableFields(Class<?> type, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
+    private static InjectableField[] getInjectableFields(
+            Class<?> type,
+            StaticInjectAnnotationProcessorFactory[] processorFactories,
+            DefaultInjectionStrategy defaultInjectionStrategy) {
         if (type.isInterface()) {
             return new InjectableField[0];
         }
         List<Field> injectableFields = ReflectionUtil.collectInjectableFields(type);
         InjectableField[] array = new InjectableField[injectableFields.size()];
-        for (int i=0; i<array.length; i++) {
+        for (int i = 0; i < array.length; i++) {
             array[i] = new InjectableField(injectableFields.get(i), processorFactories, defaultInjectionStrategy);
         }
         return array;
     }
 
-    private static InjectableMethod[] getInjectableMethods(Class<?> type, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
+    private static InjectableMethod[] getInjectableMethods(
+            Class<?> type,
+            StaticInjectAnnotationProcessorFactory[] processorFactories,
+            DefaultInjectionStrategy defaultInjectionStrategy) {
         if (!type.isInterface()) {
             return new InjectableMethod[0];
         }
         List<Method> injectableMethods = ReflectionUtil.collectInjectableMethods(type);
         InjectableMethod[] array = new InjectableMethod[injectableMethods.size()];
-        for (int i=0; i<array.length; i++) {
+        for (int i = 0; i < array.length; i++) {
             array[i] = new InjectableMethod(injectableMethods.get(i), processorFactories, defaultInjectionStrategy);
         }
         return array;
@@ -103,15 +113,15 @@ public class ModelClass<ModelType> {
     public Class<ModelType> getType() {
         return this.type;
     }
-    
+
     public Model getModelAnnotation() {
         return this.modelAnnotation;
     }
-    
+
     public boolean hasModelAnnotation() {
         return this.modelAnnotation != null;
     }
-    
+
     public ModelClassConstructor<ModelType>[] getConstructors() {
         return constructors;
     }
@@ -123,5 +133,4 @@ public class ModelClass<ModelType> {
     public InjectableMethod[] getInjectableMethods() {
         return this.injectableMethods;
     }
-
 }

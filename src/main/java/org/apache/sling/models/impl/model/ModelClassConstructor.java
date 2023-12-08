@@ -18,11 +18,11 @@
  */
 package org.apache.sling.models.impl.model;
 
+import javax.inject.Inject;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
-
-import javax.inject.Inject;
 
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.impl.ReflectionUtil;
@@ -34,7 +34,10 @@ public class ModelClassConstructor<M> {
     private final boolean hasInjectAnnotation;
     private final ConstructorParameter[] constructorParametersArray;
 
-    public ModelClassConstructor(Constructor<M> constructor, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
+    public ModelClassConstructor(
+            Constructor<M> constructor,
+            StaticInjectAnnotationProcessorFactory[] processorFactories,
+            DefaultInjectionStrategy defaultInjectionStrategy) {
         this.constructor = constructor;
         this.hasInjectAnnotation = constructor.isAnnotationPresent(Inject.class);
 
@@ -45,29 +48,35 @@ public class ModelClassConstructor<M> {
             Type genericType = ReflectionUtil.mapPrimitiveClasses(parameterTypes[i]);
             boolean isPrimitive = (parameterTypes[i] != genericType);
             this.constructorParametersArray[i] = new ConstructorParameter(
-                    constructor.getParameterAnnotations()[i], constructor.getParameterTypes()[i], genericType, isPrimitive, i,
-                    processorFactories, defaultInjectionStrategy);
+                    constructor.getParameterAnnotations()[i],
+                    constructor.getParameterTypes()[i],
+                    genericType,
+                    isPrimitive,
+                    i,
+                    processorFactories,
+                    defaultInjectionStrategy);
         }
     }
 
     /**
      * Proxies the call to {@link Constructor#newInstance(Object...)}, checking (and
      * setting) accessibility first.
-     * 
+     *
      * @param parameters
      *            the constructor parameters that are passed to
      *            {@link Constructor#newInstance(Object...)}
      * @return The constructed object
-     * 
+     *
      * @throws InstantiationException when {@link Constructor#newInstance(Object...)} would throw
      * @throws IllegalAccessException when {@link Constructor#newInstance(Object...)} would throw
      * @throws IllegalArgumentException when {@link Constructor#newInstance(Object...)} would throw
      * @throws InvocationTargetException when {@link Constructor#newInstance(Object...)} would throw
-     * 
+     *
      * @see Constructor#newInstance(Object...)
      */
-    @SuppressWarnings({"java:S3011","java:S1874"})
-    public M newInstance(Object... parameters) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    @SuppressWarnings({"java:S3011", "java:S1874"})
+    public M newInstance(Object... parameters)
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         constructor.setAccessible(true);
         return constructor.newInstance(parameters);
     }
@@ -82,6 +91,6 @@ public class ModelClassConstructor<M> {
 
     public ConstructorParameter[] getConstructorParameters() {
         return constructorParametersArray;
-    };
-
+    }
+    ;
 }

@@ -18,15 +18,10 @@
  */
 package org.apache.sling.models.impl.injectors;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
+import javax.servlet.http.HttpServletRequest;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -41,6 +36,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SelfInjectorTest {
@@ -65,45 +65,104 @@ public class SelfInjectorTest {
     @Before
     public void setup() {
         lenient().when(modelAnnotation.defaultInjectionStrategy()).thenReturn(DefaultInjectionStrategy.REQUIRED);
-        firstConstructorParameter = new ConstructorParameter(new Annotation[0], Object.class, Object.class, true, 0,
-                new StaticInjectAnnotationProcessorFactory[0], null);
-        secondConstructorParameter = new ConstructorParameter(new Annotation[0], Object.class, Object.class, true, 1,
-                new StaticInjectAnnotationProcessorFactory[0], null);
+        firstConstructorParameter = new ConstructorParameter(
+                new Annotation[0],
+                Object.class,
+                Object.class,
+                true,
+                0,
+                new StaticInjectAnnotationProcessorFactory[0],
+                null);
+        secondConstructorParameter = new ConstructorParameter(
+                new Annotation[0],
+                Object.class,
+                Object.class,
+                true,
+                1,
+                new StaticInjectAnnotationProcessorFactory[0],
+                null);
     }
 
     @Test
     public void testMatchingClass() {
-        assertSame(request, injector.getValue(request, "notRelevant", SlingHttpServletRequest.class, firstConstructorParameter.getAnnotatedElement(), registry));
-        assertNull(injector.getValue(request, "notRelevant", SlingHttpServletRequest.class, secondConstructorParameter.getAnnotatedElement(), registry));
-        assertNull(injector.getValue(request, "notRelevant", SlingHttpServletRequest.class, annotatedElement, registry));
+        assertSame(
+                request,
+                injector.getValue(
+                        request,
+                        "notRelevant",
+                        SlingHttpServletRequest.class,
+                        firstConstructorParameter.getAnnotatedElement(),
+                        registry));
+        assertNull(injector.getValue(
+                request,
+                "notRelevant",
+                SlingHttpServletRequest.class,
+                secondConstructorParameter.getAnnotatedElement(),
+                registry));
+        assertNull(
+                injector.getValue(request, "notRelevant", SlingHttpServletRequest.class, annotatedElement, registry));
     }
 
     @Test
     public void testMatchingSubClass() {
-        assertSame(request, injector.getValue(request, "notRelevant", HttpServletRequest.class, firstConstructorParameter.getAnnotatedElement(), registry));
-        assertNull(injector.getValue(request, "notRelevant", HttpServletRequest.class, secondConstructorParameter.getAnnotatedElement(), registry));
+        assertSame(
+                request,
+                injector.getValue(
+                        request,
+                        "notRelevant",
+                        HttpServletRequest.class,
+                        firstConstructorParameter.getAnnotatedElement(),
+                        registry));
+        assertNull(injector.getValue(
+                request,
+                "notRelevant",
+                HttpServletRequest.class,
+                secondConstructorParameter.getAnnotatedElement(),
+                registry));
         assertNull(injector.getValue(request, "notRelevant", HttpServletRequest.class, annotatedElement, registry));
     }
 
     @Test
     public void testNotMatchingClass() {
-        assertNull(injector.getValue(request, "notRelevant", ResourceResolver.class, firstConstructorParameter.getAnnotatedElement(), registry));
-        assertNull(injector.getValue(request, "notRelevant", ResourceResolver.class, secondConstructorParameter.getAnnotatedElement(), registry));
+        assertNull(injector.getValue(
+                request,
+                "notRelevant",
+                ResourceResolver.class,
+                firstConstructorParameter.getAnnotatedElement(),
+                registry));
+        assertNull(injector.getValue(
+                request,
+                "notRelevant",
+                ResourceResolver.class,
+                secondConstructorParameter.getAnnotatedElement(),
+                registry));
         assertNull(injector.getValue(request, "notRelevant", ResourceResolver.class, annotatedElement, registry));
     }
 
     @Test
     public void testWithNullName() {
-        assertSame(request, injector.getValue(request, null, SlingHttpServletRequest.class, firstConstructorParameter.getAnnotatedElement(), registry));
-        assertNull(injector.getValue(request, null, SlingHttpServletRequest.class, secondConstructorParameter.getAnnotatedElement(), registry));
+        assertSame(
+                request,
+                injector.getValue(
+                        request,
+                        null,
+                        SlingHttpServletRequest.class,
+                        firstConstructorParameter.getAnnotatedElement(),
+                        registry));
+        assertNull(injector.getValue(
+                request,
+                null,
+                SlingHttpServletRequest.class,
+                secondConstructorParameter.getAnnotatedElement(),
+                registry));
         assertNull(injector.getValue(request, null, SlingHttpServletRequest.class, annotatedElement, registry));
     }
 
     @Test
     public void testMatchingClassWithSelfAnnotation() {
         when(annotatedElement.isAnnotationPresent(Self.class)).thenReturn(true);
-        Object result = injector
-                .getValue(request, "notRelevant", SlingHttpServletRequest.class, annotatedElement, registry);
+        Object result =
+                injector.getValue(request, "notRelevant", SlingHttpServletRequest.class, annotatedElement, registry);
         assertSame(request, result);
     }
 
@@ -113,5 +172,4 @@ public class SelfInjectorTest {
         Object result = injector.getValue(request, "notRelevant", ResourceResolver.class, annotatedElement, registry);
         assertSame(request, result);
     }
-
 }

@@ -18,6 +18,8 @@
  */
 package org.apache.sling.models.impl.model;
 
+import javax.inject.Named;
+
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
@@ -25,8 +27,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import javax.inject.Named;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.sling.models.annotations.Default;
@@ -63,8 +63,12 @@ abstract class AbstractInjectableElement implements InjectableElement {
 
     private static final Logger log = LoggerFactory.getLogger(ModelAdapterFactory.class);
 
-    public AbstractInjectableElement(AnnotatedElement element, Type type, String defaultName,
-            StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
+    public AbstractInjectableElement(
+            AnnotatedElement element,
+            Type type,
+            String defaultName,
+            StaticInjectAnnotationProcessorFactory[] processorFactories,
+            DefaultInjectionStrategy defaultInjectionStrategy) {
         this.element = element;
         this.type = type;
         InjectAnnotationProcessor2 annotationProcessor = getAnnotationProcessor(element, processorFactories);
@@ -79,7 +83,8 @@ abstract class AbstractInjectableElement implements InjectableElement {
         this.defaultInjectionStrategy = defaultInjectionStrategy;
     }
 
-    private static InjectAnnotationProcessor2 getAnnotationProcessor(AnnotatedElement element, StaticInjectAnnotationProcessorFactory[] processorFactories) {
+    private static InjectAnnotationProcessor2 getAnnotationProcessor(
+            AnnotatedElement element, StaticInjectAnnotationProcessorFactory[] processorFactories) {
         for (StaticInjectAnnotationProcessorFactory processorFactory : processorFactories) {
             InjectAnnotationProcessor2 annotationProcessor = processorFactory.createAnnotationProcessor(element);
             if (annotationProcessor != null) {
@@ -90,7 +95,8 @@ abstract class AbstractInjectableElement implements InjectableElement {
     }
 
     @SuppressWarnings("unused")
-    private static String getName(AnnotatedElement element, String defaultName, InjectAnnotationProcessor2 annotationProcessor) {
+    private static String getName(
+            AnnotatedElement element, String defaultName, InjectAnnotationProcessor2 annotationProcessor) {
         String name = null;
         if (annotationProcessor != null) {
             name = annotationProcessor.getName();
@@ -99,8 +105,7 @@ abstract class AbstractInjectableElement implements InjectableElement {
             Named namedAnnotation = element.getAnnotation(Named.class);
             if (namedAnnotation != null) {
                 name = namedAnnotation.value();
-            }
-            else {
+            } else {
                 name = defaultName;
             }
         }
@@ -134,7 +139,8 @@ abstract class AbstractInjectableElement implements InjectableElement {
         return spec;
     }
 
-    private static boolean getHasDefaultValue(AnnotatedElement element, InjectAnnotationProcessor2 annotationProcessor) {
+    private static boolean getHasDefaultValue(
+            AnnotatedElement element, InjectAnnotationProcessor2 annotationProcessor) {
         if (annotationProcessor != null) {
             return annotationProcessor.hasDefault();
         }
@@ -142,7 +148,8 @@ abstract class AbstractInjectableElement implements InjectableElement {
     }
 
     @SuppressWarnings("unused")
-    private static Object getDefaultValue(AnnotatedElement element, Type type, InjectAnnotationProcessor2 annotationProcessor) {
+    private static Object getDefaultValue(
+            AnnotatedElement element, Type type, InjectAnnotationProcessor2 annotationProcessor) {
         if (annotationProcessor != null && annotationProcessor.hasDefault()) {
             return annotationProcessor.getDefault();
         }
@@ -155,7 +162,7 @@ abstract class AbstractInjectableElement implements InjectableElement {
         Object value = null;
 
         if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType)type;
+            ParameterizedType parameterizedType = (ParameterizedType) type;
             Type rawType = parameterizedType.getRawType();
             if ((rawType == Collection.class || rawType == List.class)
                     && parameterizedType.getActualTypeArguments().length > 0) {
@@ -177,12 +184,10 @@ abstract class AbstractInjectableElement implements InjectableElement {
                 } else {
                     log.warn("Default values for {} List/Collection are not supported (used on {})", itemType, element);
                 }
-            }
-            else {
+            } else {
                 log.warn("Cannot provide default for {} (used on {})", type, element);
             }
-        }
-        else if (type instanceof Class) {
+        } else if (type instanceof Class) {
             Class<?> injectedClass = (Class<?>) type;
             if (injectedClass.isArray()) {
                 Class<?> componentType = injectedClass.getComponentType();
@@ -217,19 +222,33 @@ abstract class AbstractInjectableElement implements InjectableElement {
                 }
             } else {
                 if (injectedClass == String.class) {
-                    value = defaultAnnotation.values().length == 0 ? "" : defaultAnnotation.values()[0];
+                    value = defaultAnnotation.values().length == 0
+                            ? ""
+                            : defaultAnnotation.values()[0];
                 } else if (injectedClass == Integer.class) {
-                    value = defaultAnnotation.intValues().length == 0 ? 0 : defaultAnnotation.intValues()[0];
+                    value = defaultAnnotation.intValues().length == 0
+                            ? 0
+                            : defaultAnnotation.intValues()[0];
                 } else if (injectedClass == Long.class) {
-                    value = defaultAnnotation.longValues().length == 0 ? 0l : defaultAnnotation.longValues()[0];
+                    value = defaultAnnotation.longValues().length == 0
+                            ? 0l
+                            : defaultAnnotation.longValues()[0];
                 } else if (injectedClass == Boolean.class) {
-                    value = defaultAnnotation.booleanValues().length == 0 ? false : defaultAnnotation.booleanValues()[0];
+                    value = defaultAnnotation.booleanValues().length == 0
+                            ? false
+                            : defaultAnnotation.booleanValues()[0];
                 } else if (injectedClass == Short.class) {
-                    value = defaultAnnotation.shortValues().length == 0 ? ((short) 0) : defaultAnnotation.shortValues()[0];
+                    value = defaultAnnotation.shortValues().length == 0
+                            ? ((short) 0)
+                            : defaultAnnotation.shortValues()[0];
                 } else if (injectedClass == Float.class) {
-                    value = defaultAnnotation.floatValues().length == 0 ? 0f : defaultAnnotation.floatValues()[0];
+                    value = defaultAnnotation.floatValues().length == 0
+                            ? 0f
+                            : defaultAnnotation.floatValues()[0];
                 } else if (injectedClass == Double.class) {
-                    value = defaultAnnotation.doubleValues().length == 0 ? 0d : defaultAnnotation.doubleValues()[0];
+                    value = defaultAnnotation.doubleValues().length == 0
+                            ? 0d
+                            : defaultAnnotation.doubleValues()[0];
                 } else {
                     log.warn("Default values for {} are not supported  (used on {})", injectedClass, element);
                 }
@@ -252,12 +271,11 @@ abstract class AbstractInjectableElement implements InjectableElement {
             int arrayLength = Array.getLength(array);
             if (arrayLength > 0) {
                 List<T> result = new ArrayList<>();
-                for (int i=0; i<arrayLength; i++) {
-                    result.add((T)Array.get(array, i));
+                for (int i = 0; i < arrayLength; i++) {
+                    result.add((T) Array.get(array, i));
                 }
                 return result;
             }
-
         }
         return null;
     }
@@ -281,10 +299,13 @@ abstract class AbstractInjectableElement implements InjectableElement {
         return element.isAnnotationPresent(Required.class);
     }
 
-    private static DefaultInjectionStrategy getInjectionStrategy(AnnotatedElement element, InjectAnnotationProcessor annotationProcessor, DefaultInjectionStrategy defaultInjectionStrategy) {
+    private static DefaultInjectionStrategy getInjectionStrategy(
+            AnnotatedElement element,
+            InjectAnnotationProcessor annotationProcessor,
+            DefaultInjectionStrategy defaultInjectionStrategy) {
         if (annotationProcessor != null) {
             if (annotationProcessor instanceof InjectAnnotationProcessor2) {
-                switch (((InjectAnnotationProcessor2)annotationProcessor).getInjectionStrategy()) {
+                switch (((InjectAnnotationProcessor2) annotationProcessor).getInjectionStrategy()) {
                     case OPTIONAL:
                         return DefaultInjectionStrategy.OPTIONAL;
                     case REQUIRED:
@@ -323,7 +344,9 @@ abstract class AbstractInjectableElement implements InjectableElement {
     }
 
     @Override
-    public Class<? extends ViaProviderType> getViaProviderType() { return this.via.type; }
+    public Class<? extends ViaProviderType> getViaProviderType() {
+        return this.via.type;
+    }
 
     @Override
     public boolean hasDefaultValue() {
@@ -358,5 +381,4 @@ abstract class AbstractInjectableElement implements InjectableElement {
         String via;
         Class<? extends ViaProviderType> type;
     }
-
 }

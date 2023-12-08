@@ -18,6 +18,8 @@
  */
 package org.apache.sling.models.impl;
 
+import javax.inject.Inject;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -25,8 +27,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotation;
@@ -59,7 +59,6 @@ public final class ReflectionUtil {
             type = type.getSuperclass();
         }
         return result;
-
     }
 
     private static void addAnnotatedMethodsFromInterfaces(Class<?> type, List<Method> result) {
@@ -124,5 +123,4 @@ public final class ReflectionUtil {
             return type;
         }
     }
-
 }

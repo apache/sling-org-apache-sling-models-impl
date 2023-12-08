@@ -1,18 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl.injectors;
 
@@ -48,7 +50,9 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(property=Constants.SERVICE_RANKING+":Integer=5000", service={Injector.class, StaticInjectAnnotationProcessorFactory.class, AcceptsNullName.class})
+@Component(
+        property = Constants.SERVICE_RANKING + ":Integer=5000",
+        service = {Injector.class, StaticInjectAnnotationProcessorFactory.class, AcceptsNullName.class})
 public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProcessorFactory, AcceptsNullName {
 
     private static final Logger log = LoggerFactory.getLogger(OSGiServiceInjector.class);
@@ -66,7 +70,11 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
     }
 
     @Override
-    public Object getValue(@NotNull Object adaptable, String name, @NotNull Type type, @NotNull AnnotatedElement element,
+    public Object getValue(
+            @NotNull Object adaptable,
+            String name,
+            @NotNull Type type,
+            @NotNull AnnotatedElement element,
             @NotNull DisposalCallbackRegistry callbackRegistry) {
         return getValue(adaptable, name, type, element, callbackRegistry, bundleContext);
     }
@@ -80,9 +88,14 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
      * @param modelContext Model context
      * @return Object
      */
-    @SuppressWarnings({ "null", "unused" })
-    public Object getValue(@NotNull Object adaptable, String name, @NotNull Type type, @NotNull AnnotatedElement element,
-                           @NotNull DisposalCallbackRegistry callbackRegistry, @Nullable BundleContext modelContext) {
+    @SuppressWarnings({"null", "unused"})
+    public Object getValue(
+            @NotNull Object adaptable,
+            String name,
+            @NotNull Type type,
+            @NotNull AnnotatedElement element,
+            @NotNull DisposalCallbackRegistry callbackRegistry,
+            @Nullable BundleContext modelContext) {
         OSGiService annotation = element.getAnnotation(OSGiService.class);
         String filterString = null;
         if (annotation != null) {
@@ -95,21 +108,27 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
                 filterString = filter.value();
             }
         }
-        return getValue(adaptable, type, filterString, callbackRegistry, modelContext == null ? bundleContext : modelContext);
+        return getValue(
+                adaptable, type, filterString, callbackRegistry, modelContext == null ? bundleContext : modelContext);
     }
 
-    private <T> Object getService(Object adaptable, Class<T> type, String filter,
-            DisposalCallbackRegistry callbackRegistry, BundleContext modelContext) {
-        // cannot use SlingScriptHelper since it does not support ordering by service ranking due to https://issues.apache.org/jira/browse/SLING-5665
+    private <T> Object getService(
+            Object adaptable,
+            Class<T> type,
+            String filter,
+            DisposalCallbackRegistry callbackRegistry,
+            BundleContext modelContext) {
+        // cannot use SlingScriptHelper since it does not support ordering by service ranking due to
+        // https://issues.apache.org/jira/browse/SLING-5665
         try {
             ServiceReference<?>[] refs = modelContext.getServiceReferences(type.getName(), filter);
             if (refs != null && refs.length > 0) {
                 // sort by reverse service ranking (highest first) (see ServiceReference.compareTo)
                 List<ServiceReference<?>> references = Arrays.asList(refs);
                 Collections.sort(references, Collections.reverseOrder());
-                for(final ServiceReference<?> ref : references) {
+                for (final ServiceReference<?> ref : references) {
                     final Object obj = modelContext.getService(ref);
-                    if ( obj != null ) {
+                    if (obj != null) {
                         callbackRegistry.addDisposalCallback(new Callback(new ServiceReference[] {ref}, modelContext));
                         return obj;
                     }
@@ -121,9 +140,14 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
         return null;
     }
 
-    private <T> Object[] getServices(Object adaptable, Class<T> type, String filter,
-            DisposalCallbackRegistry callbackRegistry, BundleContext modelContext) {
-        // cannot use SlingScriptHelper since it does not support ordering by service ranking due to https://issues.apache.org/jira/browse/SLING-5665
+    private <T> Object[] getServices(
+            Object adaptable,
+            Class<T> type,
+            String filter,
+            DisposalCallbackRegistry callbackRegistry,
+            BundleContext modelContext) {
+        // cannot use SlingScriptHelper since it does not support ordering by service ranking due to
+        // https://issues.apache.org/jira/browse/SLING-5665
         try {
             ServiceReference<?>[] refs = modelContext.getServiceReferences(type.getName(), filter);
             if (refs != null && refs.length > 0) {
@@ -139,8 +163,9 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
                         usedRefs.add(ref);
                     }
                 }
-                if ( !services.isEmpty() ) {
-                    callbackRegistry.addDisposalCallback(new Callback(usedRefs.toArray(new ServiceReference[usedRefs.size()]), modelContext));
+                if (!services.isEmpty()) {
+                    callbackRegistry.addDisposalCallback(
+                            new Callback(usedRefs.toArray(new ServiceReference[usedRefs.size()]), modelContext));
                     return services.toArray(new Object[services.size()]);
                 }
             }
@@ -150,13 +175,17 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
         return null;
     }
 
-    private Object getValue(Object adaptable, Type type, String filterString, DisposalCallbackRegistry callbackRegistry,
-                            BundleContext modelContext) {
+    private Object getValue(
+            Object adaptable,
+            Type type,
+            String filterString,
+            DisposalCallbackRegistry callbackRegistry,
+            BundleContext modelContext) {
         if (type instanceof Class) {
             Class<?> injectedClass = (Class<?>) type;
             if (injectedClass.isArray()) {
-                Object[] services = getServices(adaptable, injectedClass.getComponentType(), filterString,
-                        callbackRegistry, modelContext);
+                Object[] services = getServices(
+                        adaptable, injectedClass.getComponentType(), filterString, callbackRegistry, modelContext);
                 if (services == null) {
                     return null;
                 }
@@ -214,7 +243,7 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
     }
 
     @Override
-    @SuppressWarnings({ "unused", "null" })
+    @SuppressWarnings({"unused", "null"})
     public InjectAnnotationProcessor2 createAnnotationProcessor(AnnotatedElement element) {
         // check if the element has the expected annotation
         OSGiService annotation = element.getAnnotation(OSGiService.class);
@@ -243,6 +272,4 @@ public class OSGiServiceInjector implements Injector, StaticInjectAnnotationProc
             return annotation.optional();
         }
     }
-
-
 }

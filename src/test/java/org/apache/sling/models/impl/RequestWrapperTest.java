@@ -1,33 +1,27 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-
 import javax.script.Bindings;
 import javax.script.ScriptEngineFactory;
+
+import java.util.Collections;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
@@ -42,6 +36,14 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestWrapperTest {
@@ -69,14 +71,16 @@ public class RequestWrapperTest {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindingsValuesProvidersByContext = bindingsValuesProvidersByContext;
         factory.adapterManager = adapterManager;
-        when(bindingsValuesProvidersByContext.getBindingsValuesProviders(any(ScriptEngineFactory.class), eq(BindingsValuesProvider.DEFAULT_CONTEXT))).
-                thenReturn(Collections.singleton(bindingsValuesProvider));
+        when(bindingsValuesProvidersByContext.getBindingsValuesProviders(
+                        any(ScriptEngineFactory.class), eq(BindingsValuesProvider.DEFAULT_CONTEXT)))
+                .thenReturn(Collections.singleton(bindingsValuesProvider));
     }
 
     @Test
     public void testWrapper() {
         Target expected = new Target();
-        when(adapterManager.getAdapter(any(SlingHttpServletRequest.class), eq(Target.class))).thenReturn(expected);
+        when(adapterManager.getAdapter(any(SlingHttpServletRequest.class), eq(Target.class)))
+                .thenReturn(expected);
 
         Target actual = factory.getModelFromWrappedRequest(request, resource, Target.class);
         assertEquals(expected, actual);
@@ -103,8 +107,5 @@ public class RequestWrapperTest {
         };
     }
 
-    class Target {
-
-    }
-
+    class Target {}
 }

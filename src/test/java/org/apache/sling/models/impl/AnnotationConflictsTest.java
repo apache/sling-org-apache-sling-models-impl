@@ -18,12 +18,6 @@
  */
 package org.apache.sling.models.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-
 import java.util.Collections;
 
 import org.apache.sling.api.resource.Resource;
@@ -45,6 +39,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
 @SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class AnnotationConflictsTest {
@@ -59,7 +59,8 @@ public class AnnotationConflictsTest {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         ValueMapInjector injector = new ValueMapInjector();
         factory.bindInjector(injector, new ServicePropertiesMap(1, 1));
-        factory.injectAnnotationProcessorFactories = Collections.<InjectAnnotationProcessorFactory>singletonList(new ValueMapInjector());
+        factory.injectAnnotationProcessorFactories =
+                Collections.<InjectAnnotationProcessorFactory>singletonList(new ValueMapInjector());
 
         for (Class<?> clazz : this.getClass().getDeclaredClasses()) {
             if (!clazz.isInterface()) {
@@ -263,6 +264,7 @@ public class AnnotationConflictsTest {
 
     private interface Methods {
         String getOtherText();
+
         String getEmptyText();
     }
 
@@ -272,8 +274,13 @@ public class AnnotationConflictsTest {
 
         Methods model = factory.createModel(resource, modelClass);
         assertNotNull("Adaptation to " + modelClass.getSimpleName() + " was not null.", model);
-        assertNull("Adaptation to " + modelClass.getSimpleName() + " had a non-null emptyText value.", model.getEmptyText());
-        assertEquals("Adaptation to " + modelClass.getSimpleName() + " had an unexpected value in the otherText value.", "hello", model.getOtherText());
+        assertNull(
+                "Adaptation to " + modelClass.getSimpleName() + " had a non-null emptyText value.",
+                model.getEmptyText());
+        assertEquals(
+                "Adaptation to " + modelClass.getSimpleName() + " had an unexpected value in the otherText value.",
+                "hello",
+                model.getOtherText());
     }
 
     private <T extends Methods> void failing(Class<T> modelClass) {
@@ -285,9 +292,14 @@ public class AnnotationConflictsTest {
         try {
             factory.createModel(resource, modelClass);
         } catch (MissingElementsException e) {
-            assertEquals("Adaptation to " + modelClass.getSimpleName() + " failed, but with the wrong number of exceptions.",1, e.getMissingElements().size());
+            assertEquals(
+                    "Adaptation to " + modelClass.getSimpleName() + " failed, but with the wrong number of exceptions.",
+                    1,
+                    e.getMissingElements().size());
             MissingElementException me = e.getMissingElements().iterator().next();
-            assertTrue("Adaptation to " + modelClass.getSimpleName() + " didn't fail due to emptyText.", me.getElement().toString().endsWith("emptyText"));
+            assertTrue(
+                    "Adaptation to " + modelClass.getSimpleName() + " didn't fail due to emptyText.",
+                    me.getElement().toString().endsWith("emptyText"));
             thrown = true;
         }
         assertTrue("Adaptation to " + modelClass.getSimpleName() + " was successful.", thrown);

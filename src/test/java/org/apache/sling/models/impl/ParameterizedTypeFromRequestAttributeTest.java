@@ -18,14 +18,10 @@
  */
 package org.apache.sling.models.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.when;
+import javax.inject.Inject;
 
 import java.util.Collections;
 import java.util.Iterator;
-
-import javax.inject.Inject;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -36,6 +32,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ParameterizedTypeFromRequestAttributeTest {
@@ -55,7 +55,7 @@ public class ParameterizedTypeFromRequestAttributeTest {
 
     @Test
     public void test() {
-        Iterator<Resource> it = Collections.<Resource> emptySet().iterator();
+        Iterator<Resource> it = Collections.<Resource>emptySet().iterator();
 
         when(request.getAttribute("someResources")).thenReturn(it);
         TestModel model = factory.getAdapter(request, TestModel.class);

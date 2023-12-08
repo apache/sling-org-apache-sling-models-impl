@@ -43,9 +43,11 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(property=Constants.SERVICE_RANKING+":Integer=2500", service={Injector.class, StaticInjectAnnotationProcessorFactory.class, AcceptsNullName.class})
-public class ResourcePathInjector extends AbstractInjector implements Injector, AcceptsNullName,
-        StaticInjectAnnotationProcessorFactory {
+@Component(
+        property = Constants.SERVICE_RANKING + ":Integer=2500",
+        service = {Injector.class, StaticInjectAnnotationProcessorFactory.class, AcceptsNullName.class})
+public class ResourcePathInjector extends AbstractInjector
+        implements Injector, AcceptsNullName, StaticInjectAnnotationProcessorFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResourcePathInjector.class);
 
@@ -55,8 +57,12 @@ public class ResourcePathInjector extends AbstractInjector implements Injector, 
     }
 
     @Override
-    @SuppressWarnings({ "unused", "null" })
-    public Object getValue(@NotNull Object adaptable, String name, @NotNull Type declaredType, @NotNull AnnotatedElement element,
+    @SuppressWarnings({"unused", "null"})
+    public Object getValue(
+            @NotNull Object adaptable,
+            String name,
+            @NotNull Type declaredType,
+            @NotNull AnnotatedElement element,
             @NotNull DisposalCallbackRegistry callbackRegistry) {
         String[] resourcePaths = null;
         Path pathAnnotation = element.getAnnotation(Path.class);
@@ -91,17 +97,17 @@ public class ResourcePathInjector extends AbstractInjector implements Injector, 
         // unwrap/wrap if necessary
         if (isDeclaredTypeCollection(declaredType)) {
             return resources;
-        } if (declaredType instanceof Class<?> && ((Class<?>)declaredType).isArray()){
+        }
+        if (declaredType instanceof Class<?> && ((Class<?>) declaredType).isArray()) {
             return resources.toArray(new Resource[0]);
         }
-         if (resources.size() == 1) {
+        if (resources.size() == 1) {
             return resources.get(0);
         } else {
             // multiple resources to inject, but field is not a list
             LOG.warn("Cannot inject multiple resources into field {} since it is not declared as a list", name);
             return null;
         }
-
     }
 
     private List<Resource> getResources(ResourceResolver resolver, String[] paths, String fieldName) {
@@ -111,8 +117,10 @@ public class ResourcePathInjector extends AbstractInjector implements Injector, 
             if (resource != null) {
                 resources.add(resource);
             } else {
-                LOG.warn("Could not retrieve resource at path {} for field {}. Since it is required it won't be injected.",
-                        path, fieldName);
+                LOG.warn(
+                        "Could not retrieve resource at path {} for field {}. Since it is required it won't be injected.",
+                        path,
+                        fieldName);
                 // all resources should've been injected. we stop
                 return null;
             }
@@ -128,7 +136,7 @@ public class ResourcePathInjector extends AbstractInjector implements Injector, 
     private String[] getPathsFromAnnotation(Path pathAnnotation) {
         String[] resourcePaths = null;
         if (StringUtils.isNotEmpty(pathAnnotation.value())) {
-            resourcePaths = new String[] { pathAnnotation.value() };
+            resourcePaths = new String[] {pathAnnotation.value()};
         } else {
             resourcePaths = pathAnnotation.paths();
         }
@@ -143,7 +151,7 @@ public class ResourcePathInjector extends AbstractInjector implements Injector, 
     private String[] getPathsFromAnnotation(ResourcePath resourcePathAnnotation) {
         String[] resourcePaths = null;
         if (StringUtils.isNotEmpty(resourcePathAnnotation.path())) {
-            resourcePaths = new String[] { resourcePathAnnotation.path() };
+            resourcePaths = new String[] {resourcePathAnnotation.path()};
         } else {
             resourcePaths = resourcePathAnnotation.paths();
         }
@@ -151,7 +159,7 @@ public class ResourcePathInjector extends AbstractInjector implements Injector, 
     }
 
     @Override
-    @SuppressWarnings({ "unused", "null" })
+    @SuppressWarnings({"unused", "null"})
     public InjectAnnotationProcessor2 createAnnotationProcessor(AnnotatedElement element) {
         // check if the element has the expected annotation
         ResourcePath annotation = element.getAnnotation(ResourcePath.class);
@@ -190,5 +198,4 @@ public class ResourcePathInjector extends AbstractInjector implements Injector, 
             return annotation.injectionStrategy();
         }
     }
-
 }
