@@ -36,6 +36,7 @@ import org.apache.sling.api.adapter.Adaptable;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.osgi.RankedServices;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.ValidationStrategy;
@@ -107,7 +108,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     private static final Object REQUEST_MARKER_VALUE = new Object();
 
-    private static final String REQUEST_CACHE_ATTRIBUTE = ModelAdapterFactory.class.getName() + ".AdapterCache";
+
 
     private static class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry, Disposable {
 
@@ -242,7 +243,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     // Use threadlocal to count recursive invocations and break recursing if a max. limit is reached (to avoid cyclic dependencies)
     private ThreadLocal<ThreadInvocationCounter> invocationCountThreadLocal;
 
-    private Map<Object, Map<Class<?>, SoftReference<Object>>> adapterCache;
+    private AdapterCacheHolder adapterCacheHolder;
 
     private SlingModelsScriptEngineFactory scriptEngineFactory;
 
@@ -337,20 +338,29 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         throw new ModelClassException("Could not yet find an adapter factory for the model " + requestedType + " from adaptable " + adaptable.getClass());
     }
 
-    @SuppressWarnings("unchecked")
     private Map<Class<?>, SoftReference<Object>> getOrCreateCache(final Object adaptable) {
-        Map<Class<?>, SoftReference<Object>> adaptableCache;
+        AdapterCacheHolder cache;
         if (adaptable instanceof ServletRequest) {
             ServletRequest request = (ServletRequest) adaptable;
-            adaptableCache = (Map<Class<?>, SoftReference<Object>>) request.getAttribute(REQUEST_CACHE_ATTRIBUTE);
-            if (adaptableCache == null) {
-                adaptableCache = Collections.synchronizedMap(new WeakHashMap<>());
-                request.setAttribute(REQUEST_CACHE_ATTRIBUTE, adaptableCache);
+            cache = (AdapterCacheHolder) request.getAttribute(AdapterCacheHolder.ADAPTABLE_ADAPTER_CACHE_KEY);
+            if (cache == null) {
+                // This cache does not need to be synchronized, since it is just for a single request
+                cache = new AdapterCacheHolder(false);
+                request.setAttribute(AdapterCacheHolder.ADAPTABLE_ADAPTER_CACHE_KEY, cache);
             }
+        } else if (adaptable instanceof Resource || adaptable instanceof ResourceResolver) {
+            ResourceResolver rr;
+            if (adaptable instanceof Resource) {
+                rr = ((Resource)adaptable).getResourceResolver();
+            } else {
+                rr = (ResourceResolver) adaptable;
+            }
+            // This cache does not need to be synchronized, since it is just for a single resource or resource resolver
+            cache = (AdapterCacheHolder) rr.getPropertyMap().computeIfAbsent(AdapterCacheHolder.ADAPTABLE_ADAPTER_CACHE_KEY, k -> new AdapterCacheHolder(false));
         } else {
-            adaptableCache = adapterCache.computeIfAbsent(adaptable, k -> Collections.synchronizedMap(new WeakHashMap<>()));
+            cache = adapterCacheHolder;
         }
-        return adaptableCache;
+        return cache.getCacheMapForAdaptable(adaptable);
     }
 
     @SuppressWarnings("unchecked")
@@ -1152,7 +1162,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             }
         };
 
-        this.adapterCache = Collections.synchronizedMap(new WeakHashMap<Object, Map<Class<?>, SoftReference<Object>>>());
+        // This map needs to be synchronized, since it is shared
+        this.adapterCacheHolder = new AdapterCacheHolder(true);
 
         BundleContext bundleContext = ctx.getBundleContext();
         this.queue = new ReferenceQueue<>();
@@ -1184,7 +1195,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     @Deactivate
     protected void deactivate() {
-        this.adapterCache = null;
+        this.adapterCacheHolder.close();
+        this.adapterCacheHolder = null;
         if (this.requestDisposalCallbacks != null) {
             for (final Disposable requestRegistries : this.requestDisposalCallbacks.values()) {
                 requestRegistries.onDisposed();
@@ -1385,6 +1397,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         if (registry != null) {
             registry.onDisposed();
         }
+        Optional.ofNullable(request.getAttribute(AdapterCacheHolder.ADAPTABLE_ADAPTER_CACHE_KEY))
+                .map(AdapterCacheHolder.class::cast)
+                .ifPresent(AdapterCacheHolder::close);
     }
 
     @Override
