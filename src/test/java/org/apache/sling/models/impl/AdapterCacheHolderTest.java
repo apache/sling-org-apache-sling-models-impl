@@ -98,9 +98,6 @@ public class AdapterCacheHolderTest {
         Map<Object, Object> nonSyncMap= AdapterCacheHolder.newMap(false);
         Map<Object, Object> syncMap= AdapterCacheHolder.newMap(true);
 
-        System.out.println(nonSyncMap.getClass());
-        System.out.println(syncMap.getClass());
-
         try {
             WeakHashMap<Object, Object> weakMap = (WeakHashMap<Object, Object>) nonSyncMap;
         } catch (ClassCastException e) {
