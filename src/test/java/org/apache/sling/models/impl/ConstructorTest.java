@@ -34,6 +34,8 @@ import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
 import org.apache.sling.models.impl.injectors.SelfInjector;
 import org.apache.sling.models.impl.via.BeanPropertyViaProvider;
 import org.apache.sling.models.testmodels.classes.InvalidConstructorModel;
+import org.apache.sling.models.testmodels.classes.RecordModel;
+import org.apache.sling.models.testmodels.classes.RecordNamedAttributesModel;
 import org.apache.sling.models.testmodels.classes.SuperclassConstructorModel;
 import org.apache.sling.models.testmodels.classes.WithOneConstructorModel;
 import org.apache.sling.models.testmodels.classes.WithThreeConstructorsModel;
@@ -86,7 +88,9 @@ public class ConstructorTest {
                 InvalidConstructorModel.class,
                 WithThreeConstructorsOneInjectModel.class,
                 NoNameModel.class,
-                ViaRequestSuffixModel.class);
+                ViaRequestSuffixModel.class,
+                RecordModel.class,
+                RecordNamedAttributesModel.class);
     }
 
     @Test
@@ -210,5 +214,21 @@ public class ConstructorTest {
         ViaRequestSuffixModel model = factory.getAdapter(request, ViaRequestSuffixModel.class);
         assertThat(model, Matchers.notNullValue());
         assertThat(model.getSuffix(), Matchers.is("/the/suffix"));
+    }
+
+    @Test
+    public void testRecordImplicitConstructor() {
+        RecordModel model = factory.getAdapter(request, RecordModel.class);
+        assertNotNull(model);
+        assertEquals(INT_VALUE, model.attribute());
+        assertEquals(STRING_VALUE, model.attribute2());
+    }
+
+    @Test
+    public void testRecordNamedAttributesImplicitConstructor() {
+        RecordNamedAttributesModel model = factory.getAdapter(request, RecordNamedAttributesModel.class);
+        assertNotNull(model);
+        assertEquals(INT_VALUE, model.attribute());
+        assertEquals(STRING_VALUE, model.attribute2());
     }
 }

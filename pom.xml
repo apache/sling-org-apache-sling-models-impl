@@ -37,6 +37,7 @@
         <url>https://github.com/apache/sling-org-apache-sling-models-impl.git</url>
     </scm>
     <properties>
+        <sling.java.version>17</sling.java.version>
         <project.build.outputTimestamp>2023-05-30T08:54:10Z</project.build.outputTimestamp>
     </properties>
 
