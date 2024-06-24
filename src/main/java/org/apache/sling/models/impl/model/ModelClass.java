@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
-import org.apache.sling.models.impl.AssignableFrom;
 import org.apache.sling.models.impl.ReflectionUtil;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 
@@ -78,7 +77,7 @@ public class ModelClass<ModelType> {
     }
 
     private static InjectableField[] getInjectableFields(Class<?> type, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
-        if (type.isInterface() || isRecord(type)) {
+        if (type.isInterface() || ReflectionUtil.isRecord(type)) {
             return new InjectableField[0];
         }
         List<Field> injectableFields = ReflectionUtil.collectInjectableFields(type);
@@ -87,11 +86,6 @@ public class ModelClass<ModelType> {
             array[i] = new InjectableField(injectableFields.get(i), processorFactories, defaultInjectionStrategy);
         }
         return array;
-    }
-
-    private static boolean isRecord(Class<?> type) {
-        AssignableFrom assignableFrom = new AssignableFrom() { };
-        return assignableFrom.isAssignableFrom(type, "java.lang.Record");
     }
 
     private static InjectableMethod[] getInjectableMethods(Class<?> type, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {

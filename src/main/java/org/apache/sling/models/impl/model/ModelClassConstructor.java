@@ -25,7 +25,6 @@ import java.lang.reflect.Type;
 import javax.inject.Inject;
 
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
-import org.apache.sling.models.impl.AssignableFrom;
 import org.apache.sling.models.impl.ReflectionUtil;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 
@@ -85,9 +84,10 @@ public class ModelClassConstructor<M> {
         return constructorParametersArray;
     };
 
-    public boolean isRecordConstructor() {
+    public boolean isCanonicalRecordConstructor() {
         Class<M> declaringClass = constructor.getDeclaringClass();
-        AssignableFrom assignableFrom = new AssignableFrom() { };
-        return assignableFrom.isAssignableFrom(declaringClass, "java.lang.Record");
+        boolean areBalancedCtorParamsAndFields = ReflectionUtil.areBalancedCtorParamsAndFields(constructor);
+        boolean isRecordDeclaringClass = ReflectionUtil.isRecord(declaringClass);
+        return areBalancedCtorParamsAndFields && isRecordDeclaringClass;
     }
 }
