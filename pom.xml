@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.sling</groupId>
         <artifactId>sling-bundle-parent</artifactId>
-        <version>49</version>
+        <version>60</version>
         <relativePath />
     </parent>
     <artifactId>org.apache.sling.models.impl</artifactId>
@@ -37,7 +37,6 @@
         <tag>HEAD</tag>
     </scm>
     <properties>
-        <sling.java.version>8</sling.java.version>
         <project.build.outputTimestamp>2023-05-30T08:54:10Z</project.build.outputTimestamp>
     </properties>
     <build>
