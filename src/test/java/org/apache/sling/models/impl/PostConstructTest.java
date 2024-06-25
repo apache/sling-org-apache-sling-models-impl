@@ -1,26 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.factory.PostConstructException;
@@ -35,6 +31,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(MockitoJUnitRunner.class)
 public class PostConstructTest {
 
@@ -47,7 +49,12 @@ public class PostConstructTest {
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         // no injectors are necessary
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(SubClass.class, SubClassOverriddenPostConstruct.class, FailingPostConstructModel.class, FalsePostConstructModel.class, TruePostConstructModel.class);
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(
+                SubClass.class,
+                SubClassOverriddenPostConstruct.class,
+                FailingPostConstructModel.class,
+                FalsePostConstructModel.class,
+                TruePostConstructModel.class);
     }
 
     @Test
@@ -60,8 +67,12 @@ public class PostConstructTest {
     @Test
     public void testOverriddenPostConstruct() {
         SubClassOverriddenPostConstruct sc = factory.getAdapter(resource, SubClassOverriddenPostConstruct.class);
-        assertEquals("Post construct not called exactly one time in sub class!", 1, sc.getPostConstructorCalledCounter());
-        assertEquals("Post construct was called on super class although overridden in sub class", 0, sc.getPostConstructCalledTimestampInSuper());
+        assertEquals(
+                "Post construct not called exactly one time in sub class!", 1, sc.getPostConstructorCalledCounter());
+        assertEquals(
+                "Post construct was called on super class although overridden in sub class",
+                0,
+                sc.getPostConstructCalledTimestampInSuper());
     }
 
     @Test
@@ -88,7 +99,9 @@ public class PostConstructTest {
     }
 
     public void testPostConstructMethodWhichReturnsFalseInternalCreateModel() {
-        assertSame(Result.POST_CONSTRUCT_PREVENTED_MODEL_CONSTRUCTION, factory.internalCreateModel(resource, FalsePostConstructModel.class));
+        assertSame(
+                Result.POST_CONSTRUCT_PREVENTED_MODEL_CONSTRUCTION,
+                factory.internalCreateModel(resource, FalsePostConstructModel.class));
     }
 
     @Test

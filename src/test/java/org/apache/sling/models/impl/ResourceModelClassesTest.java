@@ -1,31 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -60,6 +51,17 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceModelClassesTest {
@@ -73,8 +75,10 @@ public class ResourceModelClassesTest {
         factory.bindInjector(valueMapInjector, new ServicePropertiesMap(2, 2));
         factory.bindInjector(new ChildResourceInjector(), new ServicePropertiesMap(1, 1));
 
-        factory.injectAnnotationProcessorFactories = factory.injectAnnotationProcessorFactories = Collections.<InjectAnnotationProcessorFactory>singletonList(new ValueMapInjector());
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(SimplePropertyModel.class,
+        factory.injectAnnotationProcessorFactories = factory.injectAnnotationProcessorFactories =
+                Collections.<InjectAnnotationProcessorFactory>singletonList(new ValueMapInjector());
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(
+                SimplePropertyModel.class,
                 ArrayWrappersModel.class,
                 ResourceModelWithRequiredField.class,
                 ChildValueMapModel.class,
@@ -94,7 +98,7 @@ public class ResourceModelClassesTest {
         map.put("first", "first-value");
         map.put("third", "third-value");
         map.put("intProperty", new Integer(3));
-        map.put("arrayProperty", new String[] { "three", "four" });
+        map.put("arrayProperty", new String[] {"three", "four"});
         ValueMap vm = new ValueMapDecorator(map);
 
         Resource res = mock(Resource.class);
@@ -119,7 +123,7 @@ public class ResourceModelClassesTest {
     @Test
     public void testArrayPrimitivesModel() {
         Map<String, Object> map = new HashMap<>();
-        map.put("intArray", new int[] { 1, 2, 9, 8 });
+        map.put("intArray", new int[] {1, 2, 9, 8});
         map.put("secondIntArray", new Integer[] {1, 2, 9, 8});
 
         ValueMap vm = new ValueMapDecorator(map);
@@ -194,12 +198,12 @@ public class ResourceModelClassesTest {
         assertNotNull(model);
 
         assertEquals(Arrays.asList("v1", "v2"), model.getStringList());
-        assertEquals(Arrays.asList(1,2,3), model.getIntList());
-        assertEquals(Arrays.asList(1L,2L), model.getLongList());
-        assertEquals(Arrays.asList(true,false), model.getBooleanList());
-        assertEquals(Arrays.asList((short)1), model.getShortList());
-        assertEquals(Arrays.asList(1.1f,1.2f), model.getFloatList());
-        assertEquals(Arrays.asList(1.1d,1.2d,1.3d), model.getDoubleList());
+        assertEquals(Arrays.asList(1, 2, 3), model.getIntList());
+        assertEquals(Arrays.asList(1L, 2L), model.getLongList());
+        assertEquals(Arrays.asList(true, false), model.getBooleanList());
+        assertEquals(Arrays.asList((short) 1), model.getShortList());
+        assertEquals(Arrays.asList(1.1f, 1.2f), model.getFloatList());
+        assertEquals(Arrays.asList(1.1d, 1.2d, 1.3d), model.getDoubleList());
     }
 
     @Test
@@ -213,11 +217,11 @@ public class ResourceModelClassesTest {
         CollectionDefaultsModel model = factory.getAdapter(res, CollectionDefaultsModel.class);
         assertNotNull(model);
 
-        assertEquals(Arrays.asList(1,2,3), model.getIntCollection());
+        assertEquals(Arrays.asList(1, 2, 3), model.getIntCollection());
         assertEquals(Arrays.asList("v1", "v2"), model.getStringCollection());
     }
 
-    @SuppressWarnings({ "unused", "null" })
+    @SuppressWarnings({"unused", "null"})
     @Test
     public void testRequiredPropertyModel() {
         Map<String, Object> map = new HashMap<>();
@@ -248,7 +252,9 @@ public class ResourceModelClassesTest {
         try {
             factory.createModel(res, ResourceModelWithRequiredField.class);
         } catch (MissingElementsException e) {
-            assertEquals("required", ((Field) e.getMissingElements().iterator().next().getElement()).getName());
+            assertEquals(
+                    "required",
+                    ((Field) e.getMissingElements().iterator().next().getElement()).getName());
             thrown = true;
         }
         assertTrue(thrown);
@@ -256,7 +262,7 @@ public class ResourceModelClassesTest {
         verify(vm).get("required", String.class);
     }
 
-    @SuppressWarnings({ "unused", "null" })
+    @SuppressWarnings({"unused", "null"})
     @Test
     public void testRequiredPropertyMissingModelOptionalStrategy() {
         Map<String, Object> map = new HashMap<>();
@@ -266,7 +272,8 @@ public class ResourceModelClassesTest {
         Resource res = mock(Resource.class);
         when(res.adaptTo(ValueMap.class)).thenReturn(vm);
 
-        ResourceModelWithRequiredFieldOptionalStrategy model = factory.getAdapter(res, ResourceModelWithRequiredFieldOptionalStrategy.class);
+        ResourceModelWithRequiredFieldOptionalStrategy model =
+                factory.getAdapter(res, ResourceModelWithRequiredFieldOptionalStrategy.class);
         assertNull(model);
 
         verify(vm).get("optional1", String.class);
@@ -284,7 +291,8 @@ public class ResourceModelClassesTest {
         Resource res = mock(Resource.class);
         when(res.adaptTo(ValueMap.class)).thenReturn(vm);
 
-        ResourceModelWithRequiredFieldOptionalStrategy model = factory.getAdapter(res, ResourceModelWithRequiredFieldOptionalStrategy.class);
+        ResourceModelWithRequiredFieldOptionalStrategy model =
+                factory.getAdapter(res, ResourceModelWithRequiredFieldOptionalStrategy.class);
         assertNotNull(model);
         assertEquals("required value", model.getRequired1());
         assertEquals("required value", model.getRequired2());
@@ -301,8 +309,10 @@ public class ResourceModelClassesTest {
 
         Resource firstGrandChild = mock(Resource.class);
         Resource secondGrandChild = mock(Resource.class);
-        when(secondChild.listChildren()).thenReturn(Arrays.asList(firstGrandChild, secondGrandChild).iterator());
-        when(emptyChild.listChildren()).thenReturn(Collections.<Resource>emptySet().iterator());
+        when(secondChild.listChildren())
+                .thenReturn(Arrays.asList(firstGrandChild, secondGrandChild).iterator());
+        when(emptyChild.listChildren())
+                .thenReturn(Collections.<Resource>emptySet().iterator());
 
         Resource res = mock(Resource.class);
         when(res.getChild("firstChild")).thenReturn(child);
@@ -345,7 +355,8 @@ public class ResourceModelClassesTest {
         Object firstGrandChildValue = RandomStringUtils.randomAlphabetic(10);
         ValueMap firstGrandChildMap = new ValueMapDecorator(Collections.singletonMap("property", firstGrandChildValue));
         Object secondGrandChildValue = RandomStringUtils.randomAlphabetic(10);
-        ValueMap secondGrandChildMap = new ValueMapDecorator(Collections.singletonMap("property", secondGrandChildValue));
+        ValueMap secondGrandChildMap =
+                new ValueMapDecorator(Collections.singletonMap("property", secondGrandChildValue));
 
         final Resource firstGrandChild = mock(Resource.class);
         lenient().when(firstGrandChild.adaptTo(ValueMap.class)).thenReturn(firstGrandChildMap);
@@ -356,10 +367,14 @@ public class ResourceModelClassesTest {
         lenient().when(secondGrandChild.adaptTo(ChildModel.class)).thenAnswer(new AdaptToChildModel());
 
         Resource secondChild = mock(Resource.class);
-        lenient().when(secondChild.listChildren()).thenReturn(Arrays.asList(firstGrandChild, secondGrandChild).iterator());
+        lenient()
+                .when(secondChild.listChildren())
+                .thenReturn(Arrays.asList(firstGrandChild, secondGrandChild).iterator());
 
         Resource emptyChild = mock(Resource.class);
-        lenient().when(emptyChild.listChildren()).thenReturn(Collections.<Resource>emptySet().iterator());
+        lenient()
+                .when(emptyChild.listChildren())
+                .thenReturn(Collections.<Resource>emptySet().iterator());
 
         Resource res = mock(Resource.class);
         lenient().when(res.getChild("firstChild")).thenReturn(firstChild);
@@ -385,5 +400,4 @@ public class ResourceModelClassesTest {
             return factory.getAdapter(invocation.getMock(), ChildModel.class);
         }
     }
-
 }

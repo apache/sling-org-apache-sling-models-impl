@@ -23,12 +23,11 @@ import javax.annotation.PostConstruct;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 
-@Model(adaptables=Resource.class)
+@Model(adaptables = Resource.class)
 public class FailingPostConstructModel {
 
     @PostConstruct
     protected void pc() throws Exception {
         throw new Exception("FAIL");
     }
-
 }

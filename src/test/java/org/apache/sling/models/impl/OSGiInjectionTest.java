@@ -1,32 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -54,6 +44,18 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.ServiceReference;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 @RunWith(MockitoJUnitRunner.class)
 public class OSGiInjectionTest {
     private ModelAdapterFactory factory;
@@ -75,16 +77,26 @@ public class OSGiInjectionTest {
         factory.bindInjector(injectorFactory, new ServicePropertiesMap(1, 1));
 
         bindings.setSling(helper);
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(SimpleOSGiModel.class, ListOSGiModel.class, RequestOSGiModel.class, ArrayOSGiModel.class, SetOSGiModel.class, OptionalListOSGiModel.class, org.apache.sling.models.testmodels.classes.constructorinjection.ListOSGiModel.class, org.apache.sling.models.testmodels.classes.constructorinjection.SimpleOSGiModel.class, CollectionOSGiModel.class, OptionalArrayOSGiModel.class);
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(
+                SimpleOSGiModel.class,
+                ListOSGiModel.class,
+                RequestOSGiModel.class,
+                ArrayOSGiModel.class,
+                SetOSGiModel.class,
+                OptionalListOSGiModel.class,
+                org.apache.sling.models.testmodels.classes.constructorinjection.ListOSGiModel.class,
+                org.apache.sling.models.testmodels.classes.constructorinjection.SimpleOSGiModel.class,
+                CollectionOSGiModel.class,
+                OptionalArrayOSGiModel.class);
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({"unchecked", "null"})
     public void testSimpleOSGiModelField() throws Exception {
         ServiceReference ref = mock(ServiceReference.class);
         ServiceInterface service = mock(ServiceInterface.class);
-        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null)).thenReturn(
-                new ServiceReference[] { ref });
+        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
+                .thenReturn(new ServiceReference[] {ref});
         when(bundleContext.getService(ref)).thenReturn(service);
 
         Resource res = mock(Resource.class);
@@ -98,7 +110,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({"unchecked", "null"})
     public void testListOSGiModelField() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
@@ -107,8 +119,8 @@ public class OSGiInjectionTest {
         ServiceInterface service2 = mock(ServiceInterface.class);
         when(bundleContext.getService(ref2)).thenReturn(service2);
 
-        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null)).thenReturn(
-                new ServiceReference[] { ref1, ref2 });
+        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
+                .thenReturn(new ServiceReference[] {ref1, ref2});
 
         Resource res = mock(Resource.class);
 
@@ -123,7 +135,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({"unchecked", "null"})
     public void testArrayOSGiModelField() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
@@ -132,8 +144,8 @@ public class OSGiInjectionTest {
         ServiceInterface service2 = mock(ServiceInterface.class);
         when(bundleContext.getService(ref2)).thenReturn(service2);
 
-        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null)).thenReturn(
-                new ServiceReference[] { ref1, ref2 });
+        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
+                .thenReturn(new ServiceReference[] {ref1, ref2});
 
         Resource res = mock(Resource.class);
 
@@ -173,7 +185,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({"unchecked", "null"})
     public void testCollectionOSGiModelField() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
@@ -182,8 +194,8 @@ public class OSGiInjectionTest {
         ServiceInterface service2 = mock(ServiceInterface.class);
         when(bundleContext.getService(ref2)).thenReturn(service2);
 
-        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null)).thenReturn(
-                new ServiceReference[] { ref1, ref2 });
+        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
+                .thenReturn(new ServiceReference[] {ref1, ref2});
 
         Resource res = mock(Resource.class);
 
@@ -198,7 +210,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({ "unused", "unchecked", "null" })
+    @SuppressWarnings({"unused", "unchecked", "null"})
     public void testSetOSGiModelField() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
@@ -207,8 +219,9 @@ public class OSGiInjectionTest {
         ServiceInterface service2 = mock(ServiceInterface.class);
         lenient().when(bundleContext.getService(ref2)).thenReturn(service2);
 
-        lenient().when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null)).thenReturn(
-                new ServiceReference[] { ref1, ref2 });
+        lenient()
+                .when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
+                .thenReturn(new ServiceReference[] {ref1, ref2});
 
         Resource res = mock(Resource.class);
 
@@ -224,18 +237,18 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({"unchecked", "null"})
     public void testSimpleOSGiModelConstructor() throws Exception {
         ServiceReference ref = mock(ServiceReference.class);
         ServiceInterface service = mock(ServiceInterface.class);
-        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null)).thenReturn(
-                new ServiceReference[] { ref });
+        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
+                .thenReturn(new ServiceReference[] {ref});
         when(bundleContext.getService(ref)).thenReturn(service);
 
         Resource res = mock(Resource.class);
 
-        org.apache.sling.models.testmodels.classes.constructorinjection.SimpleOSGiModel model
-                = factory.getAdapter(res, org.apache.sling.models.testmodels.classes.constructorinjection.SimpleOSGiModel.class);
+        org.apache.sling.models.testmodels.classes.constructorinjection.SimpleOSGiModel model = factory.getAdapter(
+                res, org.apache.sling.models.testmodels.classes.constructorinjection.SimpleOSGiModel.class);
         assertNotNull(model);
         assertNotNull(model.getService());
         assertEquals(service, model.getService());
@@ -244,7 +257,7 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({"unchecked", "null"})
     public void testListOSGiModelConstructor() throws Exception {
         ServiceReference ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
@@ -253,13 +266,13 @@ public class OSGiInjectionTest {
         ServiceInterface service2 = mock(ServiceInterface.class);
         when(bundleContext.getService(ref2)).thenReturn(service2);
 
-        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null)).thenReturn(
-                new ServiceReference[] { ref1, ref2 });
+        when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
+                .thenReturn(new ServiceReference[] {ref1, ref2});
 
         Resource res = mock(Resource.class);
 
-        org.apache.sling.models.testmodels.classes.constructorinjection.ListOSGiModel model
-                = factory.getAdapter(res, org.apache.sling.models.testmodels.classes.constructorinjection.ListOSGiModel.class);
+        org.apache.sling.models.testmodels.classes.constructorinjection.ListOSGiModel model = factory.getAdapter(
+                res, org.apache.sling.models.testmodels.classes.constructorinjection.ListOSGiModel.class);
         assertNotNull(model);
         assertNotNull(model.getServices());
         // the order on those is non deterministic as the ServiceReference.compareTo() is always returning 0
@@ -268,5 +281,4 @@ public class OSGiInjectionTest {
 
         verifyNoMoreInteractions(res);
     }
-
 }

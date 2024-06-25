@@ -1,20 +1,24 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
+
+import javax.servlet.Servlet;
 
 import java.lang.annotation.AnnotationFormatError;
 import java.net.URL;
@@ -26,8 +30,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.Servlet;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -87,11 +89,12 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
 
     private final SlingModelsScriptEngineFactory scriptEngineFactory;
 
-    public ModelPackageBundleListener(BundleContext bundleContext,
-                                      ModelAdapterFactory factory,
-                                      AdapterImplementations adapterImplementations,
-                                      BindingsValuesProvidersByContext bindingsValuesProvidersByContext,
-                                      SlingModelsScriptEngineFactory scriptEngineFactory) {
+    public ModelPackageBundleListener(
+            BundleContext bundleContext,
+            ModelAdapterFactory factory,
+            AdapterImplementations adapterImplementations,
+            BindingsValuesProvidersByContext bindingsValuesProvidersByContext,
+            SlingModelsScriptEngineFactory scriptEngineFactory) {
         this.bundleContext = bundleContext;
         this.factory = factory;
         this.adapterImplementations = adapterImplementations;
@@ -122,7 +125,6 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
                     URL url = classUrls.nextElement();
                     String className = toClassName(url);
                     analyzeClass(bundle, className, regs);
-
                 }
             }
         }
@@ -147,21 +149,23 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
                 // get list of adapters from annotation - if not given use annotated class itself
                 Class<?>[] adapterTypes = annotation.adapters();
                 if (adapterTypes.length == 0) {
-                    adapterTypes = new Class<?>[] { implType };
+                    adapterTypes = new Class<?>[] {implType};
                 } else if (!ArrayUtils.contains(adapterTypes, implType)) {
                     adapterTypes = ArrayUtils.add(adapterTypes, implType);
                 }
                 // register adapter only if given adapters are valid
                 if (validateAdapterClasses(implType, adapterTypes)) {
                     if (adapterImplementations.addAll(implType, adapterTypes)) {
-                        ServiceRegistration reg = registerAdapterFactory(adapterTypes, annotation.adaptables(), implType, annotation.condition());
+                        ServiceRegistration reg = registerAdapterFactory(
+                                adapterTypes, annotation.adaptables(), implType, annotation.condition());
                         regs.add(reg);
 
                         String[] resourceTypes = annotation.resourceType();
                         for (String resourceType : resourceTypes) {
                             if (StringUtils.isNotEmpty(resourceType)) {
                                 for (Class<?> adaptable : annotation.adaptables()) {
-                                    adapterImplementations.registerModelToResourceType(bundle, resourceType, adaptable, implType);
+                                    adapterImplementations.registerModelToResourceType(
+                                            bundle, resourceType, adaptable, implType);
                                     ExportServlet.ExportedObjectAccessor accessor = null;
                                     if (adaptable == Resource.class) {
                                         accessor = new ExportServlet.ResourceAccessor(implType);
@@ -170,7 +174,8 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
                                     }
                                     Exporter exporterAnnotation = implType.getAnnotation(Exporter.class);
                                     if (exporterAnnotation != null) {
-                                        registerExporter(bundle, implType, resourceType, exporterAnnotation, regs, accessor);
+                                        registerExporter(
+                                                bundle, implType, resourceType, exporterAnnotation, regs, accessor);
                                     }
                                     Exporters exportersAnnotation = implType.getAnnotation(Exporters.class);
                                     if (exportersAnnotation != null) {
@@ -178,22 +183,24 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
                                             registerExporter(bundle, implType, resourceType, ann, regs, accessor);
                                         }
                                     }
-
                                 }
                             }
                         }
                     }
                 }
-
             }
-        } catch (ClassNotFoundException|AnnotationFormatError e) {
-            log.warn("Unable to load class '{}' from bundle '{}': {}", className, bundle.getSymbolicName(), e.getLocalizedMessage(), e);
+        } catch (ClassNotFoundException | AnnotationFormatError e) {
+            log.warn(
+                    "Unable to load class '{}' from bundle '{}': {}",
+                    className,
+                    bundle.getSymbolicName(),
+                    e.getLocalizedMessage(),
+                    e);
         }
     }
 
     @Override
-    public void modifiedBundle(Bundle bundle, BundleEvent event, ServiceRegistration[] object) {
-    }
+    public void modifiedBundle(Bundle bundle, BundleEvent event, ServiceRegistration[] object) {}
 
     @Override
     public void removedBundle(Bundle bundle, BundleEvent event, ServiceRegistration[] object) {
@@ -209,7 +216,6 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
             reg.unregister();
         }
         adapterImplementations.removeResourceTypeBindings(bundle);
-
     }
 
     public synchronized void unregisterAll() {
@@ -242,8 +248,10 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
     private boolean validateAdapterClasses(Class<?> clazz, Class<?>[] adapterClasses) {
         for (Class<?> adapterClass : adapterClasses) {
             if (!adapterClass.isAssignableFrom(clazz)) {
-                log.warn("Unable to register model class {} because adapter class {} is not valid.",
-                        clazz.getName(), adapterClass.getName());
+                log.warn(
+                        "Unable to register model class {} because adapter class {} is not valid.",
+                        clazz.getName(),
+                        adapterClass.getName());
                 return false;
             }
         }
@@ -258,7 +266,8 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
      * @param condition Condition (optional)
      * @return Service registration
      */
-    private ServiceRegistration registerAdapterFactory(Class<?>[] adapterTypes, Class<?>[] adaptableTypes, Class<?> implType, String condition) {
+    private ServiceRegistration registerAdapterFactory(
+            Class<?>[] adapterTypes, Class<?>[] adaptableTypes, Class<?> implType, String condition) {
         Dictionary<String, Object> registrationProps = new Hashtable<>();
         registrationProps.put(AdapterFactory.ADAPTER_CLASSES, toStringArray(adapterTypes));
         registrationProps.put(AdapterFactory.ADAPTABLE_CLASSES, toStringArray(adaptableTypes));
@@ -271,13 +280,25 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
         return bundleContext.registerService(AdapterFactory.SERVICE_NAME, factory, registrationProps);
     }
 
-
-    private void registerExporter(Bundle bundle, Class<?> annotatedClass, String resourceType, Exporter exporterAnnotation,
-                                  List<ServiceRegistration> regs, ExportServlet.ExportedObjectAccessor accessor) {
+    private void registerExporter(
+            Bundle bundle,
+            Class<?> annotatedClass,
+            String resourceType,
+            Exporter exporterAnnotation,
+            List<ServiceRegistration> regs,
+            ExportServlet.ExportedObjectAccessor accessor) {
         if (accessor != null) {
             Map<String, String> baseOptions = getOptions(exporterAnnotation);
-            ExportServlet servlet = new ExportServlet(bundle.getBundleContext(), factory, bindingsValuesProvidersByContext,
-                    scriptEngineFactory, annotatedClass, exporterAnnotation.selector(), exporterAnnotation.name(), accessor, baseOptions);
+            ExportServlet servlet = new ExportServlet(
+                    bundle.getBundleContext(),
+                    factory,
+                    bindingsValuesProvidersByContext,
+                    scriptEngineFactory,
+                    annotatedClass,
+                    exporterAnnotation.selector(),
+                    exporterAnnotation.name(),
+                    accessor,
+                    baseOptions);
             Dictionary<String, Object> registrationProps = new Hashtable<>();
             registrationProps.put("sling.servlet.resourceTypes", resourceType);
             registrationProps.put("sling.servlet.selectors", exporterAnnotation.selector());
@@ -285,9 +306,12 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
             registrationProps.put(PROP_EXPORTER_SERVLET_CLASS, annotatedClass.getName());
             registrationProps.put(PROP_EXPORTER_SERVLET_NAME, exporterAnnotation.name());
 
-            log.debug("registering servlet for {}, {}, {}", new Object[]{resourceType, exporterAnnotation.selector(), exporterAnnotation.extensions()});
+            log.debug(
+                    "registering servlet for {}, {}, {}",
+                    new Object[] {resourceType, exporterAnnotation.selector(), exporterAnnotation.extensions()});
 
-            ServiceRegistration reg = bundleContext.registerService(Servlet.class.getName(), servlet, registrationProps);
+            ServiceRegistration reg =
+                    bundleContext.registerService(Servlet.class.getName(), servlet, registrationProps);
             regs.add(reg);
         }
     }
@@ -304,5 +328,4 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
             return map;
         }
     }
-
 }

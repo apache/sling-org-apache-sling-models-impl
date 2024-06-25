@@ -46,15 +46,39 @@ public class ConstructorParameter extends AbstractInjectableElement {
      * @param processorFactories
      * @param defaultInjectionStrategy
      */
-    public static ConstructorParameter of(Parameter parameter, int parameterIndex, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
+    public static ConstructorParameter of(
+            Parameter parameter,
+            int parameterIndex,
+            StaticInjectAnnotationProcessorFactory[] processorFactories,
+            DefaultInjectionStrategy defaultInjectionStrategy) {
         Type genericType = ReflectionUtil.mapPrimitiveClasses(parameter.getParameterizedType());
         boolean isPrimitive = (parameter.getParameterizedType() != genericType);
-        return new ConstructorParameter(parameter.getAnnotations(), parameter.getType(), genericType, isPrimitive, parameterIndex, parameter.getName(), processorFactories, defaultInjectionStrategy);
+        return new ConstructorParameter(
+                parameter.getAnnotations(),
+                parameter.getType(),
+                genericType,
+                isPrimitive,
+                parameterIndex,
+                parameter.getName(),
+                processorFactories,
+                defaultInjectionStrategy);
     }
 
-    public ConstructorParameter(Annotation[] annotations, Type parameterType, Type genericType, boolean isPrimitive,
-            int parameterIndex, String name, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
-        super(new FakeAnnotatedElement(annotations, parameterIndex), genericType, name, processorFactories, defaultInjectionStrategy);
+    public ConstructorParameter(
+            Annotation[] annotations,
+            Type parameterType,
+            Type genericType,
+            boolean isPrimitive,
+            int parameterIndex,
+            String name,
+            StaticInjectAnnotationProcessorFactory[] processorFactories,
+            DefaultInjectionStrategy defaultInjectionStrategy) {
+        super(
+                new FakeAnnotatedElement(annotations, parameterIndex),
+                genericType,
+                name,
+                processorFactories,
+                defaultInjectionStrategy);
         this.parameterType = parameterType;
         this.isPrimitive = isPrimitive;
         this.parameterIndex = parameterIndex;
@@ -92,12 +116,12 @@ public class ConstructorParameter extends AbstractInjectableElement {
             return getAnnotation(paramClass) != null;
         }
 
-        @SuppressWarnings({ "unchecked", "null" })
+        @SuppressWarnings({"unchecked", "null"})
         @Override
         public <T extends Annotation> T getAnnotation(Class<T> paramClass) {
             for (Annotation annotation : this.annotations) {
                 if (paramClass.isInstance(annotation)) {
-                    return (T)annotation;
+                    return (T) annotation;
                 }
             }
             return null;
@@ -122,7 +146,5 @@ public class ConstructorParameter extends AbstractInjectableElement {
             return "FakeAnnotatedElement [annotations=" + Arrays.toString(annotations) + ", parameterIndex="
                     + parameterIndex + "]";
         }
-
     }
-
 }

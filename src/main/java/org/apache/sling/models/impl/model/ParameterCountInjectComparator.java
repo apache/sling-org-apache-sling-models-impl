@@ -18,10 +18,10 @@
  */
 package org.apache.sling.models.impl.model;
 
+import javax.inject.Inject;
+
 import java.lang.reflect.Constructor;
 import java.util.Comparator;
-
-import javax.inject.Inject;
 
 /**
  * Comparator which sorts constructors by the number of parameters
@@ -34,10 +34,9 @@ class ParameterCountInjectComparator implements Comparator<Constructor<?>> {
     @Override
     public int compare(Constructor<?> o1, Constructor<?> o2) {
         int result = compareParameterCount(o2.getParameterTypes().length, o1.getParameterTypes().length);
-        if (result==0) {
+        if (result == 0) {
             return compareInjectAnnotation(o1, o2);
-        }
-        else {
+        } else {
             return result;
         }
     }
@@ -51,13 +50,10 @@ class ParameterCountInjectComparator implements Comparator<Constructor<?>> {
         boolean hasInject2 = o2.isAnnotationPresent(Inject.class);
         if (hasInject1 && !hasInject2) {
             return -1;
-        }
-        else if (hasInject2 && !hasInject1) {
+        } else if (hasInject2 && !hasInject1) {
             return 1;
-        }
-        else {
+        } else {
             return 0;
         }
     }
-    
 }

@@ -60,7 +60,7 @@ abstract class AbstractInjector {
         if (adaptable instanceof ValueMap) {
             return (ValueMap) adaptable;
         } else if (adaptable instanceof SlingHttpServletRequest) {
-            final Resource resource = ((SlingHttpServletRequest)adaptable).getResource();
+            final Resource resource = ((SlingHttpServletRequest) adaptable).getResource();
             // resource may be null for mocked adaptables, therefore do a check here
             if (resource != null) {
                 return resource.adaptTo(ValueMap.class);
@@ -79,10 +79,8 @@ abstract class AbstractInjector {
         if (declaredType instanceof ParameterizedType) {
             ParameterizedType type = (ParameterizedType) declaredType;
             Class<?> collectionType = (Class<?>) type.getRawType();
-            isCollection = collectionType.equals(Collection.class)
-                    || collectionType.equals(List.class);
+            isCollection = collectionType.equals(Collection.class) || collectionType.equals(List.class);
         }
         return isCollection;
     }
-
 }

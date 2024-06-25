@@ -1,18 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
 
@@ -40,6 +42,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
+
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -73,24 +76,23 @@ public class OptionalObjectsTest {
         ChildResourceInjector childResourceInjector = new ChildResourceInjector();
         RequestAttributeInjector requestAttributeInjector = new RequestAttributeInjector();
 
-        factory.bindInjector(bindingsInjector,
-                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 1L));
-        factory.bindInjector(valueMapInjector,
-                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 2L));
-        factory.bindInjector(childResourceInjector,
-                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 3L));
-        factory.bindInjector(requestAttributeInjector,
-                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 4L));
+        factory.bindInjector(bindingsInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 1L));
+        factory.bindInjector(valueMapInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 2L));
+        factory.bindInjector(childResourceInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 3L));
+        factory.bindInjector(
+                requestAttributeInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 4L));
         factory.bindInjector(osgiInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 5L));
 
-        factory.bindStaticInjectAnnotationProcessorFactory(bindingsInjector,
-                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 1L));
-        factory.injectAnnotationProcessorFactories = Collections.<InjectAnnotationProcessorFactory>singletonList(valueMapInjector);
-        factory.injectAnnotationProcessorFactories2 = Collections.<InjectAnnotationProcessorFactory2>singletonList(childResourceInjector);
-        factory.bindStaticInjectAnnotationProcessorFactory(requestAttributeInjector,
-                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 4L));
-        factory.bindStaticInjectAnnotationProcessorFactory(osgiInjector,
-                Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 5L));
+        factory.bindStaticInjectAnnotationProcessorFactory(
+                bindingsInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 1L));
+        factory.injectAnnotationProcessorFactories =
+                Collections.<InjectAnnotationProcessorFactory>singletonList(valueMapInjector);
+        factory.injectAnnotationProcessorFactories2 =
+                Collections.<InjectAnnotationProcessorFactory2>singletonList(childResourceInjector);
+        factory.bindStaticInjectAnnotationProcessorFactory(
+                requestAttributeInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 4L));
+        factory.bindStaticInjectAnnotationProcessorFactory(
+                osgiInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 5L));
         factory.bindViaProvider(new BeanPropertyViaProvider(), null);
 
         SlingBindings bindings = new SlingBindings();
@@ -98,7 +100,6 @@ public class OptionalObjectsTest {
         Mockito.when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
 
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(OptionalObjectsModel.class);
-
     }
 
     @Test
@@ -118,8 +119,8 @@ public class OptionalObjectsTest {
         Resource res = mock(Resource.class);
         when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(map));
 
-        org.apache.sling.models.testmodels.classes.OptionalObjectsModel model = factory.getAdapter(res,
-                OptionalObjectsModel.class);
+        org.apache.sling.models.testmodels.classes.OptionalObjectsModel model =
+                factory.getAdapter(res, OptionalObjectsModel.class);
         assertNotNull(model);
 
         assertEquals(Optional.of("foo bar baz"), model.getOptionalString());
@@ -157,10 +158,10 @@ public class OptionalObjectsTest {
     public void testFieldInjectionListsAndArrays() {
         Map<String, Object> map = new HashMap<>();
 
-        map.put("intList", new Integer[]{1, 2, 9, 8});
-        map.put("stringList", new String[]{"hello", "world"});
+        map.put("intList", new Integer[] {1, 2, 9, 8});
+        map.put("stringList", new String[] {"hello", "world"});
         map.put("optionalList", Arrays.asList("foo", "bar", "baz"));
-        map.put("optionalArray", new String[]{"qux", "quux"});
+        map.put("optionalArray", new String[] {"qux", "quux"});
 
         ValueMap vm = new ValueMapDecorator(map);
         Resource res = mock(Resource.class);
@@ -215,8 +216,7 @@ public class OptionalObjectsTest {
     public void testFieldInjectionsOSGiService() throws InvalidSyntaxException {
         ServiceReference ref = mock(ServiceReference.class);
         Logger log = mock(Logger.class);
-        when(bundleContext.getServiceReferences(Logger.class.getName(), null)).thenReturn(
-                new ServiceReference[]{ref});
+        when(bundleContext.getServiceReferences(Logger.class.getName(), null)).thenReturn(new ServiceReference[] {ref});
         when(bundleContext.getService(ref)).thenReturn(log);
 
         OptionalObjectsModel model = factory.getAdapter(request, OptionalObjectsModel.class);

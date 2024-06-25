@@ -18,12 +18,12 @@
  */
 package org.apache.sling.models.impl.implpicker;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.sling.models.impl.FirstImplementationPicker;
 import org.apache.sling.models.spi.ImplementationPicker;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class FirstImplementationPickerTest {
 
@@ -39,14 +39,13 @@ public class FirstImplementationPickerTest {
 
     @Test
     public void testPickOneImplementation() {
-        Class<?>[] implementations = new Class<?>[] { String.class };
+        Class<?>[] implementations = new Class<?>[] {String.class};
         assertEquals(String.class, underTest.pick(SAMPLE_ADAPTER, implementations, SAMPLE_ADAPTABLE));
     }
 
     @Test
     public void testPickMultipleImplementations() {
-        Class<?>[] implementations = new Class<?>[] { Integer.class, Long.class, String.class };
+        Class<?>[] implementations = new Class<?>[] {Integer.class, Long.class, String.class};
         assertEquals(Integer.class, underTest.pick(SAMPLE_ADAPTER, implementations, SAMPLE_ADAPTABLE));
     }
-
 }

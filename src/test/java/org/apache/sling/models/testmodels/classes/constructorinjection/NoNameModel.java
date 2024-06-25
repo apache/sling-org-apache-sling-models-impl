@@ -37,5 +37,4 @@ public class NoNameModel {
     public SlingScriptHelper getSling() {
         return sling;
     }
-
 }

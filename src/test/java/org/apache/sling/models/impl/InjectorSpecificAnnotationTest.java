@@ -1,25 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,6 +50,11 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("deprecation")
 public class InjectorSpecificAnnotationTest {
@@ -82,31 +84,32 @@ public class InjectorSpecificAnnotationTest {
         ChildResourceInjector childResourceInjector = new ChildResourceInjector();
         RequestAttributeInjector requestAttributeInjector = new RequestAttributeInjector();
 
-        factory.bindInjector(bindingsInjector,
-                Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 1L));
-        factory.bindInjector(valueMapInjector,
-                Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 2L));
-        factory.bindInjector(childResourceInjector,
-                Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 3L));
-        factory.bindInjector(requestAttributeInjector,
-                Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 4L));
-        factory.bindInjector(osgiInjector, Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 5L));
+        factory.bindInjector(bindingsInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 1L));
+        factory.bindInjector(valueMapInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 2L));
+        factory.bindInjector(childResourceInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 3L));
+        factory.bindInjector(
+                requestAttributeInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 4L));
+        factory.bindInjector(osgiInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 5L));
 
-        factory.bindStaticInjectAnnotationProcessorFactory(bindingsInjector,
-                Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 1L));
-        factory.injectAnnotationProcessorFactories = Collections.<InjectAnnotationProcessorFactory>singletonList(valueMapInjector);
-        factory.injectAnnotationProcessorFactories2 = Collections.<InjectAnnotationProcessorFactory2>singletonList(childResourceInjector);
-        factory.bindStaticInjectAnnotationProcessorFactory(requestAttributeInjector,
-                Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 4L));
-        factory.bindStaticInjectAnnotationProcessorFactory(osgiInjector,
-                Collections.<String, Object> singletonMap(Constants.SERVICE_ID, 5L));
+        factory.bindStaticInjectAnnotationProcessorFactory(
+                bindingsInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 1L));
+        factory.injectAnnotationProcessorFactories =
+                Collections.<InjectAnnotationProcessorFactory>singletonList(valueMapInjector);
+        factory.injectAnnotationProcessorFactories2 =
+                Collections.<InjectAnnotationProcessorFactory2>singletonList(childResourceInjector);
+        factory.bindStaticInjectAnnotationProcessorFactory(
+                requestAttributeInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 4L));
+        factory.bindStaticInjectAnnotationProcessorFactory(
+                osgiInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 5L));
         factory.bindViaProvider(new BeanPropertyViaProvider(), null);
 
         SlingBindings bindings = new SlingBindings();
         bindings.setLog(log);
         Mockito.when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
 
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(InjectorSpecificAnnotationModel.class, org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel.class);
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(
+                InjectorSpecificAnnotationModel.class,
+                org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel.class);
     }
 
     @Test
@@ -149,12 +152,11 @@ public class InjectorSpecificAnnotationTest {
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({"unchecked", "null"})
     public void testOSGiServiceField() throws InvalidSyntaxException {
         ServiceReference ref = mock(ServiceReference.class);
         Logger log = mock(Logger.class);
-        when(bundleContext.getServiceReferences(Logger.class.getName(), null)).thenReturn(
-                new ServiceReference[] { ref });
+        when(bundleContext.getServiceReferences(Logger.class.getName(), null)).thenReturn(new ServiceReference[] {ref});
         when(bundleContext.getService(ref)).thenReturn(log);
 
         InjectorSpecificAnnotationModel model = factory.getAdapter(request, InjectorSpecificAnnotationModel.class);
@@ -207,8 +209,11 @@ public class InjectorSpecificAnnotationTest {
         when(res.adaptTo(ValueMap.class)).thenReturn(vm);
         when(request.getResource()).thenReturn(res);
 
-        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel model
-                = factory.getAdapter(request, org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel.class);
+        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel model =
+                factory.getAdapter(
+                        request,
+                        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel
+                                .class);
         assertNotNull("Could not instanciate model", model);
         assertEquals("first-value", model.getFirst());
         assertEquals("second-value", model.getSecond());
@@ -230,24 +235,29 @@ public class InjectorSpecificAnnotationTest {
         when(res.adaptTo(ValueMap.class)).thenReturn(vm);
         when(request.getResource()).thenReturn(res);
 
-        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel model
-                = factory.getAdapter(request, org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel.class);
+        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel model =
+                factory.getAdapter(
+                        request,
+                        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel
+                                .class);
         assertNotNull("Could not instanciate model", model);
         assertEquals("first-value", model.getFirst());
         assertEquals(logFromValueMap, model.getLog());
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({"unchecked", "null"})
     public void testOSGiServiceConstructor() throws InvalidSyntaxException {
         ServiceReference ref = mock(ServiceReference.class);
         Logger log = mock(Logger.class);
-        when(bundleContext.getServiceReferences(Logger.class.getName(), null)).thenReturn(
-                new ServiceReference[] { ref });
+        when(bundleContext.getServiceReferences(Logger.class.getName(), null)).thenReturn(new ServiceReference[] {ref});
         when(bundleContext.getService(ref)).thenReturn(log);
 
-        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel model
-                = factory.getAdapter(request, org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel.class);
+        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel model =
+                factory.getAdapter(
+                        request,
+                        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel
+                                .class);
         assertNotNull("Could not instanciate model", model);
         assertEquals(log, model.getService());
     }
@@ -259,8 +269,11 @@ public class InjectorSpecificAnnotationTest {
         bindings.setSling(helper);
         when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
 
-        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel model
-                = factory.getAdapter(request, org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel.class);
+        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel model =
+                factory.getAdapter(
+                        request,
+                        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel
+                                .class);
         assertNotNull("Could not instanciate model", model);
         assertEquals(helper, model.getHelper());
     }
@@ -270,8 +283,11 @@ public class InjectorSpecificAnnotationTest {
         Object attribute = new Object();
         when(request.getAttribute("attribute")).thenReturn(attribute);
 
-        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel model
-                = factory.getAdapter(request, org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel.class);
+        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel model =
+                factory.getAdapter(
+                        request,
+                        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel
+                                .class);
         assertNotNull("Could not instanciate model", model);
         assertEquals(attribute, model.getRequestAttribute());
     }
@@ -283,10 +299,12 @@ public class InjectorSpecificAnnotationTest {
         when(res.getChild("child1")).thenReturn(child);
         when(request.getResource()).thenReturn(res);
 
-        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel model
-                = factory.getAdapter(request, org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel.class);
+        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel model =
+                factory.getAdapter(
+                        request,
+                        org.apache.sling.models.testmodels.classes.constructorinjection.InjectorSpecificAnnotationModel
+                                .class);
         assertNotNull("Could not instanciate model", model);
         assertEquals(child, model.getChildResource());
     }
-
 }

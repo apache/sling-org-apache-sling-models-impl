@@ -1,29 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -63,6 +56,15 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 @RunWith(MockitoJUnitRunner.class)
 public class ImplementsExtendsTest {
 
@@ -86,30 +88,32 @@ public class ImplementsExtendsTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setup() throws ClassNotFoundException, MalformedURLException {
-        when(bundleContext.registerService(anyString(), any(), any(Dictionary.class))).then(new Answer<ServiceRegistration>() {
-            @Override
-            public ServiceRegistration<?> answer(InvocationOnMock invocation) throws Throwable {
-                final Dictionary<String, Object> props = (Dictionary<String, Object>)invocation.getArguments()[2];
-                ServiceRegistration reg = mock(ServiceRegistration.class);
-                ServiceReference ref = mock(ServiceReference.class);
-                when(reg.getReference()).thenReturn(ref);
-                when(ref.getProperty(anyString())).thenAnswer(new Answer<Object>() {
+        when(bundleContext.registerService(anyString(), any(), any(Dictionary.class)))
+                .then(new Answer<ServiceRegistration>() {
                     @Override
-                    public Object answer(InvocationOnMock invocation) throws Throwable {
-                        String key = (String)invocation.getArguments()[0];
-                        return props.get(key);
+                    public ServiceRegistration<?> answer(InvocationOnMock invocation) throws Throwable {
+                        final Dictionary<String, Object> props =
+                                (Dictionary<String, Object>) invocation.getArguments()[2];
+                        ServiceRegistration reg = mock(ServiceRegistration.class);
+                        ServiceReference ref = mock(ServiceReference.class);
+                        when(reg.getReference()).thenReturn(ref);
+                        when(ref.getProperty(anyString())).thenAnswer(new Answer<Object>() {
+                            @Override
+                            public Object answer(InvocationOnMock invocation) throws Throwable {
+                                String key = (String) invocation.getArguments()[0];
+                                return props.get(key);
+                            }
+                        });
+                        return reg;
                     }
                 });
-                return reg;
-            }
-        });
 
         factory = AdapterFactoryTest.createModelAdapterFactory(bundleContext);
         factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(2, 2));
         factory.bindImplementationPicker(firstImplementationPicker, firstImplementationPickerProps);
 
         // simulate bundle add for ModelPackageBundleListener
-        Dictionary<String, String> headers = new Hashtable<String,String>();
+        Dictionary<String, String> headers = new Hashtable<String, String>();
         headers.put(ModelPackageBundleListener.PACKAGE_HEADER, "org.apache.sling.models.testmodels.classes.implextend");
         when(bundle.getHeaders()).thenReturn(headers);
 
@@ -126,7 +130,7 @@ public class ImplementsExtendsTest {
         when(bundle.loadClass(anyString())).then(new Answer<Class<?>>() {
             @Override
             public Class<?> answer(InvocationOnMock invocation) throws ClassNotFoundException {
-                String className = (String)invocation.getArguments()[0];
+                String className = (String) invocation.getArguments()[0];
                 return ImplementsExtendsTest.this.getClass().getClassLoader().loadClass(className);
             }
         });
@@ -148,7 +152,8 @@ public class ImplementsExtendsTest {
         Resource res = getMockResourceWithProps();
         try {
             factory.getAdapter(res, SampleServiceInterface.class);
-            Assert.fail("Getting the model for interface 'SampleServiceInterface' should fail after the accroding adapter factory has been unregistered");
+            Assert.fail(
+                    "Getting the model for interface 'SampleServiceInterface' should fail after the accroding adapter factory has been unregistered");
         } catch (ModelClassException e) {
 
         }
@@ -187,7 +192,7 @@ public class ImplementsExtendsTest {
      * Try to adapt in a case where there is no picker available.
      * The case where the class is the adapter still works.
      */
-    @Test(expected=ModelClassException.class)
+    @Test(expected = ModelClassException.class)
     public void testImplementsNoPickerWithDifferentImplementations() {
         factory.unbindImplementationPicker(firstImplementationPicker, firstImplementationPickerProps);
 
@@ -212,7 +217,7 @@ public class ImplementsExtendsTest {
     /**
      * Test implementation class with a mapping that is not valid (an interface that is not implemented).
      */
-    @Test(expected=ModelClassException.class)
+    @Test(expected = ModelClassException.class)
     public void testInvalidImplementsInterfaceModel() {
         Resource res = getMockResourceWithProps();
         factory.getAdapter(res, InvalidSampleServiceInterface.class);
@@ -242,7 +247,8 @@ public class ImplementsExtendsTest {
      */
     @Test
     public void testImplementsInterfaceModelWithPickLastImplementationPicker() {
-        factory.bindImplementationPicker(new AdapterImplementationsTest.LastImplementationPicker(), new ServicePropertiesMap(3, 1));
+        factory.bindImplementationPicker(
+                new AdapterImplementationsTest.LastImplementationPicker(), new ServicePropertiesMap(3, 1));
 
         Resource res = getMockResourceWithProps();
         SampleServiceInterface model = factory.getAdapter(res, SampleServiceInterface.class);
@@ -262,5 +268,4 @@ public class ImplementsExtendsTest {
         when(res.adaptTo(ValueMap.class)).thenReturn(vm);
         return res;
     }
-
 }

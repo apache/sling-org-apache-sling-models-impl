@@ -28,11 +28,19 @@ import org.apache.sling.models.impl.Result;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 
 public class InjectableField extends AbstractInjectableElement {
-    
+
     private final Field field;
-    
-    public InjectableField(Field field, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
-        super(field, ReflectionUtil.mapPrimitiveClasses(field.getGenericType()), field.getName(), processorFactories, defaultInjectionStrategy);
+
+    public InjectableField(
+            Field field,
+            StaticInjectAnnotationProcessorFactory[] processorFactories,
+            DefaultInjectionStrategy defaultInjectionStrategy) {
+        super(
+                field,
+                ReflectionUtil.mapPrimitiveClasses(field.getGenericType()),
+                field.getName(),
+                processorFactories,
+                defaultInjectionStrategy);
         this.field = field;
     }
 
@@ -41,7 +49,7 @@ public class InjectableField extends AbstractInjectableElement {
             field.setAccessible(true);
             field.set(createdObject, result.getValue());
         } catch (Exception e) {
-            return new ModelClassException("Could not inject field due to reflection issues", e);
+            return new ModelClassException("Could not inject field " + field + " due to reflection issues", e);
         }
         return null;
     }

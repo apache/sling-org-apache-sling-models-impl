@@ -1,27 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
-
-import org.apache.sling.scripting.api.AbstractScriptEngineFactory;
-import org.apache.sling.scripting.api.BindingsValuesProvider;
-import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
-import org.apache.sling.scripting.core.impl.helper.ProtectedBindings;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
@@ -31,6 +26,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.sling.scripting.api.AbstractScriptEngineFactory;
+import org.apache.sling.scripting.api.BindingsValuesProvider;
+import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
+import org.apache.sling.scripting.core.impl.helper.ProtectedBindings;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 
 import static org.apache.sling.api.scripting.SlingBindings.*;
 
@@ -53,7 +55,9 @@ class SlingModelsScriptEngineFactory extends AbstractScriptEngineFactory impleme
         super();
         setEngineName("Apache Sling Models");
         // really the only time this is null is during testing
-        if (bundle != null && bundle.getHeaders() != null && bundle.getHeaders().get(Constants.BUNDLE_VERSION) != null) {
+        if (bundle != null
+                && bundle.getHeaders() != null
+                && bundle.getHeaders().get(Constants.BUNDLE_VERSION) != null) {
             setEngineVersion(bundle.getHeaders().get(Constants.BUNDLE_VERSION).toString());
         }
         setNames("sling-models-exporter", "sling-models");
@@ -74,9 +78,11 @@ class SlingModelsScriptEngineFactory extends AbstractScriptEngineFactory impleme
         return null;
     }
 
-    void invokeBindingsValuesProviders(BindingsValuesProvidersByContext bindingsValuesProvidersByContext, Bindings bindings) {
+    void invokeBindingsValuesProviders(
+            BindingsValuesProvidersByContext bindingsValuesProvidersByContext, Bindings bindings) {
         final Collection<BindingsValuesProvider> bindingsValuesProviders =
-                bindingsValuesProvidersByContext.getBindingsValuesProviders(this, SlingModelsScriptEngineFactory.BINDINGS_CONTEXT);
+                bindingsValuesProvidersByContext.getBindingsValuesProviders(
+                        this, SlingModelsScriptEngineFactory.BINDINGS_CONTEXT);
 
         if (!bindingsValuesProviders.isEmpty()) {
             Set<String> protectedKeys = new HashSet<String>();
@@ -86,7 +92,6 @@ class SlingModelsScriptEngineFactory extends AbstractScriptEngineFactory impleme
             for (BindingsValuesProvider provider : bindingsValuesProviders) {
                 provider.addBindings(protectedBindings);
             }
-
         }
     }
 }
