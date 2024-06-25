@@ -18,12 +18,9 @@
  */
 package org.apache.sling.models.impl.injectors;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import javax.servlet.ServletRequest;
 
 import java.lang.reflect.AnnotatedElement;
-
-import javax.servlet.ServletRequest;
 
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
@@ -33,25 +30,30 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 @RunWith(MockitoJUnitRunner.class)
 public class RequestAttributeInjectorTest {
 
     private RequestAttributeInjector injector = new RequestAttributeInjector();
-    
+
     @Mock
     private ServletRequest request;
+
     @Mock
     private AnnotatedElement element;
+
     @Mock
     private DisposalCallbackRegistry registry;
-    
+
     private static final String STRING_PARAM = "param1";
     private static final String INTEGER_PARAM = "param2";
     private static final String CLASS_PARAM = "param3";
     private static final String STRING_VALUE = "myValue";
     private static final int INTEGER_VALUE = 42;
     private static final ResourceResolver CLASS_INSTANCE = mock(ResourceResolver.class);
-    
+
     @Before
     public void setUp() {
         when(request.getAttribute(STRING_PARAM)).thenReturn(STRING_VALUE);

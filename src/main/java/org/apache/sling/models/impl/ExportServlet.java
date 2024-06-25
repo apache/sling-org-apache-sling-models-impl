@@ -18,23 +18,15 @@
  */
 package org.apache.sling.models.impl;
 
-import static org.apache.sling.api.scripting.SlingBindings.LOG;
-import static org.apache.sling.api.scripting.SlingBindings.OUT;
-import static org.apache.sling.api.scripting.SlingBindings.READER;
-import static org.apache.sling.api.scripting.SlingBindings.REQUEST;
-import static org.apache.sling.api.scripting.SlingBindings.RESOURCE;
-import static org.apache.sling.api.scripting.SlingBindings.RESPONSE;
-import static org.apache.sling.api.scripting.SlingBindings.SLING;
+import javax.script.Bindings;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.script.Bindings;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -50,6 +42,14 @@ import org.apache.sling.scripting.core.ScriptHelper;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.apache.sling.api.scripting.SlingBindings.LOG;
+import static org.apache.sling.api.scripting.SlingBindings.OUT;
+import static org.apache.sling.api.scripting.SlingBindings.READER;
+import static org.apache.sling.api.scripting.SlingBindings.REQUEST;
+import static org.apache.sling.api.scripting.SlingBindings.RESOURCE;
+import static org.apache.sling.api.scripting.SlingBindings.RESPONSE;
+import static org.apache.sling.api.scripting.SlingBindings.SLING;
 
 @SuppressWarnings("serial")
 class ExportServlet extends SlingSafeMethodsServlet {
@@ -68,10 +68,16 @@ class ExportServlet extends SlingSafeMethodsServlet {
     private final ExportedObjectAccessor accessor;
     private final Map<String, String> baseOptions;
 
-    public ExportServlet(BundleContext bundleContext, ModelFactory modelFactory,
-                         BindingsValuesProvidersByContext bindingsValuesProvidersByContext, SlingModelsScriptEngineFactory scriptFactory,
-                         Class<?> annotatedClass, String registeredSelector, String exporterName, ExportedObjectAccessor accessor,
-                         Map<String, String> baseOptions) {
+    public ExportServlet(
+            BundleContext bundleContext,
+            ModelFactory modelFactory,
+            BindingsValuesProvidersByContext bindingsValuesProvidersByContext,
+            SlingModelsScriptEngineFactory scriptFactory,
+            Class<?> annotatedClass,
+            String registeredSelector,
+            String exporterName,
+            ExportedObjectAccessor accessor,
+            Map<String, String> baseOptions) {
         this.bundleContext = bundleContext;
         this.modelFactory = modelFactory;
         this.bindingsValuesProvidersByContext = bindingsValuesProvidersByContext;
@@ -124,12 +130,14 @@ class ExportServlet extends SlingSafeMethodsServlet {
         }
     }
 
-    private void addScriptBindings(SlingScriptHelper scriptHelper, SlingHttpServletRequest request, SlingHttpServletResponse response)
+    private void addScriptBindings(
+            SlingScriptHelper scriptHelper, SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException {
         Bindings bindings = new LazyBindings();
         bindings.put(SLING, scriptHelper);
         bindings.put(RESOURCE, request.getResource());
-        bindings.put(SlingModelsScriptEngineFactory.RESOLVER, request.getResource().getResourceResolver());
+        bindings.put(
+                SlingModelsScriptEngineFactory.RESOLVER, request.getResource().getResourceResolver());
         bindings.put(REQUEST, request);
         bindings.put(RESPONSE, response);
         try {
@@ -146,13 +154,13 @@ class ExportServlet extends SlingSafeMethodsServlet {
         slingBindings.putAll(bindings);
 
         request.setAttribute(SlingBindings.class.getName(), slingBindings);
-
     }
 
     private Map<String, String> createOptionMap(SlingHttpServletRequest request) {
         Map<String, String[]> parameterMap = request.getParameterMap();
         String[] selectors = request.getRequestPathInfo().getSelectors();
-        Map<String, String> result = new HashMap<String, String>(baseOptions.size() + parameterMap.size() + selectors.length - 1);
+        Map<String, String> result =
+                new HashMap<String, String>(baseOptions.size() + parameterMap.size() + selectors.length - 1);
         result.putAll(baseOptions);
         for (String selector : selectors) {
             if (!selector.equals(registeredSelector)) {
@@ -171,7 +179,12 @@ class ExportServlet extends SlingSafeMethodsServlet {
     }
 
     public interface ExportedObjectAccessor {
-        String getExportedString(SlingHttpServletRequest request, Map<String, String> options, ModelFactory modelFactory, String exporterName) throws ExportException, MissingExporterException;
+        String getExportedString(
+                SlingHttpServletRequest request,
+                Map<String, String> options,
+                ModelFactory modelFactory,
+                String exporterName)
+                throws ExportException, MissingExporterException;
     }
 
     public static final class ResourceAccessor implements ExportedObjectAccessor {
@@ -183,7 +196,12 @@ class ExportServlet extends SlingSafeMethodsServlet {
         }
 
         @Override
-        public String getExportedString(SlingHttpServletRequest request, Map<String, String> options, ModelFactory modelFactory, String exporterName) throws ExportException, MissingExporterException {
+        public String getExportedString(
+                SlingHttpServletRequest request,
+                Map<String, String> options,
+                ModelFactory modelFactory,
+                String exporterName)
+                throws ExportException, MissingExporterException {
             Object adapter = modelFactory.createModel(request.getResource(), adapterClass);
             return modelFactory.exportModel(adapter, exporterName, String.class, options);
         }
@@ -198,10 +216,15 @@ class ExportServlet extends SlingSafeMethodsServlet {
         }
 
         @Override
-        public String getExportedString(SlingHttpServletRequest request, Map<String, String> options, ModelFactory modelFactory, String exporterName) throws ExportException, MissingExporterException {
+        public String getExportedString(
+                SlingHttpServletRequest request,
+                Map<String, String> options,
+                ModelFactory modelFactory,
+                String exporterName)
+                throws ExportException, MissingExporterException {
             Object adapter = modelFactory.createModel(request, adapterClass);
             return modelFactory.exportModel(adapter, exporterName, String.class, options);
         }
-    };
-
+    }
+    ;
 }

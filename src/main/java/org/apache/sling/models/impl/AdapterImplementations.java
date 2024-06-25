@@ -50,11 +50,10 @@ final class AdapterImplementations {
 
     private static final Logger log = LoggerFactory.getLogger(AdapterImplementations.class);
 
-    private final ConcurrentMap<String,ConcurrentNavigableMap<String,ModelClass<?>>> adapterImplementations
-            = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, ConcurrentNavigableMap<String, ModelClass<?>>> adapterImplementations =
+            new ConcurrentHashMap<>();
 
-    private final ConcurrentMap<String,ModelClass<?>> modelClasses
-            = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, ModelClass<?>> modelClasses = new ConcurrentHashMap<>();
 
     private final ConcurrentMap<String, Class<?>> resourceTypeMappingsForResources = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Class<?>> resourceTypeMappingsForRequests = new ConcurrentHashMap<>();
@@ -62,10 +61,12 @@ final class AdapterImplementations {
     private final ConcurrentMap<Bundle, List<String>> resourceTypeRemovalListsForRequests = new ConcurrentHashMap<>();
 
     private volatile ImplementationPicker[] sortedImplementationPickers = new ImplementationPicker[0];
-    private volatile StaticInjectAnnotationProcessorFactory[] sortedStaticInjectAnnotationProcessorFactories = new StaticInjectAnnotationProcessorFactory[0];
+    private volatile StaticInjectAnnotationProcessorFactory[] sortedStaticInjectAnnotationProcessorFactories =
+            new StaticInjectAnnotationProcessorFactory[0];
 
     public void setImplementationPickers(Collection<ImplementationPicker> implementationPickers) {
-        this.sortedImplementationPickers = implementationPickers.toArray(new ImplementationPicker[implementationPickers.size()]);
+        this.sortedImplementationPickers =
+                implementationPickers.toArray(new ImplementationPicker[implementationPickers.size()]);
     }
 
     public ImplementationPicker[] getImplementationPickers() {
@@ -78,7 +79,8 @@ final class AdapterImplementations {
 
     public void setStaticInjectAnnotationProcessorFactories(
             Collection<StaticInjectAnnotationProcessorFactory> factories) {
-        this.sortedStaticInjectAnnotationProcessorFactories = factories.toArray(new StaticInjectAnnotationProcessorFactory[factories.size()]);
+        this.sortedStaticInjectAnnotationProcessorFactories =
+                factories.toArray(new StaticInjectAnnotationProcessorFactory[factories.size()]);
         updateProcessorFactoriesInModelClasses();
     }
 
@@ -88,12 +90,14 @@ final class AdapterImplementations {
     private void updateProcessorFactoriesInModelClasses() {
         Iterator<ModelClass<?>> items = modelClasses.values().iterator();
         updateProcessorFactoriesInModelClasses(items);
-        Iterator<ConcurrentNavigableMap<String,ModelClass<?>>> mapItems = adapterImplementations.values().iterator();
+        Iterator<ConcurrentNavigableMap<String, ModelClass<?>>> mapItems =
+                adapterImplementations.values().iterator();
         while (mapItems.hasNext()) {
-            ConcurrentNavigableMap<String,ModelClass<?>> mapItem = mapItems.next();
+            ConcurrentNavigableMap<String, ModelClass<?>> mapItem = mapItems.next();
             updateProcessorFactoriesInModelClasses(mapItem.values().iterator());
         }
     }
+
     private void updateProcessorFactoriesInModelClasses(Iterator<ModelClass<?>> items) {
         while (items.hasNext()) {
             ModelClass<?> item = items.next();
@@ -135,11 +139,13 @@ final class AdapterImplementations {
             if (adapterType == implType) {
                 modelClasses.put(key, modelClass);
             } else {
-                // although we already use a ConcurrentMap synchronize explicitly because we apply non-atomic operations on it
+                // although we already use a ConcurrentMap synchronize explicitly because we apply non-atomic operations
+                // on it
                 synchronized (adapterImplementations) {
                     ConcurrentNavigableMap<String, ModelClass<?>> implementations = adapterImplementations.get(key);
                     if (implementations == null) {
-                        // to have a consistent ordering independent of bundle loading use a ConcurrentSkipListMap that sorts by class name
+                        // to have a consistent ordering independent of bundle loading use a ConcurrentSkipListMap that
+                        // sorts by class name
                         implementations = new ConcurrentSkipListMap<>();
                         adapterImplementations.put(key, implementations);
                     }
@@ -159,11 +165,11 @@ final class AdapterImplementations {
         String key = adapterTypeName;
         if (StringUtils.equals(adapterTypeName, implTypeName)) {
             modelClasses.remove(key);
-        }
-        else {
-            // although we already use a ConcurrentMap synchronize explicitly because we apply non-atomic operations on it
+        } else {
+            // although we already use a ConcurrentMap synchronize explicitly because we apply non-atomic operations on
+            // it
             synchronized (adapterImplementations) {
-                ConcurrentNavigableMap<String,ModelClass<?>> implementations = adapterImplementations.get(key);
+                ConcurrentNavigableMap<String, ModelClass<?>> implementations = adapterImplementations.get(key);
                 if (implementations != null) {
                     implementations.remove(implTypeName);
                     if (implementations.isEmpty()) {
@@ -193,31 +199,32 @@ final class AdapterImplementations {
         String key = adapterType.getName();
 
         // lookup in cache for models without adapter classes
-        ModelClass<ModelType> modelClass = (ModelClass<ModelType>)modelClasses.get(key);
-        if (modelClass!=null) {
+        ModelClass<ModelType> modelClass = (ModelClass<ModelType>) modelClasses.get(key);
+        if (modelClass != null) {
             return modelClass;
         }
 
         // not found? look in cache with adapter classes
-        ConcurrentNavigableMap<String,ModelClass<?>> implementations = adapterImplementations.get(key);
-        if (implementations==null || implementations.isEmpty()) {
+        ConcurrentNavigableMap<String, ModelClass<?>> implementations = adapterImplementations.get(key);
+        if (implementations == null || implementations.isEmpty()) {
             return null;
         }
         Collection<ModelClass<?>> implementationsCollection = implementations.values();
-        ModelClass<?>[] implementationWrappersArray = implementationsCollection.toArray(new ModelClass<?>[implementationsCollection.size()]);
+        ModelClass<?>[] implementationWrappersArray =
+                implementationsCollection.toArray(new ModelClass<?>[implementationsCollection.size()]);
 
         // prepare array for implementation picker
         Class<?>[] implementationsArray = new Class<?>[implementationsCollection.size()];
-        for (int i=0; i<implementationWrappersArray.length; i++) {
+        for (int i = 0; i < implementationWrappersArray.length; i++) {
             implementationsArray[i] = implementationWrappersArray[i].getType();
         }
 
         for (ImplementationPicker picker : this.sortedImplementationPickers) {
             Class<?> implementation = picker.pick(adapterType, implementationsArray, adaptable);
             if (implementation != null) {
-                for (int i=0; i<implementationWrappersArray.length; i++) {
-                    if (implementation==implementationWrappersArray[i].getType()) {
-                        return (ModelClass<ModelType>)implementationWrappersArray[i];
+                for (int i = 0; i < implementationWrappersArray.length; i++) {
+                    if (implementation == implementationWrappersArray[i].getType()) {
+                        return (ModelClass<ModelType>) implementationWrappersArray[i];
                     }
                 }
             }
@@ -235,65 +242,69 @@ final class AdapterImplementations {
         String key = adapterType.getName();
 
         // lookup in cache for models without adapter classes
-        ModelClass<ModelType> modelClass = (ModelClass<ModelType>)modelClasses.get(key);
-        if (modelClass!=null) {
+        ModelClass<ModelType> modelClass = (ModelClass<ModelType>) modelClasses.get(key);
+        if (modelClass != null) {
             return true;
         }
 
         // not found? look in cache with adapter classes
-        ConcurrentNavigableMap<String,ModelClass<?>> implementations = adapterImplementations.get(key);
-        if (implementations==null || implementations.isEmpty()) {
+        ConcurrentNavigableMap<String, ModelClass<?>> implementations = adapterImplementations.get(key);
+        if (implementations == null || implementations.isEmpty()) {
             return false;
         }
         return true;
     }
 
-     public void registerModelToResourceType(final Bundle bundle, final String resourceType, final Class<?> adaptableType, final Class<?> clazz) {
-         if (resourceType.startsWith("/")) {
-             log.warn("Registering model class {} for adaptable {} with absolute resourceType {}." ,
-                     new Object[] { clazz, adaptableType, resourceType });
-         }
-         ConcurrentMap<String, Class<?>> map;
-         ConcurrentMap<Bundle, List<String>> resourceTypeRemovalLists;
-         if (adaptableType == Resource.class) {
-             map = resourceTypeMappingsForResources;
-             resourceTypeRemovalLists = resourceTypeRemovalListsForResources;
-         } else if (adaptableType == SlingHttpServletRequest.class) {
-             map = resourceTypeMappingsForRequests;
-             resourceTypeRemovalLists = resourceTypeRemovalListsForRequests;
-         } else {
-             log.warn("Found model class {} with resource type {} for adaptable {}. Unsupported type for resourceType binding.",
-                     new Object[] { clazz, resourceType, adaptableType });
-             return;
-         }
-         Class<?> existingMapping = map.putIfAbsent(resourceType, clazz);
-         if (existingMapping == null) {
-             resourceTypeRemovalLists.putIfAbsent(bundle, new CopyOnWriteArrayList<String>());
-             resourceTypeRemovalLists.get(bundle).add(resourceType);
-         } else {
-             log.warn("Skipped registering {} for resourceType {} under adaptable {} because of existing mapping to {}",
-                     new Object[] { clazz, resourceType, adaptableType, existingMapping });
-         }
-     }
+    public void registerModelToResourceType(
+            final Bundle bundle, final String resourceType, final Class<?> adaptableType, final Class<?> clazz) {
+        if (resourceType.startsWith("/")) {
+            log.warn(
+                    "Registering model class {} for adaptable {} with absolute resourceType {}.",
+                    new Object[] {clazz, adaptableType, resourceType});
+        }
+        ConcurrentMap<String, Class<?>> map;
+        ConcurrentMap<Bundle, List<String>> resourceTypeRemovalLists;
+        if (adaptableType == Resource.class) {
+            map = resourceTypeMappingsForResources;
+            resourceTypeRemovalLists = resourceTypeRemovalListsForResources;
+        } else if (adaptableType == SlingHttpServletRequest.class) {
+            map = resourceTypeMappingsForRequests;
+            resourceTypeRemovalLists = resourceTypeRemovalListsForRequests;
+        } else {
+            log.warn(
+                    "Found model class {} with resource type {} for adaptable {}. Unsupported type for resourceType binding.",
+                    new Object[] {clazz, resourceType, adaptableType});
+            return;
+        }
+        Class<?> existingMapping = map.putIfAbsent(resourceType, clazz);
+        if (existingMapping == null) {
+            resourceTypeRemovalLists.putIfAbsent(bundle, new CopyOnWriteArrayList<String>());
+            resourceTypeRemovalLists.get(bundle).add(resourceType);
+        } else {
+            log.warn(
+                    "Skipped registering {} for resourceType {} under adaptable {} because of existing mapping to {}",
+                    new Object[] {clazz, resourceType, adaptableType, existingMapping});
+        }
+    }
 
-     public void removeResourceTypeBindings(final Bundle bundle) {
-         List<String> registeredResourceTypes = resourceTypeRemovalListsForResources.remove(bundle);
-         if (registeredResourceTypes != null) {
-             for (String resourceType : registeredResourceTypes) {
-                 resourceTypeMappingsForResources.remove(resourceType);
-             }
-         }
-         registeredResourceTypes = resourceTypeRemovalListsForRequests.remove(bundle);
-         if (registeredResourceTypes != null) {
-             for (String resourceType : registeredResourceTypes) {
-                 resourceTypeMappingsForRequests.remove(resourceType);
-             }
-         }
-     }
+    public void removeResourceTypeBindings(final Bundle bundle) {
+        List<String> registeredResourceTypes = resourceTypeRemovalListsForResources.remove(bundle);
+        if (registeredResourceTypes != null) {
+            for (String resourceType : registeredResourceTypes) {
+                resourceTypeMappingsForResources.remove(resourceType);
+            }
+        }
+        registeredResourceTypes = resourceTypeRemovalListsForRequests.remove(bundle);
+        if (registeredResourceTypes != null) {
+            for (String resourceType : registeredResourceTypes) {
+                resourceTypeMappingsForRequests.remove(resourceType);
+            }
+        }
+    }
 
-     public Class<?> getModelClassForRequest(final SlingHttpServletRequest request) {
-         return getModelClassForResource(request.getResource(), resourceTypeMappingsForRequests);
-     }
+    public Class<?> getModelClassForRequest(final SlingHttpServletRequest request) {
+        return getModelClassForResource(request.getResource(), resourceTypeMappingsForRequests);
+    }
 
     public Class<?> getModelClassForResource(final Resource resource) {
         return getModelClassForResource(resource, resourceTypeMappingsForResources);
@@ -327,7 +338,8 @@ final class AdapterImplementations {
         }
     }
 
-    private static Class<?> getClassFromResourceTypeMap(final String resourceType, final Map<String, Class<?>> map, final ResourceResolver resolver) {
+    private static Class<?> getClassFromResourceTypeMap(
+            final String resourceType, final Map<String, Class<?>> map, final ResourceResolver resolver) {
         if (resourceType == null) {
             return null;
         }

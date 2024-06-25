@@ -1,27 +1,26 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import javax.inject.Inject;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequestEvent;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
@@ -29,10 +28,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import javax.inject.Inject;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequestEvent;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -50,6 +45,13 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestDisposalTest {
@@ -76,12 +78,16 @@ public class RequestDisposalTest {
 
         doAnswer(new Answer<Void>() {
 
-            @Override
-            public Void answer(InvocationOnMock invocation) {
-                attributes.put((String) invocation.getArguments()[0], invocation.getArguments()[1]);
-                return null;
-            }
-        }).when(request).setAttribute(any(String.class), any());
+                    @Override
+                    public Void answer(InvocationOnMock invocation) {
+                        attributes.put(
+                                (String) invocation.getArguments()[0],
+                                invocation.getArguments()[1]);
+                        return null;
+                    }
+                })
+                .when(request)
+                .setAttribute(any(String.class), any());
 
         when(request.getAttribute(any(String.class))).then(new Answer<Object>() {
 
@@ -100,7 +106,8 @@ public class RequestDisposalTest {
         factory.requestInitialized(new ServletRequestEvent(servletContext, destroyedRequest));
 
         // but adapt from a wrapper of a wrapper of that wrapper
-        SlingHttpServletRequest adaptableRequest = new SlingHttpServletRequestWrapper(new SlingHttpServletRequestWrapper(destroyedRequest));
+        SlingHttpServletRequest adaptableRequest =
+                new SlingHttpServletRequestWrapper(new SlingHttpServletRequestWrapper(destroyedRequest));
 
         TestModel model = factory.getAdapter(adaptableRequest, TestModel.class);
         assertEquals("teststring", model.testString);
@@ -119,7 +126,8 @@ public class RequestDisposalTest {
         factory.requestInitialized(new ServletRequestEvent(servletContext, destroyedRequest));
 
         // but adapt from a wrapper of a wrapper of that wrapper
-        SlingHttpServletRequest adaptableRequest = new SlingHttpServletRequestWrapper(new SlingHttpServletRequestWrapper(destroyedRequest));
+        SlingHttpServletRequest adaptableRequest =
+                new SlingHttpServletRequestWrapper(new SlingHttpServletRequestWrapper(destroyedRequest));
 
         TestModel model = factory.getAdapter(adaptableRequest, TestModel.class);
         assertEquals("teststring", model.testString);
@@ -140,7 +148,8 @@ public class RequestDisposalTest {
         SlingHttpServletRequest destroyedRequest = new SlingHttpServletRequestWrapper(request);
 
         // but adapt from a wrapper of a wrapper of that wrapper
-        SlingHttpServletRequest adaptableRequest = new SlingHttpServletRequestWrapper(new SlingHttpServletRequestWrapper(destroyedRequest));
+        SlingHttpServletRequest adaptableRequest =
+                new SlingHttpServletRequestWrapper(new SlingHttpServletRequestWrapper(destroyedRequest));
 
         TestModel model = factory.getAdapter(adaptableRequest, TestModel.class);
         assertEquals("teststring", model.testString);
@@ -169,7 +178,6 @@ public class RequestDisposalTest {
 
         @Inject
         public String testString;
-
     }
 
     private class DisposedInjector implements Injector {
@@ -181,7 +189,12 @@ public class RequestDisposalTest {
 
         @Nullable
         @Override
-        public Object getValue(@NotNull Object o, String s, @NotNull Type type, @NotNull AnnotatedElement annotatedElement, @NotNull DisposalCallbackRegistry disposalCallbackRegistry) {
+        public Object getValue(
+                @NotNull Object o,
+                String s,
+                @NotNull Type type,
+                @NotNull AnnotatedElement annotatedElement,
+                @NotNull DisposalCallbackRegistry disposalCallbackRegistry) {
             TestDisposalCallback callback = new TestDisposalCallback();
             callbacks.add(callback);
             disposalCallbackRegistry.addDisposalCallback(callback);
@@ -201,6 +214,4 @@ public class RequestDisposalTest {
             return disposed;
         }
     }
-
-
 }

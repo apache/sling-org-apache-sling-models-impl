@@ -1,23 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,6 +56,9 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.util.converter.Converter;
 import org.osgi.util.converter.Converters;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 @RunWith(MockitoJUnitRunner.class)
 public class AdapterFactoryTest {
 
@@ -92,8 +94,16 @@ public class AdapterFactoryTest {
         factory = createModelAdapterFactory();
         factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(0, 0));
         factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(1, 1));
-        factory.modelExporters = Arrays.<ModelExporter>asList(new FirstStringExporter(), new SecondStringExporter(), new FirstIntegerExporter());
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(DefaultStringModel.class, ConstructorWithExceptionModel.class, NestedModel.class, NestedModelWithInvalidAdaptable.class, NestedModelWithInvalidAdaptable2.class, ResourceModelWithRequiredField.class, CachedModelWithSelfReference.class) ;
+        factory.modelExporters = Arrays.<ModelExporter>asList(
+                new FirstStringExporter(), new SecondStringExporter(), new FirstIntegerExporter());
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(
+                DefaultStringModel.class,
+                ConstructorWithExceptionModel.class,
+                NestedModel.class,
+                NestedModelWithInvalidAdaptable.class,
+                NestedModelWithInvalidAdaptable2.class,
+                ResourceModelWithRequiredField.class,
+                CachedModelWithSelfReference.class);
     }
 
     @Test
@@ -176,7 +186,7 @@ public class AdapterFactoryTest {
         Assert.assertEquals("required", model.getNestedModel().getRequired());
     }
 
-    @Test(expected=MissingElementsException.class)
+    @Test(expected = MissingElementsException.class)
     public void testCreatedNestedModelWithMissingElements() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("invalid", "required");
@@ -193,7 +203,8 @@ public class AdapterFactoryTest {
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
 
-        String exported = factory.handleAndExportResult(result, "second", String.class, Collections.<String, String>emptyMap());
+        String exported =
+                factory.handleAndExportResult(result, "second", String.class, Collections.<String, String>emptyMap());
         Assert.assertEquals("Export from second", exported);
     }
 
@@ -204,7 +215,8 @@ public class AdapterFactoryTest {
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
 
-        Integer exported = factory.handleAndExportResult(result, "first", Integer.class, Collections.<String, String>emptyMap());
+        Integer exported =
+                factory.handleAndExportResult(result, "first", Integer.class, Collections.<String, String>emptyMap());
         Assert.assertEquals(Integer.valueOf(42), exported);
     }
 
@@ -227,7 +239,8 @@ public class AdapterFactoryTest {
         @Nullable
         @Override
         @SuppressWarnings("unchecked")
-        public <T> T export(@NotNull Object o, @NotNull Class<T> aClass, @NotNull Map<String, String> map) throws ExportException {
+        public <T> T export(@NotNull Object o, @NotNull Class<T> aClass, @NotNull Map<String, String> map)
+                throws ExportException {
             if (aClass == String.class) {
                 return (T) "Export from first";
             } else {
@@ -251,7 +264,8 @@ public class AdapterFactoryTest {
 
         @Nullable
         @Override
-        public <T> T export(@NotNull Object o, @NotNull Class<T> aClass, @NotNull Map<String, String> map) throws ExportException {
+        public <T> T export(@NotNull Object o, @NotNull Class<T> aClass, @NotNull Map<String, String> map)
+                throws ExportException {
             if (aClass == String.class) {
                 return (T) "Export from second";
             } else {
@@ -275,7 +289,8 @@ public class AdapterFactoryTest {
 
         @Nullable
         @Override
-        public <T> T export(@NotNull Object o, @NotNull Class<T> aClass, @NotNull Map<String, String> map) throws ExportException {
+        public <T> T export(@NotNull Object o, @NotNull Class<T> aClass, @NotNull Map<String, String> map)
+                throws ExportException {
             if (aClass == Integer.class) {
                 return (T) Integer.valueOf(42);
             } else {

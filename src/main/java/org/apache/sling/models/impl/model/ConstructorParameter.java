@@ -38,9 +38,20 @@ public class ConstructorParameter extends AbstractInjectableElement {
     private final boolean isPrimitive;
     private final int parameterIndex;
 
-    public ConstructorParameter(Annotation[] annotations, Type parameterType, Type genericType, boolean isPrimitive,
-            int parameterIndex, StaticInjectAnnotationProcessorFactory[] processorFactories, DefaultInjectionStrategy defaultInjectionStrategy) {
-        super(new FakeAnnotatedElement(annotations, parameterIndex), genericType, null, processorFactories, defaultInjectionStrategy);
+    public ConstructorParameter(
+            Annotation[] annotations,
+            Type parameterType,
+            Type genericType,
+            boolean isPrimitive,
+            int parameterIndex,
+            StaticInjectAnnotationProcessorFactory[] processorFactories,
+            DefaultInjectionStrategy defaultInjectionStrategy) {
+        super(
+                new FakeAnnotatedElement(annotations, parameterIndex),
+                genericType,
+                null,
+                processorFactories,
+                defaultInjectionStrategy);
         this.parameterType = parameterType;
         this.genericType = genericType;
         this.isPrimitive = isPrimitive;
@@ -83,12 +94,12 @@ public class ConstructorParameter extends AbstractInjectableElement {
             return getAnnotation(paramClass) != null;
         }
 
-        @SuppressWarnings({ "unchecked", "null" })
+        @SuppressWarnings({"unchecked", "null"})
         @Override
         public <T extends Annotation> T getAnnotation(Class<T> paramClass) {
             for (Annotation annotation : this.annotations) {
                 if (paramClass.isInstance(annotation)) {
-                    return (T)annotation;
+                    return (T) annotation;
                 }
             }
             return null;
@@ -113,7 +124,5 @@ public class ConstructorParameter extends AbstractInjectableElement {
             return "FakeAnnotatedElement [annotations=" + Arrays.toString(annotations) + ", parameterIndex="
                     + parameterIndex + "]";
         }
-
     }
-
 }

@@ -18,11 +18,6 @@
  */
 package org.apache.sling.models.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
-
 import java.util.Arrays;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -37,6 +32,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AdapterImplementationsTest {
@@ -61,9 +61,7 @@ public class AdapterImplementationsTest {
     @Before
     public void setUp() {
         underTest = new AdapterImplementations();
-        underTest.setImplementationPickers(Arrays.asList(new ImplementationPicker[] {
-            new FirstImplementationPicker()
-        }));
+        underTest.setImplementationPickers(Arrays.asList(new ImplementationPicker[] {new FirstImplementationPicker()}));
     }
 
     @Test
@@ -78,7 +76,8 @@ public class AdapterImplementationsTest {
     public void testSingleMapping() {
         underTest.addAll(String.class, SAMPLE_ADAPTER);
 
-        assertEquals(String.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
+        assertEquals(
+                String.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
 
         underTest.remove(SAMPLE_ADAPTER.getName(), String.class.getName());
 
@@ -91,11 +90,14 @@ public class AdapterImplementationsTest {
         underTest.addAll(Integer.class, SAMPLE_ADAPTER);
         underTest.addAll(Long.class, SAMPLE_ADAPTER);
 
-        assertEquals(Integer.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
+        assertEquals(
+                Integer.class,
+                underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
 
         underTest.remove(SAMPLE_ADAPTER.getName(), Integer.class.getName());
 
-        assertEquals(Long.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
+        assertEquals(
+                Long.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
 
         underTest.remove(SAMPLE_ADAPTER.getName(), Long.class.getName());
         underTest.remove(SAMPLE_ADAPTER.getName(), String.class.getName());
@@ -117,23 +119,23 @@ public class AdapterImplementationsTest {
     @Test
     public void testMultipleImplementationPickers() {
         underTest.setImplementationPickers(Arrays.asList(
-            new NoneImplementationPicker(),
-            new LastImplementationPicker(),
-            new FirstImplementationPicker()
-        ));
+                new NoneImplementationPicker(), new LastImplementationPicker(), new FirstImplementationPicker()));
 
         underTest.addAll(String.class, SAMPLE_ADAPTER);
         underTest.addAll(Integer.class, SAMPLE_ADAPTER);
         underTest.addAll(Long.class, SAMPLE_ADAPTER);
 
-        assertEquals(String.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
+        assertEquals(
+                String.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
     }
 
     @Test
     public void testSimpleModel() {
         underTest.addAll(SAMPLE_ADAPTER, SAMPLE_ADAPTER);
 
-        assertEquals(SAMPLE_ADAPTER, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
+        assertEquals(
+                SAMPLE_ADAPTER,
+                underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
     }
 
     @Test
@@ -144,7 +146,7 @@ public class AdapterImplementationsTest {
         when(childResource.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.getParentResourceType(resource)).thenReturn(null);
         when(resourceResolver.getParentResourceType(childResource)).thenReturn("sling/rt/one");
-        when(resourceResolver.getSearchPath()).thenReturn(new String[] { "/apps/", "/libs/" });
+        when(resourceResolver.getSearchPath()).thenReturn(new String[] {"/apps/", "/libs/"});
 
         // ensure we don't have any registrations for 'sling/rt/one'
         assertNull(underTest.getModelClassForResource(resource));
@@ -158,7 +160,8 @@ public class AdapterImplementationsTest {
 
         // ensure that trying to reregister the resource type is a no-op
         BundleContext secondBundleContext = MockOsgi.newBundleContext();
-        underTest.registerModelToResourceType(secondBundleContext.getBundle(), "sling/rt/one", Resource.class, Integer.class);
+        underTest.registerModelToResourceType(
+                secondBundleContext.getBundle(), "sling/rt/one", Resource.class, Integer.class);
         assertEquals(String.class, underTest.getModelClassForResource(resource));
         assertEquals(String.class, underTest.getModelClassForResource(childResource));
 
@@ -175,7 +178,7 @@ public class AdapterImplementationsTest {
         when(childResource.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.getParentResourceType(resource)).thenReturn(null);
         when(resourceResolver.getParentResourceType(childResource)).thenReturn("sling/rt/one");
-        when(resourceResolver.getSearchPath()).thenReturn(new String[] { "/apps/", "/libs/" });
+        when(resourceResolver.getSearchPath()).thenReturn(new String[] {"/apps/", "/libs/"});
 
         // ensure we don't have any registrations for 'sling/rt/one'
         assertNull(underTest.getModelClassForResource(resource));
@@ -183,7 +186,8 @@ public class AdapterImplementationsTest {
 
         // now add a mapping for Resource -> String
         BundleContext bundleContext = MockOsgi.newBundleContext();
-        underTest.registerModelToResourceType(bundleContext.getBundle(), "/apps/sling/rt/one", Resource.class, String.class);
+        underTest.registerModelToResourceType(
+                bundleContext.getBundle(), "/apps/sling/rt/one", Resource.class, String.class);
         assertEquals(String.class, underTest.getModelClassForResource(resource));
         assertEquals(String.class, underTest.getModelClassForResource(childResource));
 
@@ -200,7 +204,7 @@ public class AdapterImplementationsTest {
         when(childResource.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.getParentResourceType(resource)).thenReturn(null);
         when(resourceResolver.getParentResourceType(childResource)).thenReturn("/apps/sling/rt/one");
-        when(resourceResolver.getSearchPath()).thenReturn(new String[] { "/apps/", "/libs/" });
+        when(resourceResolver.getSearchPath()).thenReturn(new String[] {"/apps/", "/libs/"});
 
         // ensure we don't have any registrations for 'sling/rt/one'
         assertNull(underTest.getModelClassForResource(resource));
@@ -222,7 +226,7 @@ public class AdapterImplementationsTest {
         when(resource.getResourceType()).thenReturn("sling/rt/one");
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.getParentResourceType(resource)).thenReturn(null);
-        when(resourceResolver.getSearchPath()).thenReturn(new String[] { "/apps/", "/libs/" });
+        when(resourceResolver.getSearchPath()).thenReturn(new String[] {"/apps/", "/libs/"});
         when(request.getResource()).thenReturn(resource);
 
         // ensure we don't have any registrations for 'sling/rt/one'
@@ -231,14 +235,16 @@ public class AdapterImplementationsTest {
 
         // now add a mapping for SlingHttpServletRequest -> String
         BundleContext bundleContext = MockOsgi.newBundleContext();
-        underTest.registerModelToResourceType(bundleContext.getBundle(), "sling/rt/one", SlingHttpServletRequest.class, String.class);
+        underTest.registerModelToResourceType(
+                bundleContext.getBundle(), "sling/rt/one", SlingHttpServletRequest.class, String.class);
         underTest.registerModelToResourceType(bundleContext.getBundle(), "sling/rt/one", Resource.class, Integer.class);
         assertEquals(String.class, underTest.getModelClassForRequest(request));
         assertEquals(Integer.class, underTest.getModelClassForResource(resource));
 
         // ensure that trying to reregister the resource type is a no-op
         BundleContext secondBundleContext = MockOsgi.newBundleContext();
-        underTest.registerModelToResourceType(secondBundleContext.getBundle(), "sling/rt/one", SlingHttpServletRequest.class, Integer.class);
+        underTest.registerModelToResourceType(
+                secondBundleContext.getBundle(), "sling/rt/one", SlingHttpServletRequest.class, Integer.class);
         assertEquals(String.class, underTest.getModelClassForRequest(request));
 
         underTest.removeResourceTypeBindings(bundleContext.getBundle());
@@ -250,7 +256,7 @@ public class AdapterImplementationsTest {
     public void testResourceTypeRegistrationForResourceWithoutResourceType() {
         lenient().when(resource.getResourceType()).thenReturn(null);
         lenient().when(resource.getResourceResolver()).thenReturn(resourceResolver);
-        lenient().when(resourceResolver.getSearchPath()).thenReturn(new String[] { "/apps/", "/libs/" });
+        lenient().when(resourceResolver.getSearchPath()).thenReturn(new String[] {"/apps/", "/libs/"});
 
         // ensure we don't have any registrations and no exception is thrown
         assertNull(underTest.getModelClassForResource(resource));
@@ -258,16 +264,17 @@ public class AdapterImplementationsTest {
 
     static final class NoneImplementationPicker implements ImplementationPicker {
         @Override
-        public Class<?> pick(@NotNull Class<?> adapterType, Class<?> @NotNull [] implementationsTypes, @NotNull Object adaptable) {
+        public Class<?> pick(
+                @NotNull Class<?> adapterType, Class<?> @NotNull [] implementationsTypes, @NotNull Object adaptable) {
             return null;
         }
     }
 
     static final class LastImplementationPicker implements ImplementationPicker {
         @Override
-        public Class<?> pick(@NotNull Class<?> adapterType, Class<?> @NotNull [] implementationsTypes, @NotNull Object adaptable) {
+        public Class<?> pick(
+                @NotNull Class<?> adapterType, Class<?> @NotNull [] implementationsTypes, @NotNull Object adaptable) {
             return implementationsTypes[implementationsTypes.length - 1];
         }
     }
-
 }

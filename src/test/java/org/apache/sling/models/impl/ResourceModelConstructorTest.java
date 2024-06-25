@@ -1,25 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,6 +35,11 @@ import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceModelConstructorTest {
@@ -64,7 +66,8 @@ public class ResourceModelConstructorTest {
         Object firstGrandChildValue = RandomStringUtils.randomAlphabetic(10);
         ValueMap firstGrandChildMap = new ValueMapDecorator(Collections.singletonMap("property", firstGrandChildValue));
         Object secondGrandChildValue = RandomStringUtils.randomAlphabetic(10);
-        ValueMap secondGrandChildMap = new ValueMapDecorator(Collections.singletonMap("property", secondGrandChildValue));
+        ValueMap secondGrandChildMap =
+                new ValueMapDecorator(Collections.singletonMap("property", secondGrandChildValue));
 
         final Resource firstGrandChild = mock(Resource.class);
         lenient().when(firstGrandChild.adaptTo(ValueMap.class)).thenReturn(firstGrandChildMap);
@@ -75,10 +78,14 @@ public class ResourceModelConstructorTest {
         lenient().when(secondGrandChild.adaptTo(ChildModel.class)).thenAnswer(new AdaptToChildModel());
 
         Resource secondChild = mock(Resource.class);
-        lenient().when(secondChild.listChildren()).thenReturn(Arrays.asList(firstGrandChild, secondGrandChild).iterator());
+        lenient()
+                .when(secondChild.listChildren())
+                .thenReturn(Arrays.asList(firstGrandChild, secondGrandChild).iterator());
 
         Resource emptyChild = mock(Resource.class);
-        lenient().when(emptyChild.listChildren()).thenReturn(Collections.<Resource>emptySet().iterator());
+        lenient()
+                .when(emptyChild.listChildren())
+                .thenReturn(Collections.<Resource>emptySet().iterator());
 
         Resource res = mock(Resource.class);
         lenient().when(res.getChild("firstChild")).thenReturn(firstChild);
@@ -104,5 +111,4 @@ public class ResourceModelConstructorTest {
             return factory.getAdapter(invocation.getMock(), ChildModel.class);
         }
     }
-
 }

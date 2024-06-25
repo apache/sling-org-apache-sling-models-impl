@@ -1,18 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.testmodels.classes;
 
@@ -25,52 +27,68 @@ import org.apache.sling.models.annotations.Optional;
 @Model(adaptables = Resource.class)
 public class OptionalPrimitivesModel {
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private byte byteValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private short shortValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private int intValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private long longValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private float floatValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private double doubleValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private char charValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private boolean booleanValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private Byte byteObjectValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private Short shortObjectValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private Integer intObjectValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private Long longObjectValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private Float floatObjectValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private Double doubleObjectValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private Character charObjectValue;
 
-    @Inject @Optional
+    @Inject
+    @Optional
     private Boolean booleanObjectValue;
 
     public byte getByteValue() {
@@ -136,5 +154,4 @@ public class OptionalPrimitivesModel {
     public Boolean getBooleanObjectValue() {
         return this.booleanObjectValue;
     }
-
 }

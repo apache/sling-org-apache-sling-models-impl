@@ -18,13 +18,10 @@
  */
 package org.apache.sling.models.impl.injectors;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.lang.reflect.AnnotatedElement;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.lang.reflect.AnnotatedElement;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -40,6 +37,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 @RunWith(MockitoJUnitRunner.class)
 public class SlingObjectInjectorRequestTest {
 
@@ -47,16 +47,22 @@ public class SlingObjectInjectorRequestTest {
 
     @Mock
     private AnnotatedElement annotatedElement;
+
     @Mock
     private SlingHttpServletRequest request;
+
     @Mock
     private SlingHttpServletResponse response;
+
     @Mock
     private SlingScriptHelper scriptHelper;
+
     @Mock
     private ResourceResolver resourceResolver;
+
     @Mock
     private Resource resource;
+
     @Mock
     private DisposalCallbackRegistry registry;
 
@@ -72,7 +78,8 @@ public class SlingObjectInjectorRequestTest {
 
     @Test
     public void testResourceResolver() {
-        Object result = this.injector.getValue(this.request, null, ResourceResolver.class, this.annotatedElement, registry);
+        Object result =
+                this.injector.getValue(this.request, null, ResourceResolver.class, this.annotatedElement, registry);
         assertSame(this.resourceResolver, result);
     }
 
@@ -88,8 +95,8 @@ public class SlingObjectInjectorRequestTest {
 
     @Test
     public void testRequest() {
-        Object result = this.injector.getValue(this.request, null, SlingHttpServletRequest.class,
-                this.annotatedElement, registry);
+        Object result = this.injector.getValue(
+                this.request, null, SlingHttpServletRequest.class, this.annotatedElement, registry);
         assertSame(this.request, result);
 
         result = this.injector.getValue(this.request, null, HttpServletRequest.class, this.annotatedElement, registry);
@@ -98,8 +105,8 @@ public class SlingObjectInjectorRequestTest {
 
     @Test
     public void testResponse() {
-        Object result = this.injector.getValue(this.request, null, SlingHttpServletResponse.class,
-                this.annotatedElement, registry);
+        Object result = this.injector.getValue(
+                this.request, null, SlingHttpServletResponse.class, this.annotatedElement, registry);
         assertSame(this.response, result);
 
         result = this.injector.getValue(this.request, null, HttpServletResponse.class, this.annotatedElement, registry);
@@ -108,8 +115,8 @@ public class SlingObjectInjectorRequestTest {
 
     @Test
     public void testScriptHelper() {
-        Object result = this.injector
-                .getValue(this.request, null, SlingScriptHelper.class, this.annotatedElement, registry);
+        Object result =
+                this.injector.getValue(this.request, null, SlingScriptHelper.class, this.annotatedElement, registry);
         assertSame(this.scriptHelper, result);
     }
 
@@ -118,5 +125,4 @@ public class SlingObjectInjectorRequestTest {
         Object result = this.injector.getValue(this, null, SlingScriptHelper.class, this.annotatedElement, registry);
         assertNull(result);
     }
-
 }
