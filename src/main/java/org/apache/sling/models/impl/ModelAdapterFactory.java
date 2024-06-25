@@ -812,6 +812,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             if (constructor.hasInjectAnnotation()) {
                 return constructor;
             }
+            if (constructor.isCanonicalRecordConstructor()) {
+                return constructor;
+            }
             // compatibility mode for sling models implementation <= 1.0.6:
             // support constructor without @Inject if it has exactly one parameter matching the adaptable class
             final Class<?>[] paramTypes = constructor.getConstructor().getParameterTypes();

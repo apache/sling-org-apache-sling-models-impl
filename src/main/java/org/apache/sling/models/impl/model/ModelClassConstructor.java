@@ -84,4 +84,10 @@ public class ModelClassConstructor<M> {
         return constructorParametersArray;
     };
 
+    public boolean isCanonicalRecordConstructor() {
+        Class<M> declaringClass = constructor.getDeclaringClass();
+        boolean areBalancedCtorParamsAndFields = ReflectionUtil.areBalancedCtorParamsAndFields(constructor);
+        boolean isRecordDeclaringClass = ReflectionUtil.isRecord(declaringClass);
+        return areBalancedCtorParamsAndFields && isRecordDeclaringClass;
+    }
 }
