@@ -24,7 +24,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings({
-        "PackageVisibleInnerClass", "FieldCanBeLocal", "unused",
+        "PackageVisibleInnerClass", "FieldCanBeLocal", "unused", "java:S1172",
         "InstanceVariableMayNotBeInitialized", "PublicConstructorInNonPublicClass"
 })
 public class ReflectionUtilTest {
