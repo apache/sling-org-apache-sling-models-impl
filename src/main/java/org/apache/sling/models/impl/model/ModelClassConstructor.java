@@ -22,7 +22,8 @@ import javax.inject.Inject;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Type;
+import java.lang.reflect.Parameter;
+import java.util.stream.IntStream;
 
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.impl.ReflectionUtil;
@@ -41,21 +42,10 @@ public class ModelClassConstructor<M> {
         this.constructor = constructor;
         this.hasInjectAnnotation = constructor.isAnnotationPresent(Inject.class);
 
-        Type[] parameterTypes = constructor.getGenericParameterTypes();
-        this.constructorParametersArray = new ConstructorParameter[parameterTypes.length];
-
-        for (int i = 0; i < parameterTypes.length; i++) {
-            Type genericType = ReflectionUtil.mapPrimitiveClasses(parameterTypes[i]);
-            boolean isPrimitive = (parameterTypes[i] != genericType);
-            this.constructorParametersArray[i] = new ConstructorParameter(
-                    constructor.getParameterAnnotations()[i],
-                    constructor.getParameterTypes()[i],
-                    genericType,
-                    isPrimitive,
-                    i,
-                    processorFactories,
-                    defaultInjectionStrategy);
-        }
+        Parameter[] parameters = constructor.getParameters();
+        this.constructorParametersArray = IntStream.range(0, parameters.length)
+                .mapToObj(i -> ConstructorParameter.of(parameters[i], i, processorFactories, defaultInjectionStrategy))
+                .toArray(ConstructorParameter[]::new);
     }
 
     /**

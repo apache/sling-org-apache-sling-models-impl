@@ -27,8 +27,24 @@ import javax.servlet.ServletRequestWrapper;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -1103,7 +1119,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             ConstructorParameter constructorParameter, List<Object> parameterValues, Object value) {
         if (constructorParameter.getParameterType() instanceof Class<?>) {
             Result<Object> result = adaptIfNecessary(
-                    value, (Class<?>) constructorParameter.getParameterType(), constructorParameter.getGenericType());
+                    value, (Class<?>) constructorParameter.getParameterType(), constructorParameter.getType());
             if (result.wasSuccessful()) {
                 parameterValues.set(constructorParameter.getParameterIndex(), result.getValue());
                 return null;

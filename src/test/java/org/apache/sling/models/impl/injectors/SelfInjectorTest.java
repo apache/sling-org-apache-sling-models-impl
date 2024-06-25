@@ -71,6 +71,7 @@ public class SelfInjectorTest {
                 Object.class,
                 true,
                 0,
+                null,
                 new StaticInjectAnnotationProcessorFactory[0],
                 null);
         secondConstructorParameter = new ConstructorParameter(
@@ -79,6 +80,7 @@ public class SelfInjectorTest {
                 Object.class,
                 true,
                 1,
+                null,
                 new StaticInjectAnnotationProcessorFactory[0],
                 null);
     }
