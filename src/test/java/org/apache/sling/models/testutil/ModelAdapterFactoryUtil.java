@@ -77,7 +77,7 @@ public final class ModelAdapterFactoryUtil {
         }
 
         @Override
-        public Dictionary<String,String> getHeaders() {
+        public Dictionary<String, String> getHeaders() {
             Dictionary<String, String> headers = new Hashtable<>();
             headers.put("Sling-Model-Packages", "dummy.package");
             return headers;
@@ -89,8 +89,7 @@ public final class ModelAdapterFactoryUtil {
             for (int i = 0; i < classes.length; i++) {
                 try {
                     urls.add(new URL("file:/" + classes[i].getName().replace('.', '/') + ".class"));
-                }
-                catch (MalformedURLException ex) {
+                } catch (MalformedURLException ex) {
                     throw new RuntimeException("Malformed URL.", ex);
                 }
             }
@@ -173,7 +172,7 @@ public final class ModelAdapterFactoryUtil {
         }
 
         @Override
-        public Dictionary<String,String> getHeaders(String locale) {
+        public Dictionary<String, String> getHeaders(String locale) {
             return null;
         }
 
@@ -227,5 +226,4 @@ public final class ModelAdapterFactoryUtil {
             throw new UnsupportedOperationException();
         }
     }
-
 }

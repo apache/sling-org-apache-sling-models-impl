@@ -30,23 +30,22 @@ import org.apache.sling.models.annotations.injectorspecific.ResourcePath;
 
 @Model(adaptables = {Resource.class, SlingHttpServletRequest.class})
 public class ResourcePathPartialModel {
-    
-    @ResourcePath(name="propertyWithSeveralPaths", injectionStrategy=InjectionStrategy.REQUIRED)
+
+    @ResourcePath(name = "propertyWithSeveralPaths", injectionStrategy = InjectionStrategy.REQUIRED)
     private List<Resource> requiredResources;
-    
-    @ResourcePath(name="propertyWithSeveralPaths")
+
+    @ResourcePath(name = "propertyWithSeveralPaths")
     @Required
     private List<Resource> requiredResources2;
-    
-    
-    @ResourcePath(name="propertyWithMissingPaths", injectionStrategy=InjectionStrategy.OPTIONAL)
+
+    @ResourcePath(name = "propertyWithMissingPaths", injectionStrategy = InjectionStrategy.OPTIONAL)
     private List<Resource> optionalResources;
-    
+
     @Optional
-    @ResourcePath(name="propertyWithMissingPaths")
+    @ResourcePath(name = "propertyWithMissingPaths")
     private List<Resource> optionalResources2;
-    
-    @ResourcePath(name="propertyWithMissingPaths", optional=true)
+
+    @ResourcePath(name = "propertyWithMissingPaths", optional = true)
     private List<Resource> optionalResources3;
 
     public List<Resource> getRequiredResources() {
@@ -68,5 +67,4 @@ public class ResourcePathPartialModel {
     public List<Resource> getOptionalResources3() {
         return optionalResources3;
     }
-
 }

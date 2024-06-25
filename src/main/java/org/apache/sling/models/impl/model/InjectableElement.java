@@ -74,5 +74,4 @@ public interface InjectableElement {
      * @return {@code true} if the element is optional otherwise {@code false}
      */
     boolean isOptional(InjectAnnotationProcessor annotationProcessor);
-
 }

@@ -1,28 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,6 +34,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultTest {
 
@@ -49,7 +51,14 @@ public class DefaultTest {
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(0, 0));
-        factory.adapterImplementations.addClassesAsAdapterAndImplementation(DefaultStringModel.class, PropertyModelWithDefaults.class, DefaultPrimitivesModel.class, DefaultWrappersModel.class,  org.apache.sling.models.testmodels.classes.constructorinjection.DefaultPrimitivesModel.class, org.apache.sling.models.testmodels.classes.constructorinjection.DefaultStringModel.class, org.apache.sling.models.testmodels.classes.constructorinjection.DefaultWrappersModel.class);
+        factory.adapterImplementations.addClassesAsAdapterAndImplementation(
+                DefaultStringModel.class,
+                PropertyModelWithDefaults.class,
+                DefaultPrimitivesModel.class,
+                DefaultWrappersModel.class,
+                org.apache.sling.models.testmodels.classes.constructorinjection.DefaultPrimitivesModel.class,
+                org.apache.sling.models.testmodels.classes.constructorinjection.DefaultStringModel.class,
+                org.apache.sling.models.testmodels.classes.constructorinjection.DefaultWrappersModel.class);
     }
 
     @Test
@@ -78,7 +87,6 @@ public class DefaultTest {
         assertEquals("second default", model.getSecond());
     }
 
-
     @Test
     public void testDefaultPrimitivesField() {
         ValueMap vm = new ValueMapDecorator(Collections.<String, Object>emptyMap());
@@ -90,11 +98,12 @@ public class DefaultTest {
         assertNotNull(model);
 
         assertEquals(true, model.getBooleanProperty());
-        // we need to wait for JUnit 4.12 for this assertArrayEquals to be working on primitive boolean arrays, https://github.com/junit-team/junit/issues/86!
-        assertTrue(Arrays.equals(new boolean[] { true, true }, model.getBooleanArrayProperty()));
+        // we need to wait for JUnit 4.12 for this assertArrayEquals to be working on primitive boolean arrays,
+        // https://github.com/junit-team/junit/issues/86!
+        assertTrue(Arrays.equals(new boolean[] {true, true}, model.getBooleanArrayProperty()));
 
         assertEquals(1L, model.getLongProperty());
-        assertArrayEquals(new long[] { 1L, 1L }, model.getLongArrayProperty());
+        assertArrayEquals(new long[] {1L, 1L}, model.getLongArrayProperty());
     }
 
     @Test
@@ -108,11 +117,12 @@ public class DefaultTest {
         assertNotNull(model);
 
         assertEquals(Boolean.valueOf(true), model.getBooleanWrapperProperty());
-        // we need to wait for JUnit 4.12 for this assertArrayEquals to be working on primitive boolean arrays, https://github.com/junit-team/junit/issues/86!
-        assertTrue(Arrays.equals(new Boolean[] { Boolean.TRUE, Boolean.TRUE }, model.getBooleanWrapperArrayProperty()));
+        // we need to wait for JUnit 4.12 for this assertArrayEquals to be working on primitive boolean arrays,
+        // https://github.com/junit-team/junit/issues/86!
+        assertTrue(Arrays.equals(new Boolean[] {Boolean.TRUE, Boolean.TRUE}, model.getBooleanWrapperArrayProperty()));
 
         assertEquals(Long.valueOf(1L), model.getLongWrapperProperty());
-        assertArrayEquals(new Long[] { Long.valueOf(1L), Long.valueOf(1L) }, model.getLongWrapperArrayProperty());
+        assertArrayEquals(new Long[] {Long.valueOf(1L), Long.valueOf(1L)}, model.getLongWrapperArrayProperty());
     }
 
     @Test
@@ -122,8 +132,8 @@ public class DefaultTest {
         Resource res = mock(Resource.class);
         lenient().when(res.adaptTo(ValueMap.class)).thenReturn(vm);
 
-        org.apache.sling.models.testmodels.classes.constructorinjection.DefaultStringModel model
-                = factory.getAdapter(res, org.apache.sling.models.testmodels.classes.constructorinjection.DefaultStringModel.class);
+        org.apache.sling.models.testmodels.classes.constructorinjection.DefaultStringModel model = factory.getAdapter(
+                res, org.apache.sling.models.testmodels.classes.constructorinjection.DefaultStringModel.class);
         assertNotNull(model);
         assertEquals("firstDefault", model.getFirstProperty());
         assertEquals(2, model.getSecondProperty().length);
@@ -136,16 +146,19 @@ public class DefaultTest {
         Resource res = mock(Resource.class);
         lenient().when(res.adaptTo(ValueMap.class)).thenReturn(vm);
 
-        org.apache.sling.models.testmodels.classes.constructorinjection.DefaultPrimitivesModel model
-                = factory.getAdapter(res, org.apache.sling.models.testmodels.classes.constructorinjection.DefaultPrimitivesModel.class);
+        org.apache.sling.models.testmodels.classes.constructorinjection.DefaultPrimitivesModel model =
+                factory.getAdapter(
+                        res,
+                        org.apache.sling.models.testmodels.classes.constructorinjection.DefaultPrimitivesModel.class);
         assertNotNull(model);
 
         assertEquals(true, model.getBooleanProperty());
-        // we need to wait for JUnit 4.12 for this assertArrayEquals to be working on primitive boolean arrays, https://github.com/junit-team/junit/issues/86!
-        assertTrue(Arrays.equals(new boolean[] { true, true }, model.getBooleanArrayProperty()));
+        // we need to wait for JUnit 4.12 for this assertArrayEquals to be working on primitive boolean arrays,
+        // https://github.com/junit-team/junit/issues/86!
+        assertTrue(Arrays.equals(new boolean[] {true, true}, model.getBooleanArrayProperty()));
 
         assertEquals(1L, model.getLongProperty());
-        assertArrayEquals(new long[] { 1L, 1L }, model.getLongArrayProperty());
+        assertArrayEquals(new long[] {1L, 1L}, model.getLongArrayProperty());
     }
 
     @Test
@@ -155,16 +168,16 @@ public class DefaultTest {
         Resource res = mock(Resource.class);
         lenient().when(res.adaptTo(ValueMap.class)).thenReturn(vm);
 
-        org.apache.sling.models.testmodels.classes.constructorinjection.DefaultWrappersModel model
-                = factory.getAdapter(res, org.apache.sling.models.testmodels.classes.constructorinjection.DefaultWrappersModel.class);
+        org.apache.sling.models.testmodels.classes.constructorinjection.DefaultWrappersModel model = factory.getAdapter(
+                res, org.apache.sling.models.testmodels.classes.constructorinjection.DefaultWrappersModel.class);
         assertNotNull(model);
 
         assertEquals(Boolean.valueOf(true), model.getBooleanWrapperProperty());
-        // we need to wait for JUnit 4.12 for this assertArrayEquals to be working on primitive boolean arrays, https://github.com/junit-team/junit/issues/86!
-        assertTrue(Arrays.equals(new Boolean[] { Boolean.TRUE, Boolean.TRUE }, model.getBooleanWrapperArrayProperty()));
+        // we need to wait for JUnit 4.12 for this assertArrayEquals to be working on primitive boolean arrays,
+        // https://github.com/junit-team/junit/issues/86!
+        assertTrue(Arrays.equals(new Boolean[] {Boolean.TRUE, Boolean.TRUE}, model.getBooleanWrapperArrayProperty()));
 
         assertEquals(Long.valueOf(1L), model.getLongWrapperProperty());
-        assertArrayEquals(new Long[] { Long.valueOf(1L), Long.valueOf(1L) }, model.getLongWrapperArrayProperty());
+        assertArrayEquals(new Long[] {Long.valueOf(1L), Long.valueOf(1L)}, model.getLongWrapperArrayProperty());
     }
-
 }

@@ -1,18 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl.injectors;
 
@@ -35,7 +37,9 @@ import org.osgi.service.component.annotations.Component;
 /**
  * Injects the adaptable object itself.
  */
-@Component(property=Constants.SERVICE_RANKING+":Integer="+Integer.MAX_VALUE, service={Injector.class, StaticInjectAnnotationProcessorFactory.class, AcceptsNullName.class})
+@Component(
+        property = Constants.SERVICE_RANKING + ":Integer=" + Integer.MAX_VALUE,
+        service = {Injector.class, StaticInjectAnnotationProcessorFactory.class, AcceptsNullName.class})
 public class SelfInjector implements Injector, StaticInjectAnnotationProcessorFactory, AcceptsNullName {
 
     @Override
@@ -43,7 +47,11 @@ public class SelfInjector implements Injector, StaticInjectAnnotationProcessorFa
         return "self";
     }
 
-    public Object getValue(@NotNull Object adaptable, String name, @NotNull Type type, @NotNull AnnotatedElement element,
+    public Object getValue(
+            @NotNull Object adaptable,
+            String name,
+            @NotNull Type type,
+            @NotNull AnnotatedElement element,
             @NotNull DisposalCallbackRegistry callbackRegistry) {
         // if the @Self annotation is present return the adaptable to be inserted directly or to be adapted from
         if (element.isAnnotationPresent(Self.class)) {
@@ -51,10 +59,10 @@ public class SelfInjector implements Injector, StaticInjectAnnotationProcessorFa
         } else {
             // special handling for the first constructor parameter
             // apply class-based injection only if class matches or is a superclass
-            if (element instanceof ConstructorParameter.FakeAnnotatedElement &&
-                    ((ConstructorParameter.FakeAnnotatedElement)element).getParameterIndex() == 0 &&
-                    type instanceof Class<?> &&
-                    ((Class<?>)type).isAssignableFrom(adaptable.getClass())) {
+            if (element instanceof ConstructorParameter.FakeAnnotatedElement
+                    && ((ConstructorParameter.FakeAnnotatedElement) element).getParameterIndex() == 0
+                    && type instanceof Class<?>
+                    && ((Class<?>) type).isAssignableFrom(adaptable.getClass())) {
                 return adaptable;
             }
         }
@@ -62,7 +70,7 @@ public class SelfInjector implements Injector, StaticInjectAnnotationProcessorFa
     }
 
     @Override
-    @SuppressWarnings({ "unused", "null" })
+    @SuppressWarnings({"unused", "null"})
     public InjectAnnotationProcessor2 createAnnotationProcessor(AnnotatedElement element) {
         // check if the element has the expected annotation
         Self annotation = element.getAnnotation(Self.class);
@@ -91,5 +99,4 @@ public class SelfInjector implements Injector, StaticInjectAnnotationProcessorFa
             return annotation.optional();
         }
     }
-
 }

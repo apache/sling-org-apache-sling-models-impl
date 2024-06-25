@@ -1,24 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.models.impl;
-
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 
 import java.util.Collections;
 import java.util.Map;
@@ -37,6 +35,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+
 @RunWith(MockitoJUnitRunner.class)
 public class InvalidAdaptationsTest {
     private ModelAdapterFactory factory;
@@ -51,7 +53,7 @@ public class InvalidAdaptationsTest {
 
     @Test
     public void testNonModelClass() {
-        Map<String, Object> emptyMap = Collections.<String, Object> emptyMap();
+        Map<String, Object> emptyMap = Collections.<String, Object>emptyMap();
 
         Resource res = mock(Resource.class);
         lenient().when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
@@ -61,7 +63,7 @@ public class InvalidAdaptationsTest {
 
     @Test(expected = ModelClassException.class)
     public void testNonModelClassException() {
-        Map<String, Object> emptyMap = Collections.<String, Object> emptyMap();
+        Map<String, Object> emptyMap = Collections.<String, Object>emptyMap();
 
         Resource res = mock(Resource.class);
         lenient().when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
@@ -71,7 +73,7 @@ public class InvalidAdaptationsTest {
 
     @Test
     public void testWrongAdaptableClass() {
-        Map<String, Object> emptyMap = Collections.<String, Object> emptyMap();
+        Map<String, Object> emptyMap = Collections.<String, Object>emptyMap();
 
         Resource res = mock(Resource.class);
         lenient().when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
@@ -81,7 +83,7 @@ public class InvalidAdaptationsTest {
 
     @Test(expected = InvalidAdaptableException.class)
     public void testWrongAdaptableClassException() {
-        Map<String, Object> emptyMap = Collections.<String, Object> emptyMap();
+        Map<String, Object> emptyMap = Collections.<String, Object>emptyMap();
 
         Resource res = mock(Resource.class);
         lenient().when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
@@ -89,11 +91,8 @@ public class InvalidAdaptationsTest {
         assertNull(factory.createModel(res, RequestModel.class));
     }
 
-    private class NonModel {
-    }
+    private class NonModel {}
 
     @Model(adaptables = SlingHttpServletRequest.class)
-    private class RequestModel {
-    }
-
+    private class RequestModel {}
 }

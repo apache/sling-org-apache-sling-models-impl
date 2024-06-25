@@ -18,9 +18,6 @@
  */
 package org.apache.sling.models.impl.injectors;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import java.lang.reflect.AnnotatedElement;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -33,6 +30,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 /**
  * This was a unit test for the ResourceResolverInjector which is now removed
  * because it is obsolete due to the SlingObjectInjector.
@@ -43,9 +43,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class ResourceResolverInjectorTest {
 
     private SlingObjectInjector injector = new SlingObjectInjector();
-    
+
     @Mock
     private AnnotatedElement element;
+
     @Mock
     private DisposalCallbackRegistry registry;
 
@@ -76,5 +77,4 @@ public class ResourceResolverInjectorTest {
         Object result = injector.getValue(response, "resourceResolver", ResourceResolver.class, element, registry);
         assertNull(result);
     }
-
 }

@@ -18,13 +18,13 @@
  */
 package org.apache.sling.models.impl;
 
+import javax.inject.Inject;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotation;
@@ -57,7 +57,6 @@ public final class ReflectionUtil {
             type = type.getSuperclass();
         }
         return result;
-
     }
 
     private static void addAnnotatedMethodsFromInterfaces(Class<?> type, List<Method> result) {
@@ -127,7 +126,9 @@ public final class ReflectionUtil {
         try {
             Class<?> recordType = Class.forName("java.lang.Record");
             return recordType.isAssignableFrom(checkedType);
-        } catch (@SuppressWarnings("squid:S1166") ClassNotFoundException exception) {
+        } catch (
+                @SuppressWarnings("squid:S1166")
+                ClassNotFoundException exception) {
             return false;
         }
     }
@@ -145,9 +146,8 @@ public final class ReflectionUtil {
         int numOfCtorParams = constructor.getParameterCount();
         Class<?> declaringClass = constructor.getDeclaringClass();
         Field[] fields = declaringClass.getDeclaredFields();
-        long numOfFields = Arrays.stream(fields)
-                                 .filter(field -> !field.isSynthetic())
-                                 .count();
+        long numOfFields =
+                Arrays.stream(fields).filter(field -> !field.isSynthetic()).count();
         return numOfCtorParams == numOfFields;
     }
 }

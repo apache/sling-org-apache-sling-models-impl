@@ -18,10 +18,10 @@
  */
 package org.apache.sling.models.testmodels.classes.constructorinjection;
 
-import java.util.List;
-
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import java.util.List;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
@@ -31,7 +31,9 @@ import org.apache.sling.models.testmodels.classes.ChildModel;
 public class ParentModel {
 
     @Inject
-    public ParentModel(@Named("firstChild") ChildModel firstChild, @Named("secondChild") List<ChildModel> grandChildren,
+    public ParentModel(
+            @Named("firstChild") ChildModel firstChild,
+            @Named("secondChild") List<ChildModel> grandChildren,
             @Named("emptyChild") List<ChildModel> emptyGrandChildren) {
         this.firstChild = firstChild;
         this.grandChildren = grandChildren;
