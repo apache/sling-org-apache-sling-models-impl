@@ -36,6 +36,8 @@ import org.apache.sling.api.adapter.Adaptable;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.commons.metrics.Gauge;
+import org.apache.sling.commons.metrics.MetricsService;
 import org.apache.sling.commons.osgi.RankedServices;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.ValidationStrategy;
@@ -186,6 +188,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     private ConcurrentMap<java.lang.ref.Reference<Object>, Disposable> disposalCallbacks;
 
     private RequestDisposalCallbacks requestDisposalCallbacks;
+    
+    // exposes the number of elements in the RequestDisposableCallback's map
+    Gauge<Integer> requestsPendingCleanup;
 
     @Override
     public void run() {
@@ -230,6 +235,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     @Reference
     AdapterManager adapterManager;
+    
+    @Reference
+    MetricsService metricsService;
 
     ModelPackageBundleListener listener;
 
@@ -1179,6 +1187,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
         this.configPrinterRegistration = bundleContext.registerService(Object.class,
                 new ModelConfigurationPrinter(this, bundleContext, adapterImplementations), printerProps);
+        
+        requestsPendingCleanup = metricsService.gauge("org.apache.sling.models.ModelAdapterFactory.requestsPendingCleanup", requestDisposalCallbacks.callbacks::size);
 
     }
 

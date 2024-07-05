@@ -198,6 +198,12 @@
             <artifactId>annotations</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.commons.metrics</artifactId>
+            <version>1.2.12</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -233,14 +239,14 @@
             <version>1.4.2</version>
             <scope>test</scope>
         </dependency>
-        <!-- transitive depedendencies of org.apache.sling.servlet-helpers -->
+		<!-- transitive depedendencies of org.apache.sling.servlet-helpers -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <version>4.1</version>
             <scope>test</scope>
         </dependency>
-        <!-- for testing the annotations -->
+		<!-- for testing the annotations -->
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.util.converter</artifactId>
