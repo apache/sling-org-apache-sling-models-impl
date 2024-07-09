@@ -1423,13 +1423,13 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         if (list != null) {
             sre.getServletRequest().removeAttribute(REQUEST_MARKER_ATTRIBUTE);
             if (list instanceof List) {
-                final List<?> disposalCallbacks = (List<?>) list;
-                for (final Object disposable : disposalCallbacks) {
+                final List<?> callbackList = (List<?>) list;
+                for (final Object disposable : callbackList) {
                     if (disposable instanceof Disposable) {
                         ((Disposable) disposable).onDisposed();
                     }
                 }
-                disposalCallbacks.clear();
+                callbackList.clear();
             }
         }
     }
