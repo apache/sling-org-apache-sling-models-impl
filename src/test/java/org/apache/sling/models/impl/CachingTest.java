@@ -20,17 +20,16 @@ package org.apache.sling.models.impl;
 
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
-import org.apache.sling.models.testmodels.classes.CachedModel;
-import org.apache.sling.models.testmodels.classes.CachedModelWithAdapterTypes12;
-import org.apache.sling.models.testmodels.classes.CachedModelWithAdapterTypes23;
-import org.apache.sling.models.testmodels.classes.UncachedModel;
+import org.apache.sling.models.testmodels.classes.*;
 import org.apache.sling.models.testmodels.interfaces.AdapterType1;
 import org.apache.sling.models.testmodels.interfaces.AdapterType2;
 import org.apache.sling.models.testmodels.interfaces.AdapterType3;
@@ -60,6 +59,9 @@ public class CachingTest {
     @Mock
     private Resource resource;
 
+    @Mock
+    private ResourceResolver resourceResolver;
+
     private ModelAdapterFactory factory;
 
     @Before
@@ -88,6 +90,9 @@ public class CachingTest {
 
         ValueMap vm = new ValueMapDecorator(Collections.singletonMap("testValue", "test"));
         when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
+        when(resource.getResourceResolver()).thenReturn(resourceResolver);
+
+        when(resourceResolver.getPropertyMap()).thenReturn(new HashMap<>());
     }
 
     @Test
