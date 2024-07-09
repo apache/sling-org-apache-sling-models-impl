@@ -27,7 +27,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.commons.metrics.MetricsService;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.apache.sling.models.export.spi.ModelExporter;
@@ -84,7 +83,6 @@ public class AdapterFactoryTest {
         Converter c = Converters.standardConverter();
         Map<String, String> map = new HashMap<>();
         ModelAdapterFactoryConfiguration config = c.convert(map).to(ModelAdapterFactoryConfiguration.class);
-        factory.metricsService = Mockito.mock(MetricsService.class);
         factory.activate(componentCtx, config);
         factory.injectAnnotationProcessorFactories = Collections.emptyList();
         factory.injectAnnotationProcessorFactories2 = Collections.emptyList();

@@ -22,7 +22,6 @@ import javax.annotation.PostConstruct;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
-import javax.servlet.ServletRequestWrapper;
 
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
@@ -38,7 +37,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -54,8 +52,6 @@ import org.apache.sling.api.adapter.Adaptable;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.metrics.Gauge;
-import org.apache.sling.commons.metrics.MetricsService;
 import org.apache.sling.commons.osgi.RankedServices;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.ValidationStrategy;
@@ -130,8 +126,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     private static final String REQUEST_MARKER_ATTRIBUTE = ModelAdapterFactory.class.getName() + ".RealRequest";
 
-    private static final Object REQUEST_MARKER_VALUE = new Object();
-
     private static final String REQUEST_CACHE_ATTRIBUTE = ModelAdapterFactory.class.getName() + ".AdapterCache";
 
     private static class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry, Disposable {
@@ -155,62 +149,13 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         }
     }
 
-    private static class CombinedDisposable implements Disposable {
-        private final Collection<Disposable> delegates = Collections.synchronizedCollection(new HashSet<Disposable>());
-
-        private void add(Disposable disposable) {
-            delegates.add(disposable);
-        }
-
-        @Override
-        public void onDisposed() {
-            for (Disposable delegate : delegates) {
-                delegate.onDisposed();
-            }
-        }
-    }
-
     private interface Disposable {
         void onDisposed();
-    }
-
-    private static class RequestDisposalCallbacks {
-        private ConcurrentHashMap<ServletRequest, Disposable> callbacks = new ConcurrentHashMap<>();
-
-        public Collection<Disposable> values() {
-            return callbacks.values();
-        }
-
-        public Disposable remove(ServletRequest request) {
-            return callbacks.remove(request);
-        }
-
-        public void put(ServletRequest request, Disposable registry) {
-            synchronized (callbacks) {
-                CombinedDisposable combinedDisposable = null;
-                Disposable current = callbacks.get(request);
-                if (current == null) {
-                    callbacks.put(request, registry);
-                    return;
-                } else if (current instanceof CombinedDisposable) {
-                    combinedDisposable = (CombinedDisposable) current;
-                } else {
-                    combinedDisposable = new CombinedDisposable();
-                    combinedDisposable.add(current);
-                    callbacks.put(request, combinedDisposable);
-                }
-                combinedDisposable.add(registry);
-            }
-        }
     }
 
     private ReferenceQueue<Object> queue;
 
     private ConcurrentMap<java.lang.ref.Reference<Object>, Disposable> disposalCallbacks;
-
-    private RequestDisposalCallbacks requestDisposalCallbacks;
-    // exposes the number of elements in the RequestDisposableCallback's map
-    Gauge<Integer> requestsPendingCleanup;
 
     @Override
     public void run() {
@@ -264,9 +209,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     @Reference
     AdapterManager adapterManager;
-
-    @Reference
-    MetricsService metricsService;
 
     ModelPackageBundleListener listener;
 
@@ -745,6 +687,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private <ModelType> Result<InvocationHandler> createInvocationHandler(
             final Object adaptable, final ModelClass<ModelType> modelClass) {
         InjectableMethod[] injectableMethods = modelClass.getInjectableMethods();
@@ -770,11 +713,15 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         if (!registry.callbacks.isEmpty()) {
             registry.seal();
 
-            if (adaptable instanceof SlingHttpServletRequest
-                    && ((SlingHttpServletRequest) adaptable).getAttribute(REQUEST_MARKER_ATTRIBUTE)
-                            == REQUEST_MARKER_VALUE) {
-                registerRequestCallbackRegistry((SlingHttpServletRequest) adaptable, registry);
-            } else {
+            boolean registered = false;
+            if (adaptable instanceof SlingHttpServletRequest) {
+                final Object list = ((SlingHttpServletRequest) adaptable).getAttribute(REQUEST_MARKER_ATTRIBUTE);
+                if (list instanceof List) {
+                    ((List<Disposable>) list).add(registry);
+                    registered = true;
+                }
+            }
+            if (!registered) {
                 registerCallbackRegistry(handler, registry);
             }
         }
@@ -792,18 +739,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     private void registerCallbackRegistry(Object object, DisposalCallbackRegistryImpl registry) {
         PhantomReference<Object> reference = new PhantomReference<>(object, queue);
         disposalCallbacks.put(reference, registry);
-    }
-
-    private void registerRequestCallbackRegistry(ServletRequest request, DisposalCallbackRegistryImpl registry) {
-        request = unwrapRequest(request);
-        requestDisposalCallbacks.put(request, registry);
-    }
-
-    private static ServletRequest unwrapRequest(ServletRequest request) {
-        while (request instanceof ServletRequestWrapper) {
-            request = ((ServletRequestWrapper) request).getRequest();
-        }
-        return request;
     }
 
     @SuppressWarnings("unchecked")
@@ -860,11 +795,15 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         if (!registry.callbacks.isEmpty()) {
             registry.seal();
 
-            if (adaptable instanceof SlingHttpServletRequest
-                    && ((SlingHttpServletRequest) adaptable).getAttribute(REQUEST_MARKER_ATTRIBUTE)
-                            == REQUEST_MARKER_VALUE) {
-                registerRequestCallbackRegistry((SlingHttpServletRequest) adaptable, registry);
-            } else {
+            boolean registered = false;
+            if (adaptable instanceof SlingHttpServletRequest) {
+                final Object list = ((SlingHttpServletRequest) adaptable).getAttribute(REQUEST_MARKER_ATTRIBUTE);
+                if (list instanceof List) {
+                    ((List<Disposable>) list).add(registry);
+                    registered = true;
+                }
+            }
+            if (!registered) {
                 registerCallbackRegistry(object, registry);
             }
         }
@@ -1275,7 +1214,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         BundleContext bundleContext = ctx.getBundleContext();
         this.queue = new ReferenceQueue<>();
         this.disposalCallbacks = new ConcurrentHashMap<>();
-        this.requestDisposalCallbacks = new RequestDisposalCallbacks();
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put(Constants.SERVICE_VENDOR, "Apache Software Foundation");
         properties.put(Constants.SERVICE_DESCRIPTION, "Sling Models OSGi Service Disposal Job");
@@ -1302,21 +1240,11 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
         this.configPrinterRegistration = bundleContext.registerService(
                 Object.class, new ModelConfigurationPrinter(this, bundleContext, adapterImplementations), printerProps);
-
-        requestsPendingCleanup = metricsService.gauge(
-                "org.apache.sling.models.ModelAdapterFactory.requestsPendingCleanup",
-                requestDisposalCallbacks.callbacks::size);
     }
 
     @Deactivate
     protected void deactivate() {
         this.adapterCache = null;
-        if (this.requestDisposalCallbacks != null) {
-            for (final Disposable requestRegistries : this.requestDisposalCallbacks.values()) {
-                requestRegistries.onDisposed();
-            }
-        }
-        this.requestDisposalCallbacks = null;
         this.clearDisposalCallbackRegistryQueue();
         this.listener.unregisterAll();
         this.adapterImplementations.removeAll();
@@ -1524,16 +1452,24 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @Override
-    public void requestDestroyed(ServletRequestEvent sre) {
-        ServletRequest request = unwrapRequest(sre.getServletRequest());
-        Disposable registry = requestDisposalCallbacks.remove(request);
-        if (registry != null) {
-            registry.onDisposed();
+    public void requestDestroyed(final ServletRequestEvent sre) {
+        final Object list = sre.getServletRequest().getAttribute(REQUEST_MARKER_ATTRIBUTE);
+        if (list != null) {
+            sre.getServletRequest().removeAttribute(REQUEST_MARKER_ATTRIBUTE);
+            if (list instanceof List) {
+                final List<?> disposalCallbacks = (List<?>) list;
+                for (final Object disposable : disposalCallbacks) {
+                    if (disposable instanceof Disposable) {
+                        ((Disposable) disposable).onDisposed();
+                    }
+                }
+                disposalCallbacks.clear();
+            }
         }
     }
 
     @Override
-    public void requestInitialized(ServletRequestEvent sre) {
-        sre.getServletRequest().setAttribute(REQUEST_MARKER_ATTRIBUTE, REQUEST_MARKER_VALUE);
+    public void requestInitialized(final ServletRequestEvent sre) {
+        sre.getServletRequest().setAttribute(REQUEST_MARKER_ATTRIBUTE, new ArrayList<>());
     }
 }
