@@ -688,6 +688,25 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @SuppressWarnings("unchecked")
+    private void registerCallbackRegistry(
+            final DisposalCallbackRegistryImpl registry, final Object adaptable, final Object handler) {
+        if (!registry.callbacks.isEmpty()) {
+            registry.seal();
+
+            boolean registered = false;
+            if (adaptable instanceof SlingHttpServletRequest) {
+                final Object list = ((SlingHttpServletRequest) adaptable).getAttribute(REQUEST_MARKER_ATTRIBUTE);
+                if (list instanceof List) {
+                    ((List<Disposable>) list).add(registry);
+                    registered = true;
+                }
+            }
+            if (!registered) {
+                registerCallbackRegistry(handler, registry);
+            }
+        }
+    }
+
     private <ModelType> Result<InvocationHandler> createInvocationHandler(
             final Object adaptable, final ModelClass<ModelType> modelClass) {
         InjectableMethod[] injectableMethods = modelClass.getInjectableMethods();
@@ -710,21 +729,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             }
         }
 
-        if (!registry.callbacks.isEmpty()) {
-            registry.seal();
-
-            boolean registered = false;
-            if (adaptable instanceof SlingHttpServletRequest) {
-                final Object list = ((SlingHttpServletRequest) adaptable).getAttribute(REQUEST_MARKER_ATTRIBUTE);
-                if (list instanceof List) {
-                    ((List<Disposable>) list).add(registry);
-                    registered = true;
-                }
-            }
-            if (!registered) {
-                registerCallbackRegistry(handler, registry);
-            }
-        }
+        this.registerCallbackRegistry(registry, adaptable, handler);
         if (missingElements != null) {
             MissingElementsException missingElementsException = new MissingElementsException(
                     "Could not create all mandatory methods for interface of model " + modelClass);
@@ -792,21 +797,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             }
         }
 
-        if (!registry.callbacks.isEmpty()) {
-            registry.seal();
-
-            boolean registered = false;
-            if (adaptable instanceof SlingHttpServletRequest) {
-                final Object list = ((SlingHttpServletRequest) adaptable).getAttribute(REQUEST_MARKER_ATTRIBUTE);
-                if (list instanceof List) {
-                    ((List<Disposable>) list).add(registry);
-                    registered = true;
-                }
-            }
-            if (!registered) {
-                registerCallbackRegistry(object, registry);
-            }
-        }
+        this.registerCallbackRegistry(registry, adaptable, object);
         if (missingElements != null) {
             MissingElementsException missingElementsException =
                     new MissingElementsException("Could not inject all required fields into " + modelClass.getType());
