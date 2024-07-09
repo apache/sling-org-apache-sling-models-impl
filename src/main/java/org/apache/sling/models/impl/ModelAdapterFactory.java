@@ -687,26 +687,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         return null;
     }
 
-    @SuppressWarnings("unchecked")
-    private void registerCallbackRegistry(
-            final DisposalCallbackRegistryImpl registry, final Object adaptable, final Object handler) {
-        if (!registry.callbacks.isEmpty()) {
-            registry.seal();
-
-            boolean registered = false;
-            if (adaptable instanceof SlingHttpServletRequest) {
-                final Object list = ((SlingHttpServletRequest) adaptable).getAttribute(REQUEST_MARKER_ATTRIBUTE);
-                if (list instanceof List) {
-                    ((List<Disposable>) list).add(registry);
-                    registered = true;
-                }
-            }
-            if (!registered) {
-                registerCallbackRegistry(handler, registry);
-            }
-        }
-    }
-
     private <ModelType> Result<InvocationHandler> createInvocationHandler(
             final Object adaptable, final ModelClass<ModelType> modelClass) {
         InjectableMethod[] injectableMethods = modelClass.getInjectableMethods();
@@ -739,11 +719,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             return new Result<>(missingElementsException);
         }
         return new Result<InvocationHandler>(handler);
-    }
-
-    private void registerCallbackRegistry(Object object, DisposalCallbackRegistryImpl registry) {
-        PhantomReference<Object> reference = new PhantomReference<>(object, queue);
-        disposalCallbacks.put(reference, registry);
     }
 
     @SuppressWarnings("unchecked")
@@ -1462,5 +1437,26 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     @Override
     public void requestInitialized(final ServletRequestEvent sre) {
         sre.getServletRequest().setAttribute(REQUEST_MARKER_ATTRIBUTE, new ArrayList<>());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void registerCallbackRegistry(
+            final DisposalCallbackRegistryImpl registry, final Object adaptable, final Object handler) {
+        if (!registry.callbacks.isEmpty()) {
+            registry.seal();
+
+            boolean registered = false;
+            if (adaptable instanceof SlingHttpServletRequest) {
+                final Object list = ((SlingHttpServletRequest) adaptable).getAttribute(REQUEST_MARKER_ATTRIBUTE);
+                if (list instanceof List) {
+                    ((List<Disposable>) list).add(registry);
+                    registered = true;
+                }
+            }
+            if (!registered) {
+                PhantomReference<Object> reference = new PhantomReference<>(handler, queue);
+                disposalCallbacks.put(reference, registry);
+            }
+        }
     }
 }
