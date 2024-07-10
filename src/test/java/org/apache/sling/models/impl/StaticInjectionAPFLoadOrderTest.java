@@ -21,7 +21,6 @@ package org.apache.sling.models.impl;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.commons.metrics.MetricsService;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
@@ -34,7 +33,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertFalse;
@@ -126,7 +124,6 @@ public class StaticInjectionAPFLoadOrderTest {
     private void registerServices() {
         context.registerService(BindingsValuesProvidersByContext.class, bindingsValuesProvidersByContext);
         context.registerService(AdapterManager.class, adapterManager);
-        context.registerService(MetricsService.class, Mockito.mock(MetricsService.class));
         factory = context.registerInjectActivateService(new ModelAdapterFactory());
     }
 
