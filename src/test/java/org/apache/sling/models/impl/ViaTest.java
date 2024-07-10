@@ -59,7 +59,7 @@ public class ViaTest {
         when(request.getResource()).thenReturn(resource);
         when(resource.getChild("jcr:content")).thenReturn(childResource);
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(1, 1));
+        factory.injectors = Collections.singletonList(new ValueMapInjector());
         factory.bindViaProvider(new BeanPropertyViaProvider(), null);
         factory.bindViaProvider(new ChildResourceViaProvider(), null);
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(ViaModel.class);

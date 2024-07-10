@@ -19,6 +19,7 @@
 package org.apache.sling.models.impl;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 
 import org.apache.sling.api.resource.Resource;
@@ -74,7 +75,7 @@ public class OSGiInjectionTest {
 
         OSGiServiceInjector injectorFactory = new OSGiServiceInjector();
         injectorFactory.activate(bundleContext);
-        factory.bindInjector(injectorFactory, new ServicePropertiesMap(1, 1));
+        factory.injectors = Collections.singletonList(injectorFactory);
 
         bindings.setSling(helper);
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(

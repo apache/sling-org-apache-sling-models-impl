@@ -61,12 +61,11 @@ public class AdapterImplementationsTest {
     @Before
     public void setUp() {
         underTest = new AdapterImplementations();
-        underTest.setImplementationPickers(Arrays.asList(new ImplementationPicker[] {new FirstImplementationPicker()}));
     }
 
     @Test
     public void testNoMapping() {
-        assertNull(underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE));
+        assertNull(underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE, Arrays.asList(new FirstImplementationPicker())));
 
         // make sure this raises no exception
         underTest.remove(SAMPLE_ADAPTER.getName(), String.class.getName());
@@ -77,11 +76,14 @@ public class AdapterImplementationsTest {
         underTest.addAll(String.class, SAMPLE_ADAPTER);
 
         assertEquals(
-                String.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
+                String.class,
+                underTest
+                        .lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE, Arrays.asList(new FirstImplementationPicker()))
+                        .getType());
 
         underTest.remove(SAMPLE_ADAPTER.getName(), String.class.getName());
 
-        assertNull(underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE));
+        assertNull(underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE, Arrays.asList(new FirstImplementationPicker())));
     }
 
     @Test
@@ -92,17 +94,22 @@ public class AdapterImplementationsTest {
 
         assertEquals(
                 Integer.class,
-                underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
+                underTest
+                        .lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE, Arrays.asList(new FirstImplementationPicker()))
+                        .getType());
 
         underTest.remove(SAMPLE_ADAPTER.getName(), Integer.class.getName());
 
         assertEquals(
-                Long.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
+                Long.class,
+                underTest
+                        .lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE, Arrays.asList(new FirstImplementationPicker()))
+                        .getType());
 
         underTest.remove(SAMPLE_ADAPTER.getName(), Long.class.getName());
         underTest.remove(SAMPLE_ADAPTER.getName(), String.class.getName());
 
-        assertNull(underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE));
+        assertNull(underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE, Arrays.asList(new FirstImplementationPicker())));
     }
 
     @Test
@@ -113,20 +120,26 @@ public class AdapterImplementationsTest {
 
         underTest.removeAll();
 
-        assertNull(underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE));
+        assertNull(underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE, Arrays.asList(new FirstImplementationPicker())));
     }
 
     @Test
     public void testMultipleImplementationPickers() {
-        underTest.setImplementationPickers(Arrays.asList(
-                new NoneImplementationPicker(), new LastImplementationPicker(), new FirstImplementationPicker()));
-
         underTest.addAll(String.class, SAMPLE_ADAPTER);
         underTest.addAll(Integer.class, SAMPLE_ADAPTER);
         underTest.addAll(Long.class, SAMPLE_ADAPTER);
 
         assertEquals(
-                String.class, underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
+                String.class,
+                underTest
+                        .lookup(
+                                SAMPLE_ADAPTER,
+                                SAMPLE_ADAPTABLE,
+                                Arrays.asList(
+                                        new NoneImplementationPicker(),
+                                        new LastImplementationPicker(),
+                                        new FirstImplementationPicker()))
+                        .getType());
     }
 
     @Test
@@ -135,7 +148,9 @@ public class AdapterImplementationsTest {
 
         assertEquals(
                 SAMPLE_ADAPTER,
-                underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE).getType());
+                underTest
+                        .lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE, Arrays.asList(new FirstImplementationPicker()))
+                        .getType());
     }
 
     @Test

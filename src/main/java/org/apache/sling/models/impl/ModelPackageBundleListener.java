@@ -36,7 +36,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.models.annotations.Exporter;
 import org.apache.sling.models.annotations.ExporterOption;
 import org.apache.sling.models.annotations.Exporters;
@@ -47,6 +46,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.converter.Converters;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
@@ -108,8 +108,8 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
     public ServiceRegistration[] addingBundle(Bundle bundle, BundleEvent event) {
         List<ServiceRegistration> regs = new ArrayList<>();
 
-        Dictionary<?, ?> headers = bundle.getHeaders();
-        String packageList = PropertiesUtil.toString(headers.get(PACKAGE_HEADER), null);
+        Dictionary<String, String> headers = bundle.getHeaders();
+        String packageList = headers.get(PACKAGE_HEADER);
         if (packageList != null) {
             packageList = StringUtils.deleteWhitespace(packageList);
             String[] packages = packageList.split(",");
@@ -128,7 +128,7 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
                 }
             }
         }
-        String classesList = PropertiesUtil.toString(headers.get(CLASSES_HEADER), null);
+        String classesList = headers.get(CLASSES_HEADER);
         if (classesList != null) {
             classesList = StringUtils.deleteWhitespace(classesList);
             String[] classes = classesList.split(",");
@@ -206,9 +206,13 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
     public void removedBundle(Bundle bundle, BundleEvent event, ServiceRegistration[] object) {
         for (ServiceRegistration reg : object) {
             ServiceReference ref = reg.getReference();
-            String[] adapterTypeNames = PropertiesUtil.toStringArray(ref.getProperty(AdapterFactory.ADAPTER_CLASSES));
-            if (adapterTypeNames != null) {
-                String implTypeName = PropertiesUtil.toString(ref.getProperty(PROP_IMPLEMENTATION_CLASS), null);
+            String[] adapterTypeNames = Converters.standardConverter()
+                    .convert(ref.getProperty(AdapterFactory.ADAPTER_CLASSES))
+                    .to(String[].class);
+            if (adapterTypeNames != null && adapterTypeNames.length > 0) {
+                String implTypeName = Converters.standardConverter()
+                        .convert(ref.getProperty(PROP_IMPLEMENTATION_CLASS))
+                        .to(String.class);
                 for (String adapterTypeName : adapterTypeNames) {
                     adapterImplementations.remove(adapterTypeName, implTypeName);
                 }

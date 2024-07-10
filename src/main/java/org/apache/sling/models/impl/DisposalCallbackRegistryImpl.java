@@ -18,25 +18,30 @@
  */
 package org.apache.sling.models.impl;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import org.osgi.framework.Constants;
+import org.apache.sling.models.spi.DisposalCallback;
+import org.apache.sling.models.spi.DisposalCallbackRegistry;
+import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("serial")
-public class ServicePropertiesMap extends HashMap<String, Object> implements Comparable<ServicePropertiesMap> {
+public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry {
 
-    public ServicePropertiesMap(long serviceId, int serviceRanking) {
-        super();
-        put(Constants.SERVICE_ID, serviceId);
-        put(Constants.SERVICE_RANKING, serviceRanking);
-    }
+    List<DisposalCallback> callbacks = new ArrayList<>();
 
     @Override
-    public int compareTo(ServicePropertiesMap o) {
-        int result = ((Integer) get(Constants.SERVICE_RANKING)).compareTo((Integer) o.get(Constants.SERVICE_RANKING));
-        if (result == 0) {
-            result = ((Long) get(Constants.SERVICE_ID)).compareTo((Long) o.get(Constants.SERVICE_ID));
+    public void addDisposalCallback(@NotNull DisposalCallback callback) {
+        callbacks.add(callback);
+    }
+
+    void seal() {
+        callbacks = Collections.unmodifiableList(callbacks);
+    }
+
+    public void onDisposed() {
+        for (DisposalCallback callback : callbacks) {
+            callback.onDisposed();
         }
-        return result;
     }
 }

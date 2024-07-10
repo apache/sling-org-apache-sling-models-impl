@@ -19,6 +19,7 @@
 package org.apache.sling.models.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -75,8 +76,7 @@ public class ConstructorTest {
         when(request.getAttribute("attribute2")).thenReturn(STRING_VALUE);
 
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new RequestAttributeInjector(), new ServicePropertiesMap(1, 1));
-        factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(2, 2));
+        factory.injectors = Arrays.asList(new RequestAttributeInjector(), new SelfInjector());
         factory.bindViaProvider(new BeanPropertyViaProvider(), null);
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
                 WithOneConstructorModel.class,

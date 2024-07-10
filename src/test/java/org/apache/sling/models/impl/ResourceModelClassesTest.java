@@ -72,8 +72,7 @@ public class ResourceModelClassesTest {
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         ValueMapInjector valueMapInjector = new ValueMapInjector();
-        factory.bindInjector(valueMapInjector, new ServicePropertiesMap(2, 2));
-        factory.bindInjector(new ChildResourceInjector(), new ServicePropertiesMap(1, 1));
+        factory.injectors = Arrays.asList(new ChildResourceInjector(), valueMapInjector);
 
         factory.injectAnnotationProcessorFactories = factory.injectAnnotationProcessorFactories =
                 Collections.<InjectAnnotationProcessorFactory>singletonList(new ValueMapInjector());

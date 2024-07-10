@@ -61,8 +61,7 @@ public class ResourceModelInterfacesTest {
     @Before
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(2, 2));
-        factory.bindInjector(new ChildResourceInjector(), new ServicePropertiesMap(1, 1));
+        factory.injectors = Arrays.asList(new ChildResourceInjector(), new ValueMapInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
                 SimplePropertyModel.class,
                 ResourceModelWithRequiredField.class,
