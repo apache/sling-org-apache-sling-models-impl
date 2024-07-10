@@ -18,6 +18,8 @@
  */
 package org.apache.sling.models.impl;
 
+import java.util.Arrays;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.impl.injectors.ChildResourceInjector;
@@ -45,8 +47,7 @@ public class OptionalPrimitivesTest {
     @Before
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(2, 2));
-        factory.bindInjector(new ChildResourceInjector(), new ServicePropertiesMap(1, 1));
+        factory.injectors = Arrays.asList(new ChildResourceInjector(), new ValueMapInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
                 org.apache.sling.models.testmodels.classes.OptionalPrimitivesModel.class,
                 org.apache.sling.models.testmodels.interfaces.OptionalPrimitivesModel.class,

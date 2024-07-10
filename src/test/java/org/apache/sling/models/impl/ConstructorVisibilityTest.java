@@ -18,6 +18,8 @@
  */
 package org.apache.sling.models.impl;
 
+import java.util.Arrays;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
 import org.apache.sling.models.impl.injectors.SelfInjector;
@@ -42,8 +44,7 @@ public class ConstructorVisibilityTest {
     @Before
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new RequestAttributeInjector(), new ServicePropertiesMap(1, 1));
-        factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(2, 2));
+        factory.injectors = Arrays.asList(new RequestAttributeInjector(), new SelfInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
                 ProtectedConstructorModel.class, PackagePrivateConstructorModel.class, PrivateConstructorModel.class);
     }

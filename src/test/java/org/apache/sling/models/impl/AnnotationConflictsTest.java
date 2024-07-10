@@ -18,6 +18,7 @@
  */
 package org.apache.sling.models.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.apache.sling.api.resource.Resource;
@@ -58,7 +59,7 @@ public class AnnotationConflictsTest {
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         ValueMapInjector injector = new ValueMapInjector();
-        factory.bindInjector(injector, new ServicePropertiesMap(1, 1));
+        factory.injectors = Arrays.asList(injector);
         factory.injectAnnotationProcessorFactories =
                 Collections.<InjectAnnotationProcessorFactory>singletonList(new ValueMapInjector());
 

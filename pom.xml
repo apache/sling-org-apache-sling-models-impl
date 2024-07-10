@@ -124,6 +124,12 @@
             <version>2.4.0</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.util.converter</artifactId>
+            <version>1.0.9</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- Artifact is shaded and inlined, only some classes included (see above) -->
         <dependency>
             <groupId>org.apache.sling</groupId>
@@ -157,7 +163,7 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.osgi-mock.junit4</artifactId>
-            <version>3.2.0</version>
+            <version>3.5.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -191,12 +197,6 @@
             <scope>test</scope>
         </dependency>
         <!-- for testing the annotations -->
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.util.converter</artifactId>
-            <version>1.0.9</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>

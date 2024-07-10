@@ -18,6 +18,8 @@
  */
 package org.apache.sling.models.impl;
 
+import java.util.Collections;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.models.impl.injectors.SelfInjector;
 import org.apache.sling.models.testmodels.classes.DirectCyclicSelfDependencyModel;
@@ -59,7 +61,7 @@ public class SelfDependencyTest {
         });
 
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(1, 1));
+        factory.injectors = Collections.singletonList(new SelfInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
                 SelfDependencyModelA.class,
                 SelfDependencyModelB.class,

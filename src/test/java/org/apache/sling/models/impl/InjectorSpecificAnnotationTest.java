@@ -18,6 +18,7 @@
  */
 package org.apache.sling.models.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +45,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -84,23 +84,16 @@ public class InjectorSpecificAnnotationTest {
         ChildResourceInjector childResourceInjector = new ChildResourceInjector();
         RequestAttributeInjector requestAttributeInjector = new RequestAttributeInjector();
 
-        factory.bindInjector(bindingsInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 1L));
-        factory.bindInjector(valueMapInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 2L));
-        factory.bindInjector(childResourceInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 3L));
-        factory.bindInjector(
-                requestAttributeInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 4L));
-        factory.bindInjector(osgiInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 5L));
+        factory.injectors = Arrays.asList(
+                bindingsInjector, valueMapInjector, childResourceInjector, requestAttributeInjector, osgiInjector);
 
-        factory.bindStaticInjectAnnotationProcessorFactory(
-                bindingsInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 1L));
+        factory.bindStaticInjectAnnotationProcessorFactory(bindingsInjector, new ServicePropertiesMap(1L, 0));
         factory.injectAnnotationProcessorFactories =
                 Collections.<InjectAnnotationProcessorFactory>singletonList(valueMapInjector);
         factory.injectAnnotationProcessorFactories2 =
                 Collections.<InjectAnnotationProcessorFactory2>singletonList(childResourceInjector);
-        factory.bindStaticInjectAnnotationProcessorFactory(
-                requestAttributeInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 4L));
-        factory.bindStaticInjectAnnotationProcessorFactory(
-                osgiInjector, Collections.<String, Object>singletonMap(Constants.SERVICE_ID, 5L));
+        factory.bindStaticInjectAnnotationProcessorFactory(requestAttributeInjector, new ServicePropertiesMap(4L, 0));
+        factory.bindStaticInjectAnnotationProcessorFactory(osgiInjector, new ServicePropertiesMap(5L, 0));
         factory.bindViaProvider(new BeanPropertyViaProvider(), null);
 
         SlingBindings bindings = new SlingBindings();

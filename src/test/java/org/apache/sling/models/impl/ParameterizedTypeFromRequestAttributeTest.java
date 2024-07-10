@@ -49,7 +49,7 @@ public class ParameterizedTypeFromRequestAttributeTest {
         factory = AdapterFactoryTest.createModelAdapterFactory();
 
         RequestAttributeInjector injector = new RequestAttributeInjector();
-        factory.bindInjector(injector, new ServicePropertiesMap(1, 1));
+        factory.injectors = Collections.singletonList(injector);
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(TestModel.class);
     }
 

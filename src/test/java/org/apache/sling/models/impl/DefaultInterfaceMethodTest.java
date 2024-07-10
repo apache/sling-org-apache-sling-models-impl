@@ -40,7 +40,7 @@ public class DefaultInterfaceMethodTest {
     @Before
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(0, 0));
+        factory.injectors = Collections.singletonList(new ValueMapInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(ModelWithDefaultMethods.class);
     }
 

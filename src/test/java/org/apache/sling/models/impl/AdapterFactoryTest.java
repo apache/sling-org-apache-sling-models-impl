@@ -86,14 +86,15 @@ public class AdapterFactoryTest {
         factory.activate(componentCtx, config);
         factory.injectAnnotationProcessorFactories = Collections.emptyList();
         factory.injectAnnotationProcessorFactories2 = Collections.emptyList();
+        factory.injectors = Collections.emptyList();
+        factory.implementationPickers = Collections.emptyList();
         return factory;
     }
 
     @Before
     public void setup() {
         factory = createModelAdapterFactory();
-        factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(0, 0));
-        factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(1, 1));
+        factory.injectors = Arrays.asList(new ValueMapInjector(), new SelfInjector());
         factory.modelExporters = Arrays.<ModelExporter>asList(
                 new FirstStringExporter(), new SecondStringExporter(), new FirstIntegerExporter());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
