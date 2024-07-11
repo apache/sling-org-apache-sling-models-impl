@@ -22,7 +22,6 @@ import javax.servlet.Servlet;
 
 import java.io.PrintWriter;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.sling.models.annotations.ViaProviderType;
@@ -42,24 +41,24 @@ public class ModelConfigurationPrinter {
     private static final String EXPORT_SERVLET_FILTER =
             "(" + ModelPackageBundleListener.PROP_EXPORTER_SERVLET_CLASS + "=*)";
 
-    private final ModelAdapterFactory modelAdapterFactory;
     private final BundleContext bundleContext;
-    private final AdapterImplementations adapterImplementations;
 
-    ModelConfigurationPrinter(
-            ModelAdapterFactory modelAdapterFactory,
-            BundleContext bundleContext,
-            AdapterImplementations adapterImplementations) {
-        this.modelAdapterFactory = modelAdapterFactory;
+    ModelConfigurationPrinter(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
-        this.adapterImplementations = adapterImplementations;
     }
 
-    public void printConfiguration(PrintWriter printWriter) {
+    public void printConfiguration(
+            PrintWriter printWriter,
+            final AdapterImplementations adapterImplementations,
+            final Collection<Injector> injectors,
+            final Collection<InjectAnnotationProcessorFactory> factories,
+            final Collection<InjectAnnotationProcessorFactory2> factories2,
+            final Collection<StaticInjectAnnotationProcessorFactory> staticFactories,
+            final Collection<ImplementationPicker> pickers,
+            final Map<Class<? extends ViaProviderType>, ViaProvider> viaProviders) {
 
         // injectors
         printWriter.println("Sling Models Injectors:");
-        Collection<Injector> injectors = modelAdapterFactory.getInjectors();
         if (injectors.isEmpty()) {
             printWriter.println("none");
         } else {
@@ -73,12 +72,6 @@ public class ModelConfigurationPrinter {
 
         // inject annotations processor factories
         printWriter.println("Sling Models Inject Annotation Processor Factories:");
-        Collection<InjectAnnotationProcessorFactory> factories =
-                modelAdapterFactory.getInjectAnnotationProcessorFactories();
-        Collection<InjectAnnotationProcessorFactory2> factories2 =
-                modelAdapterFactory.getInjectAnnotationProcessorFactories2();
-        Collection<StaticInjectAnnotationProcessorFactory> staticFactories =
-                modelAdapterFactory.getStaticInjectAnnotationProcessorFactories();
         if ((factories.isEmpty()) && (factories2.isEmpty()) && (staticFactories.isEmpty())) {
             printWriter.println("none");
         } else {
@@ -99,7 +92,6 @@ public class ModelConfigurationPrinter {
 
         // implementation pickers
         printWriter.println("Sling Models Implementation Pickers:");
-        List<ImplementationPicker> pickers = modelAdapterFactory.getImplementationPickers();
         if (pickers.size() == 0) {
             printWriter.println("none");
         } else {
@@ -113,7 +105,6 @@ public class ModelConfigurationPrinter {
 
         // implementation pickers
         printWriter.println("Sling Models Via Providers:");
-        Map<Class<? extends ViaProviderType>, ViaProvider> viaProviders = modelAdapterFactory.getViaProviders();
         if (viaProviders == null || viaProviders.size() == 0) {
             printWriter.println("none");
         } else {
@@ -150,21 +141,19 @@ public class ModelConfigurationPrinter {
         // registered exporter servlets
         printWriter.println("Sling Models Exporter Servlets:");
         try {
-            ServiceReference[] servlets =
-                    bundleContext.getServiceReferences(Servlet.class.getName(), EXPORT_SERVLET_FILTER);
-            if (servlets != null) {
-                for (ServiceReference ref : servlets) {
-                    printWriter.print(ref.getProperty(ModelPackageBundleListener.PROP_EXPORTER_SERVLET_CLASS));
-                    printWriter.print(" exports '");
-                    printWriter.print(ref.getProperty("sling.servlet.resourceTypes"));
-                    printWriter.print("' with selector '");
-                    printWriter.print(ref.getProperty("sling.servlet.selectors"));
-                    printWriter.print("' and extension '");
-                    printWriter.print(ref.getProperty("sling.servlet.extensions"));
-                    printWriter.print("' with exporter '");
-                    printWriter.print(ref.getProperty(ModelPackageBundleListener.PROP_EXPORTER_SERVLET_NAME));
-                    printWriter.println("'");
-                }
+            Collection<ServiceReference<Servlet>> servlets =
+                    bundleContext.getServiceReferences(Servlet.class, EXPORT_SERVLET_FILTER);
+            for (ServiceReference<Servlet> ref : servlets) {
+                printWriter.print(ref.getProperty(ModelPackageBundleListener.PROP_EXPORTER_SERVLET_CLASS));
+                printWriter.print(" exports '");
+                printWriter.print(ref.getProperty("sling.servlet.resourceTypes"));
+                printWriter.print("' with selector '");
+                printWriter.print(ref.getProperty("sling.servlet.selectors"));
+                printWriter.print("' and extension '");
+                printWriter.print(ref.getProperty("sling.servlet.extensions"));
+                printWriter.print("' with exporter '");
+                printWriter.print(ref.getProperty(ModelPackageBundleListener.PROP_EXPORTER_SERVLET_NAME));
+                printWriter.println("'");
             }
         } catch (InvalidSyntaxException e) {
             // ignore

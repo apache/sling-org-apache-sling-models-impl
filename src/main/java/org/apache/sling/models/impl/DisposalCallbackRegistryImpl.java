@@ -18,30 +18,61 @@
  */
 package org.apache.sling.models.impl;
 
+import java.io.Closeable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.models.spi.DisposalCallback;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.jetbrains.annotations.NotNull;
 
-public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry {
+public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry, Closeable {
 
-    List<DisposalCallback> callbacks = new ArrayList<>();
+    private static final String RESOURCE_RESOLVER_DISPOSABLE =
+            ModelAdapterFactory.class.getName().concat(".Disposable");
+
+    private final List<DisposalCallback> callbacks = new ArrayList<>();
+
+    private boolean sealed = false;
 
     @Override
     public void addDisposalCallback(@NotNull DisposalCallback callback) {
+        if (sealed) {
+            throw new IllegalStateException("DisposalCallbackRegistry is sealed");
+        }
         callbacks.add(callback);
     }
 
-    void seal() {
-        callbacks = Collections.unmodifiableList(callbacks);
+    public void registerIfNotEmpty(final ResourceResolverFactory factory) {
+        if (!this.callbacks.isEmpty()) {
+            this.sealed = true;
+
+            final ResourceResolver resolver = factory.getThreadResourceResolver();
+            @SuppressWarnings("unchecked")
+            final List<DisposalCallbackRegistryImpl> list = (List<DisposalCallbackRegistryImpl>)
+                    resolver.getPropertyMap().computeIfAbsent(RESOURCE_RESOLVER_DISPOSABLE, key -> new CloseableList());
+            list.add(this);
+        }
     }
 
-    public void onDisposed() {
+    @Override
+    public void close() {
         for (DisposalCallback callback : callbacks) {
             callback.onDisposed();
+        }
+        callbacks.clear();
+    }
+
+    private static final class CloseableList extends ArrayList<DisposalCallbackRegistryImpl> implements Closeable {
+
+        @Override
+        public void close() {
+            for (final DisposalCallbackRegistryImpl registry : this) {
+                registry.close();
+            }
+            this.clear();
         }
     }
 }

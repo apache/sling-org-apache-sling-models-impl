@@ -25,9 +25,4 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 public @interface ModelAdapterFactoryConfiguration {
     @AttributeDefinition(name = "Maximum Recursion Depth", description = "Maximum depth adaptation will be attempted.")
     int max_recursion_depth() default 20;
-
-    @AttributeDefinition(
-            name = "Cleanup Job Period",
-            description = "Period in seconds at which OSGi service references from ThreadLocals will be cleaned up.")
-    long cleanup_job_period() default 30l;
 }

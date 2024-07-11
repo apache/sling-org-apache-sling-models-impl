@@ -18,9 +18,13 @@
  */
 package org.apache.sling.models.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
@@ -37,6 +41,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 /**
@@ -55,6 +60,9 @@ public class StaticInjectionAPFLoadOrderTest {
     private ResourceResolver resourceResolver;
 
     @Mock
+    private ResourceResolverFactory resourceResolverFactory;
+
+    @Mock
     private BindingsValuesProvidersByContext bindingsValuesProvidersByContext;
 
     @Mock
@@ -64,6 +72,9 @@ public class StaticInjectionAPFLoadOrderTest {
 
     @Before
     public void setUp() {
+        lenient().when(resourceResolverFactory.getThreadResourceResolver()).thenReturn(resourceResolver);
+        final Map<String, Object> props = new HashMap<>();
+        lenient().when(resourceResolver.getPropertyMap()).thenReturn(props);
         registerServices();
     }
 
@@ -124,6 +135,7 @@ public class StaticInjectionAPFLoadOrderTest {
     private void registerServices() {
         context.registerService(BindingsValuesProvidersByContext.class, bindingsValuesProvidersByContext);
         context.registerService(AdapterManager.class, adapterManager);
+        context.registerService(ResourceResolverFactory.class, resourceResolverFactory);
         factory = context.registerInjectActivateService(new ModelAdapterFactory());
     }
 
