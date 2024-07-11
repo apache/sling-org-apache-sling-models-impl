@@ -19,6 +19,8 @@
 package org.apache.sling.models.impl;
 
 import java.io.Closeable;
+import java.lang.ref.PhantomReference;
+import java.lang.ref.ReferenceQueue;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +35,8 @@ public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry, C
     private static final String RESOURCE_RESOLVER_DISPOSABLE =
             ModelAdapterFactory.class.getName().concat(".Disposable");
 
+    private static final ReferenceQueue<Object> QUEUE = new ReferenceQueue<>();
+
     private final List<DisposalCallback> callbacks = new ArrayList<>();
 
     private boolean sealed = false;
@@ -45,15 +49,21 @@ public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry, C
         callbacks.add(callback);
     }
 
-    public void registerIfNotEmpty(final ResourceResolverFactory factory) {
+    @SuppressWarnings("resource")
+    public void registerIfNotEmpty(final ResourceResolverFactory factory, final Object referencedObject) {
         if (!this.callbacks.isEmpty()) {
             this.sealed = true;
 
             final ResourceResolver resolver = factory.getThreadResourceResolver();
-            @SuppressWarnings("unchecked")
-            final List<DisposalCallbackRegistryImpl> list = (List<DisposalCallbackRegistryImpl>)
-                    resolver.getPropertyMap().computeIfAbsent(RESOURCE_RESOLVER_DISPOSABLE, key -> new CloseableList());
-            list.add(this);
+            if (resolver != null) {
+                @SuppressWarnings("unchecked")
+                final List<DisposalCallbackRegistryImpl> list =
+                        (List<DisposalCallbackRegistryImpl>) resolver.getPropertyMap()
+                                .computeIfAbsent(RESOURCE_RESOLVER_DISPOSABLE, key -> new CloseableList());
+                list.add(this);
+            } else {
+                new DisposablePhantomReference(this, referencedObject, QUEUE);
+            }
         }
     }
 
@@ -73,6 +83,32 @@ public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry, C
                 registry.close();
             }
             this.clear();
+        }
+    }
+
+    public static class DisposablePhantomReference extends PhantomReference<Object> implements Closeable {
+
+        private final DisposalCallbackRegistryImpl registry;
+
+        public DisposablePhantomReference(
+                final DisposalCallbackRegistryImpl registry,
+                final Object referent,
+                final ReferenceQueue<Object> queue) {
+            super(referent, queue);
+            this.registry = registry;
+        }
+
+        @Override
+        public void close() {
+            registry.close();
+        }
+    }
+
+    public static void cleanupDisposables() {
+        DisposablePhantomReference ref = (DisposablePhantomReference) QUEUE.poll();
+        while (ref != null) {
+            ref.close();
+            ref = (DisposablePhantomReference) QUEUE.poll();
         }
     }
 }

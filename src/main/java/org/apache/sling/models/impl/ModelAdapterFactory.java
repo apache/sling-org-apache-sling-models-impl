@@ -33,7 +33,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +48,6 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.Adaptable;
-import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -90,6 +91,7 @@ import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -112,7 +114,7 @@ import org.slf4j.LoggerFactory;
         })
 @Designate(ocd = ModelAdapterFactoryConfiguration.class)
 @SuppressWarnings("deprecation")
-public class ModelAdapterFactory implements AdapterFactory, ModelFactory {
+public class ModelAdapterFactory implements ModelFactory, Runnable {
 
     // hard code this value since we always know exactly how many there are
     private static final int VALUE_PREPARERS_COUNT = 2;
@@ -184,7 +186,13 @@ public class ModelAdapterFactory implements AdapterFactory, ModelFactory {
 
     private SlingModelsScriptEngineFactory scriptEngineFactory;
 
+    private ServiceRegistration<Runnable> jobRegistration;
+
     @Override
+    public void run() {
+        DisposalCallbackRegistryImpl.cleanupDisposables();
+    }
+
     @SuppressWarnings("null")
     public <AdapterType> AdapterType getAdapter(Object adaptable, Class<AdapterType> type) {
         Result<AdapterType> result = internalCreateModel(adaptable, type);
@@ -669,7 +677,7 @@ public class ModelAdapterFactory implements AdapterFactory, ModelFactory {
             }
         }
 
-        registry.registerIfNotEmpty(this.resourceResolverFactory);
+        registry.registerIfNotEmpty(this.resourceResolverFactory, handler);
         if (missingElements != null) {
             MissingElementsException missingElementsException = new MissingElementsException(
                     "Could not create all mandatory methods for interface of model " + modelClass);
@@ -732,7 +740,7 @@ public class ModelAdapterFactory implements AdapterFactory, ModelFactory {
             }
         }
 
-        registry.registerIfNotEmpty(this.resourceResolverFactory);
+        registry.registerIfNotEmpty(this.resourceResolverFactory, object);
         if (missingElements != null) {
             MissingElementsException missingElementsException =
                     new MissingElementsException("Could not inject all required fields into " + modelClass.getType());
@@ -1146,10 +1154,24 @@ public class ModelAdapterFactory implements AdapterFactory, ModelFactory {
                 scriptEngineFactory);
 
         this.configPrinter = new ModelConfigurationPrinter(bundleContext);
+        final Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put("scheduler.name", "Sling Models OSGi Service Disposal Job");
+        properties.put("scheduler.concurrent", false);
+        properties.put("scheduler.period", configuration.cleanup_job_period());
+
+        this.jobRegistration = bundleContext.registerService(Runnable.class, this, properties);
     }
 
     @Deactivate
     protected void deactivate() {
+        if (this.jobRegistration != null) {
+            try {
+                this.jobRegistration.unregister();
+            } catch (final IllegalStateException ignore) {
+            }
+            this.jobRegistration = null;
+        }
+        DisposalCallbackRegistryImpl.cleanupDisposables();
         this.adapterCache = null;
         this.listener.unregisterAll();
         this.adapterImplementations.removeAll();
