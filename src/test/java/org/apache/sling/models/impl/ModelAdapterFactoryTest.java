@@ -84,7 +84,7 @@ public class ModelAdapterFactoryTest {
     }
 
     @Test
-    public void testDisposableWithPhantomResource() throws InterruptedException {
+    public void testDisposableWithPhantomResource() {
         DisposalCallbackRegistryImpl.cleanupDisposables();
         final ResourceResolver resourceResolver = factory.resourceResolverFactory.getThreadResourceResolver();
         when(factory.resourceResolverFactory.getThreadResourceResolver()).thenReturn(null);

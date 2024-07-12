@@ -30,7 +30,7 @@ import org.apache.sling.models.spi.DisposalCallback;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.jetbrains.annotations.NotNull;
 
-public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry, Closeable {
+public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry {
 
     private static final String RESOURCE_RESOLVER_DISPOSABLE =
             ModelAdapterFactory.class.getName().concat(".Disposable");
@@ -69,7 +69,6 @@ public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry, C
         }
     }
 
-    @Override
     public void close() {
         for (DisposalCallback callback : callbacks) {
             callback.onDisposed();
