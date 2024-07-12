@@ -37,6 +37,8 @@ public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry, C
 
     private static final ReferenceQueue<Object> QUEUE = new ReferenceQueue<>();
 
+    private static final List<DisposablePhantomReference> REFERENCES = new ArrayList<>();
+
     private final List<DisposalCallback> callbacks = new ArrayList<>();
 
     private boolean sealed = false;
@@ -96,6 +98,9 @@ public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry, C
                 final ReferenceQueue<Object> queue) {
             super(referent, queue);
             this.registry = registry;
+            synchronized (REFERENCES) {
+                REFERENCES.add(this);
+            }
         }
 
         @Override
@@ -107,6 +112,9 @@ public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry, C
     public static void cleanupDisposables() {
         DisposablePhantomReference ref = (DisposablePhantomReference) QUEUE.poll();
         while (ref != null) {
+            synchronized (REFERENCES) {
+                REFERENCES.remove(ref);
+            }
             ref.close();
             ref = (DisposablePhantomReference) QUEUE.poll();
         }

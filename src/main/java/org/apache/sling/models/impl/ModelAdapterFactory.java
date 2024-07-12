@@ -33,9 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +89,6 @@ import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -110,7 +107,9 @@ import org.slf4j.LoggerFactory;
         property = {
             "felix.webconsole.label=slingmodels",
             "felix.webconsole.title=Sling Models",
-            "felix.webconsole.configprinter.modes=always"
+            "felix.webconsole.configprinter.modes=always",
+            "scheduler.name=Sling Models OSGi Service Disposal Job",
+            "scheduler.concurrent=false"
         })
 @Designate(ocd = ModelAdapterFactoryConfiguration.class)
 @SuppressWarnings("deprecation")
@@ -185,8 +184,6 @@ public class ModelAdapterFactory implements ModelFactory, Runnable {
     private Map<Object, Map<Class<?>, SoftReference<Object>>> adapterCache;
 
     private SlingModelsScriptEngineFactory scriptEngineFactory;
-
-    private ServiceRegistration<Runnable> jobRegistration;
 
     @Override
     public void run() {
@@ -1154,28 +1151,15 @@ public class ModelAdapterFactory implements ModelFactory, Runnable {
                 scriptEngineFactory);
 
         this.configPrinter = new ModelConfigurationPrinter(bundleContext);
-        final Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put("scheduler.name", "Sling Models OSGi Service Disposal Job");
-        properties.put("scheduler.concurrent", false);
-        properties.put("scheduler.period", configuration.cleanup_job_period());
-
-        this.jobRegistration = bundleContext.registerService(Runnable.class, this, properties);
     }
 
     @Deactivate
     protected void deactivate() {
-        if (this.jobRegistration != null) {
-            try {
-                this.jobRegistration.unregister();
-            } catch (final IllegalStateException ignore) {
-            }
-            this.jobRegistration = null;
-        }
-        DisposalCallbackRegistryImpl.cleanupDisposables();
         this.adapterCache = null;
         this.listener.unregisterAll();
         this.adapterImplementations.removeAll();
         this.configPrinter = null;
+        DisposalCallbackRegistryImpl.cleanupDisposables();
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)

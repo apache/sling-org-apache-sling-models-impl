@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.spi.DisposalCallback;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
@@ -44,6 +45,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ModelAdapterFactoryTest {
@@ -78,6 +80,26 @@ public class ModelAdapterFactoryTest {
 
         factory.resourceResolverFactory.getThreadResourceResolver().close();
 
+        assertAllDisposed();
+    }
+
+    @Test
+    public void testDisposableWithPhantomResource() throws InterruptedException {
+        DisposalCallbackRegistryImpl.cleanupDisposables();
+        final ResourceResolver resourceResolver = factory.resourceResolverFactory.getThreadResourceResolver();
+        when(factory.resourceResolverFactory.getThreadResourceResolver()).thenReturn(null);
+
+        TestModel model = factory.getAdapter(request, TestModel.class);
+        assertEquals("teststring", model.testString);
+        model = null;
+        System.gc();
+
+        assertNoneDisposed();
+
+        resourceResolver.close();
+        assertNoneDisposed();
+
+        DisposalCallbackRegistryImpl.cleanupDisposables();
         assertAllDisposed();
     }
 
