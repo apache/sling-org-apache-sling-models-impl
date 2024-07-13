@@ -29,5 +29,5 @@ public @interface ModelAdapterFactoryConfiguration {
     @AttributeDefinition(
             name = "Cleanup Job Period",
             description = "Period in seconds at which OSGi service references from ThreadLocals will be cleaned up.")
-    long cleanup_job_period() default 30l;
+    long scheduler_period() default 30l;
 }

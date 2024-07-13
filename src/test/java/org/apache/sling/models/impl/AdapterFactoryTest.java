@@ -18,6 +18,7 @@
  */
 package org.apache.sling.models.impl;
 
+import java.io.Closeable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +26,8 @@ import java.util.Map;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.annotations.Model;
@@ -50,12 +53,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.util.converter.Converter;
 import org.osgi.util.converter.Converters;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -76,18 +81,38 @@ public class AdapterFactoryTest {
     }
 
     public static ModelAdapterFactory createModelAdapterFactory(BundleContext bundleContext) {
-        ComponentContext componentCtx = Mockito.mock(ComponentContext.class);
-        when(componentCtx.getBundleContext()).thenReturn(bundleContext);
-
         ModelAdapterFactory factory = new ModelAdapterFactory();
         Converter c = Converters.standardConverter();
         Map<String, String> map = new HashMap<>();
         ModelAdapterFactoryConfiguration config = c.convert(map).to(ModelAdapterFactoryConfiguration.class);
-        factory.activate(componentCtx, config);
+        factory.activate(bundleContext, config);
         factory.injectAnnotationProcessorFactories = Collections.emptyList();
         factory.injectAnnotationProcessorFactories2 = Collections.emptyList();
         factory.injectors = Collections.emptyList();
         factory.implementationPickers = Collections.emptyList();
+        final ResourceResolverFactory rrf = mock(ResourceResolverFactory.class);
+        final ResourceResolver rr = mock(ResourceResolver.class);
+        lenient().when(rrf.getThreadResourceResolver()).thenReturn(rr);
+        final Map<String, Object> props = new HashMap<>();
+        lenient().when(rr.getPropertyMap()).thenReturn(props);
+        lenient()
+                .doAnswer(new Answer<Object>() {
+                    public Object answer(InvocationOnMock invocation) {
+                        for (final Object v : props.values()) {
+                            if (v instanceof Closeable) {
+                                try {
+                                    ((Closeable) v).close();
+                                } catch (Exception e) {
+                                    // ignore
+                                }
+                            }
+                        }
+                        return null;
+                    }
+                })
+                .when(rr)
+                .close();
+        factory.resourceResolverFactory = rrf;
         return factory;
     }
 
