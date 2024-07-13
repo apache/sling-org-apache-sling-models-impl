@@ -23,6 +23,8 @@ import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -37,7 +39,8 @@ public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry {
 
     private static final ReferenceQueue<Object> QUEUE = new ReferenceQueue<>();
 
-    private static final List<DisposablePhantomReference> REFERENCES = new ArrayList<>();
+    private static final Map<PhantomReference<Object>, DisposalCallbackRegistryImpl> REFERENCES =
+            new ConcurrentHashMap<>();
 
     private final List<DisposalCallback> callbacks = new ArrayList<>();
 
@@ -64,7 +67,8 @@ public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry {
                                 .computeIfAbsent(RESOURCE_RESOLVER_DISPOSABLE, key -> new CloseableList());
                 list.add(this);
             } else {
-                new DisposablePhantomReference(this, referencedObject, QUEUE);
+                final PhantomReference<Object> ref = new PhantomReference<>(referencedObject, QUEUE);
+                REFERENCES.put(ref, this);
             }
         }
     }
@@ -87,35 +91,15 @@ public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry {
         }
     }
 
-    public static class DisposablePhantomReference extends PhantomReference<Object> implements Closeable {
-
-        private final DisposalCallbackRegistryImpl registry;
-
-        public DisposablePhantomReference(
-                final DisposalCallbackRegistryImpl registry,
-                final Object referent,
-                final ReferenceQueue<Object> queue) {
-            super(referent, queue);
-            this.registry = registry;
-            synchronized (REFERENCES) {
-                REFERENCES.add(this);
-            }
-        }
-
-        @Override
-        public void close() {
-            registry.close();
-        }
-    }
-
+    @SuppressWarnings("unchecked")
     public static void cleanupDisposables() {
-        DisposablePhantomReference ref = (DisposablePhantomReference) QUEUE.poll();
+        PhantomReference<Object> ref = (PhantomReference<Object>) QUEUE.poll();
         while (ref != null) {
-            synchronized (REFERENCES) {
-                REFERENCES.remove(ref);
+            final DisposalCallbackRegistryImpl registry = REFERENCES.remove(ref);
+            if (registry != null) {
+                registry.close();
             }
-            ref.close();
-            ref = (DisposablePhantomReference) QUEUE.poll();
+            ref = (PhantomReference<Object>) QUEUE.poll();
         }
     }
 }
