@@ -26,7 +26,7 @@
         <relativePath />
     </parent>
     <artifactId>org.apache.sling.models.impl</artifactId>
-    <version>1.7.2</version>
+    <version>1.7.3-SNAPSHOT</version>
     <name>Apache Sling Models Implementation</name>
     <description>Apache Sling Models Implementation</description>
 
@@ -37,7 +37,7 @@
         <url>https://github.com/apache/sling-org-apache-sling-models-impl.git</url>
     </scm>
     <properties>
-        <project.build.outputTimestamp>2024-10-23T09:07:26Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2024-10-23T09:08:29Z</project.build.outputTimestamp>
     </properties>
 
     <dependencies>
