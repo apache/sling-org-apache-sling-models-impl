@@ -18,11 +18,18 @@
  */
 package org.apache.sling.models.impl;
 
-import java.util.function.IntSupplier;
+import javax.inject.Inject;
+
+import java.util.Map;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
+import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.apache.sling.models.spi.ImplementationPicker;
 import org.apache.sling.models.testutil.ModelAdapterFactoryUtil;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
@@ -36,10 +43,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.osgi.framework.Constants.SERVICE_RANKING;
+import static org.mockito.Mockito.when;
 
+/**
+ * Tests in which order the injectors are handled depending on service ranking.
+ * For historic/backwards compatibility reasons, higher ranking value means lower priority (inverse to DS behavior).
+ */
 @RunWith(MockitoJUnitRunner.class)
-public class AdapterImplementations_ImplementationPickerOrderTest {
+public class ModelAdapterFactory_InjectorOrderTest {
 
     @Rule
     public final OsgiContext context = new OsgiContext();
@@ -53,56 +64,62 @@ public class AdapterImplementations_ImplementationPickerOrderTest {
     @Mock
     private SlingHttpServletRequest request;
 
+    @Mock
+    private Resource resource;
+
     private ModelAdapterFactory factory;
 
+    @SuppressWarnings("null")
     @Before
     public void setUp() {
         context.registerService(BindingsValuesProvidersByContext.class, bindingsValuesProvidersByContext);
         context.registerService(AdapterManager.class, adapterManager);
         factory = context.registerInjectActivateService(ModelAdapterFactory.class);
 
-        ModelAdapterFactoryUtil.addModelsForPackage(context.bundleContext(), Model1.class, Model2.class);
+        ModelAdapterFactoryUtil.addModelsForPackage(context.bundleContext(), TestModel.class);
+
+        when(request.getResource()).thenReturn(resource);
+        when(resource.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(Map.of("prop1", 1)));
+        when(request.getAttribute("prop1")).thenReturn(2);
     }
 
     @Test
-    public void testFirstImplementationPicker() {
-        context.registerInjectActivateService(FirstImplementationPicker.class);
+    public void testSingleInjector_ValueMap() {
+        context.registerInjectActivateService(ValueMapInjector.class);
 
-        IntSupplier result = factory.createModel(request, IntSupplier.class);
-        assertEquals(1, result.getAsInt());
+        TestModel model = factory.createModel(request, TestModel.class);
+        assertEquals((Integer) 1, model.getProp1());
     }
 
     @Test
-    public void testMultipleImplementationPickers() {
-        // LastImplementationPicker has higher priority
-        context.registerInjectActivateService(FirstImplementationPicker.class);
-        context.registerService(ImplementationPicker.class, new LastImplementationPicker(), SERVICE_RANKING, 100);
+    public void testSingleInjector_RequestAttribute() {
+        context.registerInjectActivateService(RequestAttributeInjector.class);
 
-        IntSupplier result = factory.createModel(request, IntSupplier.class);
-        assertEquals(2, result.getAsInt());
+        TestModel model = factory.createModel(request, TestModel.class);
+        assertEquals((Integer) 2, model.getProp1());
+    }
+
+    @Test
+    public void testMultipleInjectors() {
+        // ValueMapInjector has higher priority
+        context.registerInjectActivateService(ValueMapInjector.class);
+        context.registerInjectActivateService(RequestAttributeInjector.class);
+
+        TestModel model = factory.createModel(request, TestModel.class);
+        assertEquals((Integer) 1, model.getProp1());
     }
 
     static final class LastImplementationPicker implements ImplementationPicker {
         @Override
         public Class<?> pick(
-                @NotNull Class<?> adapterType, Class<?> @NotNull [] implementationsTypes, @NotNull Object adaptable) {
+                @NotNull Class<?> adapterType, Class<?>[] implementationsTypes, @NotNull Object adaptable) {
             return implementationsTypes[implementationsTypes.length - 1];
         }
     }
 
-    @Model(adaptables = SlingHttpServletRequest.class, adapters = IntSupplier.class)
-    static final class Model1 implements IntSupplier {
-        @Override
-        public int getAsInt() {
-            return 1;
-        }
-    }
-
-    @Model(adaptables = SlingHttpServletRequest.class, adapters = IntSupplier.class)
-    static final class Model2 implements IntSupplier {
-        @Override
-        public int getAsInt() {
-            return 2;
-        }
+    @Model(adaptables = SlingHttpServletRequest.class)
+    private interface TestModel {
+        @Inject
+        Integer getProp1();
     }
 }
