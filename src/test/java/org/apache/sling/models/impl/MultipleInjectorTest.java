@@ -64,7 +64,7 @@ public class MultipleInjectorTest {
 
         factory = AdapterFactoryTest.createModelAdapterFactory();
         // binding injector should be asked first as it has a lower service ranking!
-        factory.injectors = Arrays.asList(bindingsInjector, attributesInjector);
+        factory.injectors = Arrays.asList(attributesInjector, bindingsInjector);
         factory.bindStaticInjectAnnotationProcessorFactory(bindingsInjector, new ServicePropertiesMap(1, 1));
 
         when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);

@@ -572,10 +572,12 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             if (StringUtils.isEmpty(source)) {
                 source = null;
             }
-            // find the right injector
-            final List<Injector> localInjectors = this.injectors;
+            // find the right injector (look in service ranking REVERSE order)
+            final Injector[] localInjectors = this.injectors.toArray(new Injector[this.injectors.size()]);
             boolean foundSource = false;
-            for (final Injector injector : localInjectors) {
+            for (int injectorIndex = localInjectors.length - 1; injectorIndex >= 0; injectorIndex--) {
+                final Injector injector = localInjectors[injectorIndex];
+
                 // if a source is given only use injectors with this name.
                 if (source != null && !source.equals(injector.getName())) {
                     continue;
@@ -1231,7 +1233,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         synchronized (this) {
             final Map<Comparable<?>, StaticInjectAnnotationProcessorFactory> factoryMap =
                     new TreeMap<>(this.staticInjectAnnotationProcessorFactories);
-            factoryMap.remove((Comparable<?>) props);
+            factoryMap.remove(props);
             this.staticInjectAnnotationProcessorFactories = factoryMap;
             this.adapterImplementations.setStaticInjectAnnotationProcessorFactories(
                     staticInjectAnnotationProcessorFactories.values());

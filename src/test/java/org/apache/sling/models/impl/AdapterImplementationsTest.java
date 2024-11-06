@@ -136,9 +136,9 @@ public class AdapterImplementationsTest {
                                 SAMPLE_ADAPTER,
                                 SAMPLE_ADAPTABLE,
                                 Arrays.asList(
-                                        new NoneImplementationPicker(),
+                                        new FirstImplementationPicker(),
                                         new LastImplementationPicker(),
-                                        new FirstImplementationPicker()))
+                                        new NoneImplementationPicker()))
                         .getType());
     }
 

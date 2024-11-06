@@ -212,7 +212,11 @@ final class AdapterImplementations {
             implementationsArray[i] = implementationWrappersArray[i].getType();
         }
 
-        for (ImplementationPicker picker : sortedImplementationPickers) {
+        // find first-matching implementation (look in service ranking REVERSE order)
+        ImplementationPicker[] localPickers =
+                sortedImplementationPickers.toArray(new ImplementationPicker[sortedImplementationPickers.size()]);
+        for (int pickerIndex = localPickers.length - 1; pickerIndex >= 0; pickerIndex--) {
+            ImplementationPicker picker = localPickers[pickerIndex];
             Class<?> implementation = picker.pick(adapterType, implementationsArray, adaptable);
             if (implementation != null) {
                 for (int i = 0; i < implementationWrappersArray.length; i++) {
