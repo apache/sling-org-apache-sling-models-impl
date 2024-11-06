@@ -70,7 +70,8 @@ public class ModelAdapterFactory_ImplementationPickerOrderTest {
 
     @Test
     public void testFirstImplementationPicker() {
-        context.registerInjectActivateService(FirstImplementationPicker.class);
+        context.registerService(
+                ImplementationPicker.class, new FirstImplementationPicker(), SERVICE_RANKING, Integer.MAX_VALUE);
 
         IntSupplier result = factory.createModel(request, IntSupplier.class);
         assertEquals(1, result.getAsInt());
@@ -79,7 +80,8 @@ public class ModelAdapterFactory_ImplementationPickerOrderTest {
     @Test
     public void testMultipleImplementationPickers() {
         // LastImplementationPicker has higher priority
-        context.registerInjectActivateService(FirstImplementationPicker.class); // ranking Integer.MAX_VALUE
+        context.registerService(
+                ImplementationPicker.class, new FirstImplementationPicker(), SERVICE_RANKING, Integer.MAX_VALUE);
         context.registerService(ImplementationPicker.class, new LastImplementationPicker(), SERVICE_RANKING, 100);
 
         IntSupplier result = factory.createModel(request, IntSupplier.class);

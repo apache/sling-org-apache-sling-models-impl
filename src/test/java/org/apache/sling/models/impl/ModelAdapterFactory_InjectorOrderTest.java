@@ -30,6 +30,7 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
+import org.apache.sling.models.spi.Injector;
 import org.apache.sling.models.testutil.ModelAdapterFactoryUtil;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
@@ -42,6 +43,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+import static org.osgi.framework.Constants.SERVICE_RANKING;
 
 /**
  * Tests in which order the injectors are handled depending on service ranking.
@@ -83,7 +85,7 @@ public class ModelAdapterFactory_InjectorOrderTest {
 
     @Test
     public void testSingleInjector_ValueMap() {
-        context.registerInjectActivateService(ValueMapInjector.class);
+        context.registerService(Injector.class, new ValueMapInjector(), SERVICE_RANKING, 2000);
 
         TestModel model = factory.createModel(request, TestModel.class);
         assertEquals((Integer) 1, model.getProp1());
@@ -91,7 +93,7 @@ public class ModelAdapterFactory_InjectorOrderTest {
 
     @Test
     public void testSingleInjector_RequestAttribute() {
-        context.registerInjectActivateService(RequestAttributeInjector.class);
+        context.registerService(Injector.class, new RequestAttributeInjector(), SERVICE_RANKING, 4000);
 
         TestModel model = factory.createModel(request, TestModel.class);
         assertEquals((Integer) 2, model.getProp1());
@@ -100,8 +102,8 @@ public class ModelAdapterFactory_InjectorOrderTest {
     @Test
     public void testMultipleInjectors() {
         // ValueMapInjector has higher priority
-        context.registerInjectActivateService(ValueMapInjector.class); // ranking 2000
-        context.registerInjectActivateService(RequestAttributeInjector.class); // ranking 4000
+        context.registerService(Injector.class, new RequestAttributeInjector(), SERVICE_RANKING, 4000);
+        context.registerService(Injector.class, new ValueMapInjector(), SERVICE_RANKING, 2000);
 
         TestModel model = factory.createModel(request, TestModel.class);
         assertEquals((Integer) 1, model.getProp1());
