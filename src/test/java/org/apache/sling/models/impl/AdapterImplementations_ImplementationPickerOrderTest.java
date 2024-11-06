@@ -66,7 +66,6 @@ public class AdapterImplementations_ImplementationPickerOrderTest {
 
     @Test
     public void testFirstImplementationPicker() {
-        // LastImplementationPicker has higher priority
         context.registerInjectActivateService(FirstImplementationPicker.class);
 
         IntSupplier result = factory.createModel(request, IntSupplier.class);
