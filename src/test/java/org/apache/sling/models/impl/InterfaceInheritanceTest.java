@@ -49,7 +49,7 @@ public class InterfaceInheritanceTest {
 
         factory = AdapterFactoryTest.createModelAdapterFactory();
         ValueMapInjector valueMapInjector = new ValueMapInjector();
-        factory.bindInjector(valueMapInjector, new ServicePropertiesMap(1, 2));
+        factory.injectors = Collections.singletonList(valueMapInjector);
 
         factory.injectAnnotationProcessorFactories =
                 Collections.<InjectAnnotationProcessorFactory>singletonList(valueMapInjector);

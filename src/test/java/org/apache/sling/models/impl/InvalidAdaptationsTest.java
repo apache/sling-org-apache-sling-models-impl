@@ -18,6 +18,7 @@
  */
 package org.apache.sling.models.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -46,8 +47,7 @@ public class InvalidAdaptationsTest {
     @Before
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(1, 1));
-        factory.bindInjector(new ChildResourceInjector(), new ServicePropertiesMap(2, 0));
+        factory.injectors = Arrays.asList(new ValueMapInjector(), new ChildResourceInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(NonModel.class, RequestModel.class);
     }
 

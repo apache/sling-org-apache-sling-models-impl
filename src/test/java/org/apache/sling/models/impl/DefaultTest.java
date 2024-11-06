@@ -50,7 +50,8 @@ public class DefaultTest {
     @Before
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(0, 0));
+        factory.injectors = Arrays.asList(new ValueMapInjector());
+        factory.implementationPickers = Collections.emptyList();
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
                 DefaultStringModel.class,
                 PropertyModelWithDefaults.class,

@@ -18,6 +18,7 @@
  */
 package org.apache.sling.models.impl;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,9 +104,7 @@ public class ResourcePathInjectionTest {
         when(adaptableRequest.getResourceResolver()).thenReturn(resourceResolver);
 
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(1, Integer.MAX_VALUE));
-        factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(2, 2000));
-        factory.bindInjector(new ResourcePathInjector(), new ServicePropertiesMap(3, 2500));
+        factory.injectors = Arrays.asList(new SelfInjector(), new ValueMapInjector(), new ResourcePathInjector());
         factory.bindStaticInjectAnnotationProcessorFactory(
                 new ResourcePathInjector(), new ServicePropertiesMap(3, 2500));
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(

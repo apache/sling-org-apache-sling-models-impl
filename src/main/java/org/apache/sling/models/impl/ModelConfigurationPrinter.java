@@ -22,6 +22,7 @@ import javax.servlet.Servlet;
 
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.sling.models.annotations.ViaProviderType;
@@ -98,8 +99,8 @@ public class ModelConfigurationPrinter {
 
         // implementation pickers
         printWriter.println("Sling Models Implementation Pickers:");
-        ImplementationPicker[] pickers = modelAdapterFactory.getImplementationPickers();
-        if (pickers == null || pickers.length == 0) {
+        List<ImplementationPicker> pickers = modelAdapterFactory.getImplementationPickers();
+        if (pickers.size() == 0) {
             printWriter.println("none");
         } else {
             for (ImplementationPicker picker : pickers) {

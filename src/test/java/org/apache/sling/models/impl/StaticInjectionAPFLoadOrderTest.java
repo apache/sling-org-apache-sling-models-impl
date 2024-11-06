@@ -128,7 +128,7 @@ public class StaticInjectionAPFLoadOrderTest {
     }
 
     private void registerCustomInjector() {
-        context.registerInjectActivateService(new SlingObjectInjector());
+        context.registerInjectActivateService(new SlingObjectInjector(), new ServicePropertiesMap(0, 0));
     }
 
     private void registerModel() {

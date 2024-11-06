@@ -60,18 +60,8 @@ final class AdapterImplementations {
     private final ConcurrentMap<Bundle, List<String>> resourceTypeRemovalListsForResources = new ConcurrentHashMap<>();
     private final ConcurrentMap<Bundle, List<String>> resourceTypeRemovalListsForRequests = new ConcurrentHashMap<>();
 
-    private volatile ImplementationPicker[] sortedImplementationPickers = new ImplementationPicker[0];
     private volatile StaticInjectAnnotationProcessorFactory[] sortedStaticInjectAnnotationProcessorFactories =
             new StaticInjectAnnotationProcessorFactory[0];
-
-    public void setImplementationPickers(Collection<ImplementationPicker> implementationPickers) {
-        this.sortedImplementationPickers =
-                implementationPickers.toArray(new ImplementationPicker[implementationPickers.size()]);
-    }
-
-    public ImplementationPicker[] getImplementationPickers() {
-        return this.sortedImplementationPickers;
-    }
 
     public StaticInjectAnnotationProcessorFactory[] getStaticInjectAnnotationProcessorFactories() {
         return sortedStaticInjectAnnotationProcessorFactories;
@@ -195,7 +185,10 @@ final class AdapterImplementations {
      * @return Implementation type or null if none detected
      */
     @SuppressWarnings("unchecked")
-    public <ModelType> ModelClass<ModelType> lookup(Class<ModelType> adapterType, Object adaptable) {
+    public <ModelType> ModelClass<ModelType> lookup(
+            Class<ModelType> adapterType,
+            Object adaptable,
+            final List<ImplementationPicker> sortedImplementationPickers) {
         String key = adapterType.getName();
 
         // lookup in cache for models without adapter classes
@@ -219,7 +212,7 @@ final class AdapterImplementations {
             implementationsArray[i] = implementationWrappersArray[i].getType();
         }
 
-        for (ImplementationPicker picker : this.sortedImplementationPickers) {
+        for (ImplementationPicker picker : sortedImplementationPickers) {
             Class<?> implementation = picker.pick(adapterType, implementationsArray, adaptable);
             if (implementation != null) {
                 for (int i = 0; i < implementationWrappersArray.length; i++) {

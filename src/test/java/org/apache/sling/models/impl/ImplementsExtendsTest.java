@@ -20,6 +20,8 @@ package org.apache.sling.models.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -83,8 +85,6 @@ public class ImplementsExtendsTest {
 
     private ImplementationPicker firstImplementationPicker = new FirstImplementationPicker();
 
-    private ServicePropertiesMap firstImplementationPickerProps = new ServicePropertiesMap(3, Integer.MAX_VALUE);
-
     @SuppressWarnings("unchecked")
     @Before
     public void setup() throws ClassNotFoundException, MalformedURLException {
@@ -109,8 +109,8 @@ public class ImplementsExtendsTest {
                 });
 
         factory = AdapterFactoryTest.createModelAdapterFactory(bundleContext);
-        factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(2, 2));
-        factory.bindImplementationPicker(firstImplementationPicker, firstImplementationPickerProps);
+        factory.injectors = Collections.singletonList(new ValueMapInjector());
+        factory.implementationPickers = Collections.singletonList(firstImplementationPicker);
 
         // simulate bundle add for ModelPackageBundleListener
         Dictionary<String, String> headers = new Hashtable<String, String>();
@@ -178,7 +178,7 @@ public class ImplementsExtendsTest {
      */
     @Test
     public void testImplementsNoPickerWithAdapterEqualsImplementation() {
-        factory.unbindImplementationPicker(firstImplementationPicker, firstImplementationPickerProps);
+        factory.implementationPickers = Collections.emptyList();
 
         Resource res = getMockResourceWithProps();
 
@@ -194,7 +194,7 @@ public class ImplementsExtendsTest {
      */
     @Test(expected = ModelClassException.class)
     public void testImplementsNoPickerWithDifferentImplementations() {
-        factory.unbindImplementationPicker(firstImplementationPicker, firstImplementationPickerProps);
+        factory.implementationPickers = Collections.emptyList();
 
         Resource res = getMockResourceWithProps();
         factory.getAdapter(res, SampleServiceInterface.class);
@@ -247,8 +247,8 @@ public class ImplementsExtendsTest {
      */
     @Test
     public void testImplementsInterfaceModelWithPickLastImplementationPicker() {
-        factory.bindImplementationPicker(
-                new AdapterImplementationsTest.LastImplementationPicker(), new ServicePropertiesMap(3, 1));
+        factory.implementationPickers =
+                Arrays.asList(new AdapterImplementationsTest.LastImplementationPicker(), firstImplementationPicker);
 
         Resource res = getMockResourceWithProps();
         SampleServiceInterface model = factory.getAdapter(res, SampleServiceInterface.class);

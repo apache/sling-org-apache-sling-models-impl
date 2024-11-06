@@ -18,6 +18,7 @@
  */
 package org.apache.sling.models.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 
@@ -65,8 +66,7 @@ public class CachingTest {
     @Before
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new RequestAttributeInjector(), new ServicePropertiesMap(0, 0));
-        factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(1, 1));
+        factory.injectors = Arrays.asList(new RequestAttributeInjector(), new ValueMapInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
                 CachedModel.class,
                 UncachedModel.class,
@@ -205,17 +205,15 @@ public class CachingTest {
         // test 2 model implementations that share a common adapter type, with an implementation picker that selects
         // exactly one of the
         // implementations for the common adapter type. verify that the models are cached accordingly
-        factory.bindImplementationPicker(
-                (adapterType, impls, adaptable) -> {
-                    if (AdapterType1.class.equals(adapterType)) {
-                        return CachedModelWithAdapterTypes12.class;
-                    } else if (AdapterType2.class.equals(adapterType) || AdapterType3.class.equals(adapterType)) {
-                        return CachedModelWithAdapterTypes23.class;
-                    } else {
-                        return null;
-                    }
-                },
-                new ServicePropertiesMap(2, 0));
+        factory.implementationPickers = Collections.singletonList((adapterType, impls, adaptable) -> {
+            if (AdapterType1.class.equals(adapterType)) {
+                return CachedModelWithAdapterTypes12.class;
+            } else if (AdapterType2.class.equals(adapterType) || AdapterType3.class.equals(adapterType)) {
+                return CachedModelWithAdapterTypes23.class;
+            } else {
+                return null;
+            }
+        });
 
         CachedModelWithAdapterTypes12 byImpl12 = factory.getAdapter(request, CachedModelWithAdapterTypes12.class);
         CachedModelWithAdapterTypes23 byImpl23 = factory.getAdapter(request, CachedModelWithAdapterTypes23.class);

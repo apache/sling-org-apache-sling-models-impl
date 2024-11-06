@@ -18,6 +18,8 @@
  */
 package org.apache.sling.models.impl;
 
+import java.util.Arrays;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
@@ -55,7 +57,7 @@ public class RequestInjectionTest {
         when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
 
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new BindingsInjector(), new ServicePropertiesMap(1, 1));
+        factory.injectors = Arrays.asList(new BindingsInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
                 BindingsModel.class,
                 org.apache.sling.models.testmodels.classes.constructorinjection.BindingsModel.class);

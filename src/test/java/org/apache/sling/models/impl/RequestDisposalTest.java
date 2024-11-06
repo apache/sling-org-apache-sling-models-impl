@@ -24,6 +24,7 @@ import javax.servlet.ServletRequestEvent;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -71,7 +72,7 @@ public class RequestDisposalTest {
     @Before
     public void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
-        factory.bindInjector(new DisposedInjector(), new ServicePropertiesMap(0, 0));
+        factory.injectors = Arrays.asList(new DisposedInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(TestModel.class);
 
         final Map<String, Object> attributes = new HashMap<>();

@@ -20,6 +20,7 @@ package org.apache.sling.models.impl;
 
 import javax.inject.Inject;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.apache.sling.models.annotations.Model;
@@ -50,7 +51,7 @@ public class CustomInjectorTest {
 
     @Test
     public void testInjectorWhichDoesNotImplementAnnotationProcessor() {
-        factory.bindInjector(new SimpleInjector(), new ServicePropertiesMap(1, 1));
+        factory.injectors = Arrays.asList(new SimpleInjector());
 
         TestModel model = factory.getAdapter(new Object(), TestModel.class);
         assertNotNull(model);
@@ -61,8 +62,7 @@ public class CustomInjectorTest {
     public void testInjectorWithCustomAnnotation() {
         CustomAnnotationInjector injector = new CustomAnnotationInjector();
 
-        factory.bindInjector(new SimpleInjector(), new ServicePropertiesMap(1, 1));
-        factory.bindInjector(injector, new ServicePropertiesMap(1, 1));
+        factory.injectors = Arrays.asList(new SimpleInjector(), injector);
         factory.injectAnnotationProcessorFactories = factory.injectAnnotationProcessorFactories =
                 Collections.<InjectAnnotationProcessorFactory>singletonList(injector);
 

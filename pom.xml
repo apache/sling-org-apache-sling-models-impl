@@ -22,22 +22,23 @@
     <parent>
         <groupId>org.apache.sling</groupId>
         <artifactId>sling-bundle-parent</artifactId>
-        <version>60</version>
+        <version>61</version>
         <relativePath />
     </parent>
     <artifactId>org.apache.sling.models.impl</artifactId>
-    <version>1.7.1-SNAPSHOT</version>
+    <version>1.7.3-SNAPSHOT</version>
     <name>Apache Sling Models Implementation</name>
     <description>Apache Sling Models Implementation</description>
 
     <scm>
         <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-models-impl.git</connection>
         <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-models-impl.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>org.apache.sling.models.impl-1.7.2</tag>
         <url>https://github.com/apache/sling-org-apache-sling-models-impl.git</url>
     </scm>
     <properties>
-        <project.build.outputTimestamp>2024-06-25T14:58:38Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2024-10-23T09:08:29Z</project.build.outputTimestamp>
+        <sling.java.version>11</sling.java.version>
     </properties>
 
     <dependencies>
@@ -119,10 +120,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.commons.osgi</artifactId>
-            <version>2.4.0</version>
-            <scope>compile</scope>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.util.converter</artifactId>
+            <version>1.0.9</version>
+            <scope>provided</scope>
         </dependency>
         <!-- Artifact is shaded and inlined, only some classes included (see above) -->
         <dependency>
@@ -151,7 +152,7 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.osgi-mock.junit4</artifactId>
-            <version>3.2.0</version>
+            <version>3.5.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -185,12 +186,6 @@
             <scope>test</scope>
         </dependency>
         <!-- for testing the annotations -->
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.util.converter</artifactId>
-            <version>1.0.9</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>

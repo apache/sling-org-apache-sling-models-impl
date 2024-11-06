@@ -20,6 +20,8 @@ package org.apache.sling.models.impl;
 
 import javax.inject.Inject;
 
+import java.util.Arrays;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.models.annotations.Model;
@@ -62,8 +64,7 @@ public class MultipleInjectorTest {
 
         factory = AdapterFactoryTest.createModelAdapterFactory();
         // binding injector should be asked first as it has a lower service ranking!
-        factory.bindInjector(bindingsInjector, new ServicePropertiesMap(1, 1));
-        factory.bindInjector(attributesInjector, new ServicePropertiesMap(2, 2));
+        factory.injectors = Arrays.asList(bindingsInjector, attributesInjector);
         factory.bindStaticInjectAnnotationProcessorFactory(bindingsInjector, new ServicePropertiesMap(1, 1));
 
         when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
