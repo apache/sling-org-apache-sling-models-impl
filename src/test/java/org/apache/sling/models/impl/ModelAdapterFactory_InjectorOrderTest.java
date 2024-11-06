@@ -30,11 +30,9 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
-import org.apache.sling.models.spi.ImplementationPicker;
 import org.apache.sling.models.testutil.ModelAdapterFactoryUtil;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -102,19 +100,11 @@ public class ModelAdapterFactory_InjectorOrderTest {
     @Test
     public void testMultipleInjectors() {
         // ValueMapInjector has higher priority
-        context.registerInjectActivateService(ValueMapInjector.class);
-        context.registerInjectActivateService(RequestAttributeInjector.class);
+        context.registerInjectActivateService(ValueMapInjector.class); // ranking 2000
+        context.registerInjectActivateService(RequestAttributeInjector.class); // ranking 4000
 
         TestModel model = factory.createModel(request, TestModel.class);
         assertEquals((Integer) 1, model.getProp1());
-    }
-
-    static final class LastImplementationPicker implements ImplementationPicker {
-        @Override
-        public Class<?> pick(
-                @NotNull Class<?> adapterType, Class<?>[] implementationsTypes, @NotNull Object adaptable) {
-            return implementationsTypes[implementationsTypes.length - 1];
-        }
     }
 
     @Model(adaptables = SlingHttpServletRequest.class)
