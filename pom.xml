@@ -26,18 +26,18 @@
         <relativePath />
     </parent>
     <artifactId>org.apache.sling.models.impl</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
+    <version>1.7.4</version>
     <name>Apache Sling Models Implementation</name>
     <description>Apache Sling Models Implementation</description>
 
     <scm>
         <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-models-impl.git</connection>
         <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-models-impl.git</developerConnection>
-        <tag>org.apache.sling.models.impl-1.7.2</tag>
+        <tag>org.apache.sling.models.impl-1.7.4</tag>
         <url>https://github.com/apache/sling-org-apache-sling-models-impl.git</url>
     </scm>
     <properties>
-        <project.build.outputTimestamp>2024-10-23T09:08:29Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2024-11-12T13:10:43Z</project.build.outputTimestamp>
         <sling.java.version>11</sling.java.version>
     </properties>
 
