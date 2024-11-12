@@ -34,6 +34,18 @@ import org.apache.sling.models.spi.injectorspecific.InjectAnnotation;
  */
 public final class ReflectionUtil {
 
+    static Class<?> recordType;
+
+    static {
+        try {
+            recordType = Class.forName("java.lang.Record");
+        } catch (ClassNotFoundException e) {
+            // this happens when running with Java11, which is supported, but
+            // of course does not have support for Record types
+            recordType = null;
+        }
+    }
+
     private ReflectionUtil() {
         // static methods only
     }
@@ -123,14 +135,10 @@ public final class ReflectionUtil {
     }
 
     public static boolean isRecord(Class<?> checkedType) {
-        try {
-            Class<?> recordType = Class.forName("java.lang.Record");
-            return recordType.isAssignableFrom(checkedType);
-        } catch (
-                @SuppressWarnings("squid:S1166")
-                ClassNotFoundException exception) {
+        if (recordType == null) {
             return false;
         }
+        return recordType.isAssignableFrom(checkedType);
     }
 
     /**
