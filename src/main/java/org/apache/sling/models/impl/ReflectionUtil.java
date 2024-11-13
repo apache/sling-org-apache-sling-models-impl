@@ -37,13 +37,12 @@ public final class ReflectionUtil {
     static Class<?> recordType;
 
     static {
-        if (JavaVersionDetector.supportsRecords()) {
-            try {
-                recordType = Class.forName("java.lang.Record");
-            } catch (ClassNotFoundException e) {
-                // ignore - this shouldn't actually happen
-                recordType = null;
-            }
+        try {
+            recordType = Class.forName("java.lang.Record");
+        } catch (ClassNotFoundException e) {
+            // this happens when running with Java11, which is supported, but
+            // of course does not have support for Record types
+            recordType = null;
         }
     }
 
