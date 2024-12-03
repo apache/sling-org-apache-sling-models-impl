@@ -18,30 +18,88 @@
  */
 package org.apache.sling.models.impl;
 
+import java.io.Closeable;
+import java.lang.ref.PhantomReference;
+import java.lang.ref.ReferenceQueue;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.models.spi.DisposalCallback;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.jetbrains.annotations.NotNull;
 
 public class DisposalCallbackRegistryImpl implements DisposalCallbackRegistry {
 
-    List<DisposalCallback> callbacks = new ArrayList<>();
+    private static final String RESOURCE_RESOLVER_DISPOSABLE =
+            ModelAdapterFactory.class.getName().concat(".Disposable");
+
+    private static final ReferenceQueue<Object> QUEUE = new ReferenceQueue<>();
+
+    private static final Map<PhantomReference<Object>, DisposalCallbackRegistryImpl> REFERENCES =
+            new ConcurrentHashMap<>();
+
+    private final List<DisposalCallback> callbacks = new ArrayList<>();
+
+    private boolean sealed = false;
 
     @Override
     public void addDisposalCallback(@NotNull DisposalCallback callback) {
+        if (sealed) {
+            throw new IllegalStateException("DisposalCallbackRegistry is sealed");
+        }
         callbacks.add(callback);
     }
 
-    void seal() {
-        callbacks = Collections.unmodifiableList(callbacks);
+    @SuppressWarnings("resource")
+    public void registerIfNotEmpty(final ResourceResolverFactory factory, final Object referencedObject) {
+        if (!this.callbacks.isEmpty()) {
+            this.sealed = true;
+
+            final ResourceResolver resolver = factory.getThreadResourceResolver();
+            if (resolver != null) {
+                @SuppressWarnings("unchecked")
+                final List<DisposalCallbackRegistryImpl> list =
+                        (List<DisposalCallbackRegistryImpl>) resolver.getPropertyMap()
+                                .computeIfAbsent(RESOURCE_RESOLVER_DISPOSABLE, key -> new CloseableList());
+                list.add(this);
+            } else {
+                final PhantomReference<Object> ref = new PhantomReference<>(referencedObject, QUEUE);
+                REFERENCES.put(ref, this);
+            }
+        }
     }
 
-    public void onDisposed() {
+    public void close() {
         for (DisposalCallback callback : callbacks) {
             callback.onDisposed();
+        }
+        callbacks.clear();
+    }
+
+    private static final class CloseableList extends ArrayList<DisposalCallbackRegistryImpl> implements Closeable {
+
+        @Override
+        public void close() {
+            for (final DisposalCallbackRegistryImpl registry : this) {
+                registry.close();
+            }
+            this.clear();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void cleanupDisposables() {
+        PhantomReference<Object> ref = (PhantomReference<Object>) QUEUE.poll();
+        while (ref != null) {
+            final DisposalCallbackRegistryImpl registry = REFERENCES.remove(ref);
+            if (registry != null) {
+                registry.close();
+            }
+            ref = (PhantomReference<Object>) QUEUE.poll();
         }
     }
 }
