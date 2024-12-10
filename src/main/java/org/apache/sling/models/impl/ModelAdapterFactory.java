@@ -20,11 +20,8 @@ package org.apache.sling.models.impl;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletRequestListener;
 
-import java.lang.ref.PhantomReference;
-import java.lang.ref.ReferenceQueue;
+import java.io.PrintWriter;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -37,7 +34,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -50,9 +46,9 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.Adaptable;
-import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.ValidationStrategy;
 import org.apache.sling.models.annotations.ViaProviderType;
@@ -92,10 +88,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -104,52 +97,33 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(
         immediate = true,
-        service = {ModelFactory.class, ServletRequestListener.class},
+        service = {ModelFactory.class},
         property = {
-            HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER + "=true",
-            HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=("
-                    + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)"
+            "felix.webconsole.label=slingmodels",
+            "felix.webconsole.title=Sling Models",
+            "felix.webconsole.configprinter.modes=always",
+            "scheduler.name=Sling Models OSGi Service Disposal Job",
+            "scheduler.concurrent=false"
         })
 @Designate(ocd = ModelAdapterFactoryConfiguration.class)
 @SuppressWarnings("deprecation")
-public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFactory, ServletRequestListener {
+public class ModelAdapterFactory implements ModelFactory, Runnable {
 
     // hard code this value since we always know exactly how many there are
     private static final int VALUE_PREPARERS_COUNT = 2;
-
-    private static final String REQUEST_MARKER_ATTRIBUTE = ModelAdapterFactory.class.getName() + ".RealRequest";
 
     private static final String REQUEST_CACHE_ATTRIBUTE = ModelAdapterFactory.class.getName() + ".AdapterCache";
 
     private final Logger log = LoggerFactory.getLogger(ModelAdapterFactory.class);
 
-    private ReferenceQueue<Object> queue;
-
-    private ConcurrentMap<java.lang.ref.Reference<Object>, DisposalCallbackRegistryImpl> disposalCallbacks;
-
-    @Override
-    public void run() {
-        clearDisposalCallbackRegistryQueue();
-    }
-
-    private void clearDisposalCallbackRegistryQueue() {
-        java.lang.ref.Reference<?> ref = queue.poll();
-        while (ref != null) {
-            log.debug("calling disposal for {}.", ref);
-            final DisposalCallbackRegistryImpl registry = disposalCallbacks.remove(ref);
-            if (registry != null) {
-                registry.onDisposed();
-            }
-            ref = queue.poll();
-        }
-    }
+    @Reference
+    ResourceResolverFactory resourceResolverFactory;
 
     /** Injectors are sorted by DS according to their service ranking */
     @Reference(
@@ -201,9 +175,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
     final AdapterImplementations adapterImplementations = new AdapterImplementations();
 
-    private ServiceRegistration jobRegistration;
-
-    private ServiceRegistration configPrinterRegistration;
+    private ModelConfigurationPrinter configPrinter;
 
     // Use threadlocal to count recursive invocations and break recursing if a max. limit is reached (to avoid cyclic
     // dependencies)
@@ -214,6 +186,10 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     private SlingModelsScriptEngineFactory scriptEngineFactory;
 
     @Override
+    public void run() {
+        DisposalCallbackRegistryImpl.cleanupDisposables();
+    }
+
     @SuppressWarnings("null")
     public <AdapterType> AdapterType getAdapter(Object adaptable, Class<AdapterType> type) {
         Result<AdapterType> result = internalCreateModel(adaptable, type);
@@ -700,7 +676,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             }
         }
 
-        this.registerCallbackRegistry(registry, adaptable, handler);
+        registry.registerIfNotEmpty(this.resourceResolverFactory, handler);
         if (missingElements != null) {
             MissingElementsException missingElementsException = new MissingElementsException(
                     "Could not create all mandatory methods for interface of model " + modelClass);
@@ -737,13 +713,13 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                 Result<ModelType> result = newInstanceWithConstructorInjection(
                         constructorToUse, adaptable, modelClass, registry, preparedValues);
                 if (!result.wasSuccessful()) {
-                    registry.onDisposed();
+                    registry.close();
                     return result;
                 } else {
                     object = result.getValue();
                 }
             } catch (InstantiationException | InvocationTargetException | IllegalAccessException ex) {
-                registry.onDisposed();
+                registry.close();
                 throw ex;
             }
         }
@@ -763,7 +739,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             }
         }
 
-        this.registerCallbackRegistry(registry, adaptable, object);
+        registry.registerIfNotEmpty(this.resourceResolverFactory, object);
         if (missingElements != null) {
             MissingElementsException missingElementsException =
                     new MissingElementsException("Could not inject all required fields into " + modelClass.getType());
@@ -1157,7 +1133,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     }
 
     @Activate
-    protected void activate(final ComponentContext ctx, final ModelAdapterFactoryConfiguration configuration) {
+    protected void activate(final BundleContext bundleContext, final ModelAdapterFactoryConfiguration configuration) {
         this.invocationCountThreadLocal = new ThreadLocal<ThreadInvocationCounter>() {
             @Override
             protected ThreadInvocationCounter initialValue() {
@@ -1168,51 +1144,24 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         this.adapterCache =
                 Collections.synchronizedMap(new WeakHashMap<Object, Map<Class<?>, SoftReference<Object>>>());
 
-        BundleContext bundleContext = ctx.getBundleContext();
-        this.queue = new ReferenceQueue<>();
-        this.disposalCallbacks = new ConcurrentHashMap<>();
-        Hashtable<String, Object> properties = new Hashtable<>();
-        properties.put(Constants.SERVICE_VENDOR, "Apache Software Foundation");
-        properties.put(Constants.SERVICE_DESCRIPTION, "Sling Models OSGi Service Disposal Job");
-        properties.put("scheduler.name", "Sling Models OSGi Service Disposal Job");
-        properties.put("scheduler.concurrent", false);
-        properties.put("scheduler.period", configuration.cleanup_job_period());
-
-        this.jobRegistration = bundleContext.registerService(Runnable.class, this, properties);
-
         this.scriptEngineFactory = new SlingModelsScriptEngineFactory(bundleContext.getBundle());
         this.listener = new ModelPackageBundleListener(
-                ctx.getBundleContext(),
+                bundleContext,
                 this,
                 this.adapterImplementations,
                 bindingsValuesProvidersByContext,
                 scriptEngineFactory);
 
-        Hashtable<String, Object> printerProps = new Hashtable<>();
-        printerProps.put(Constants.SERVICE_VENDOR, "Apache Software Foundation");
-        printerProps.put(Constants.SERVICE_DESCRIPTION, "Sling Models Configuration Printer");
-        printerProps.put("felix.webconsole.label", "slingmodels");
-        printerProps.put("felix.webconsole.title", "Sling Models");
-        printerProps.put("felix.webconsole.configprinter.modes", "always");
-
-        this.configPrinterRegistration = bundleContext.registerService(
-                Object.class, new ModelConfigurationPrinter(this, bundleContext, adapterImplementations), printerProps);
+        this.configPrinter = new ModelConfigurationPrinter(bundleContext);
     }
 
     @Deactivate
     protected void deactivate() {
         this.adapterCache = null;
-        this.clearDisposalCallbackRegistryQueue();
         this.listener.unregisterAll();
         this.adapterImplementations.removeAll();
-        if (jobRegistration != null) {
-            jobRegistration.unregister();
-            jobRegistration = null;
-        }
-        if (configPrinterRegistration != null) {
-            configPrinterRegistration.unregister();
-            configPrinterRegistration = null;
-        }
+        this.configPrinter = null;
+        DisposalCallbackRegistryImpl.cleanupDisposables();
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -1249,38 +1198,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     protected void unbindViaProvider(final ViaProvider viaProvider, final Map<String, Object> props) {
         Class<? extends ViaProviderType> type = viaProvider.getType();
         viaProviders.remove(type, viaProvider);
-    }
-
-    @NotNull
-    Collection<Injector> getInjectors() {
-        return injectors;
-    }
-
-    @NotNull
-    Collection<InjectAnnotationProcessorFactory> getInjectAnnotationProcessorFactories() {
-        return injectAnnotationProcessorFactories;
-    }
-
-    @NotNull
-    Collection<InjectAnnotationProcessorFactory2> getInjectAnnotationProcessorFactories2() {
-        return injectAnnotationProcessorFactories2;
-    }
-
-    @NotNull
-    Collection<StaticInjectAnnotationProcessorFactory> getStaticInjectAnnotationProcessorFactories() {
-        synchronized (this) {
-            return new ArrayList<>(staticInjectAnnotationProcessorFactories.values());
-        }
-    }
-
-    @NotNull
-    List<ImplementationPicker> getImplementationPickers() {
-        return this.implementationPickers;
-    }
-
-    @NotNull
-    Map<Class<? extends ViaProviderType>, ViaProvider> getViaProviders() {
-        return viaProviders;
     }
 
     @Override
@@ -1376,46 +1293,19 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                 .adaptTo(targetClass);
     }
 
-    @Override
-    public void requestDestroyed(final ServletRequestEvent sre) {
-        final Object list = sre.getServletRequest().getAttribute(REQUEST_MARKER_ATTRIBUTE);
-        if (list != null) {
-            sre.getServletRequest().removeAttribute(REQUEST_MARKER_ATTRIBUTE);
-            if (list instanceof List) {
-                final List<?> callbackList = (List<?>) list;
-                for (final Object disposable : callbackList) {
-                    if (disposable instanceof DisposalCallbackRegistryImpl) {
-                        ((DisposalCallbackRegistryImpl) disposable).onDisposed();
-                    }
-                }
-                callbackList.clear();
-            }
+    public void printConfiguration(final PrintWriter printWriter) {
+        final Collection<StaticInjectAnnotationProcessorFactory> factories;
+        synchronized (this) {
+            factories = new ArrayList<>(this.staticInjectAnnotationProcessorFactories.values());
         }
-    }
-
-    @Override
-    public void requestInitialized(final ServletRequestEvent sre) {
-        sre.getServletRequest().setAttribute(REQUEST_MARKER_ATTRIBUTE, new ArrayList<>());
-    }
-
-    @SuppressWarnings("unchecked")
-    private void registerCallbackRegistry(
-            final DisposalCallbackRegistryImpl registry, final Object adaptable, final Object handler) {
-        if (!registry.callbacks.isEmpty()) {
-            registry.seal();
-
-            boolean registered = false;
-            if (adaptable instanceof SlingHttpServletRequest) {
-                final Object list = ((SlingHttpServletRequest) adaptable).getAttribute(REQUEST_MARKER_ATTRIBUTE);
-                if (list instanceof List) {
-                    ((List<DisposalCallbackRegistryImpl>) list).add(registry);
-                    registered = true;
-                }
-            }
-            if (!registered) {
-                PhantomReference<Object> reference = new PhantomReference<>(handler, queue);
-                disposalCallbacks.put(reference, registry);
-            }
-        }
+        this.configPrinter.printConfiguration(
+                printWriter,
+                this.adapterImplementations,
+                this.injectors,
+                this.injectAnnotationProcessorFactories,
+                this.injectAnnotationProcessorFactories2,
+                factories,
+                this.implementationPickers,
+                this.viaProviders);
     }
 }

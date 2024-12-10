@@ -20,7 +20,6 @@ package org.apache.sling.models.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Dictionary;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
@@ -50,7 +49,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -229,9 +227,7 @@ public class OSGiInjectionTest {
         SetOSGiModel model = factory.getAdapter(res, SetOSGiModel.class);
         assertNull(model);
 
-        verify(bundleContext).registerService(eq(Runnable.class), eq(factory), any(Dictionary.class));
         verify(bundleContext).addBundleListener(any(BundleListener.class));
-        verify(bundleContext).registerService(eq(Object.class), any(Object.class), any(Dictionary.class));
         verify(bundleContext).getBundles();
         verify(bundleContext).getBundle();
         verifyNoMoreInteractions(res, bundleContext);
