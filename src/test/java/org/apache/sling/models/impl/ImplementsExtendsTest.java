@@ -248,7 +248,7 @@ public class ImplementsExtendsTest {
     @Test
     public void testImplementsInterfaceModelWithPickLastImplementationPicker() {
         factory.implementationPickers =
-                Arrays.asList(firstImplementationPicker, new AdapterImplementationsTest.LastImplementationPicker());
+                Arrays.asList(new AdapterImplementationsTest.LastImplementationPicker(), firstImplementationPicker);
 
         Resource res = getMockResourceWithProps();
         SampleServiceInterface model = factory.getAdapter(res, SampleServiceInterface.class);
