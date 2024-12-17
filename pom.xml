@@ -66,7 +66,6 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.http.whiteboard</artifactId>
-            <version>1.1.0</version>
             <scope>provided</scope>
         </dependency>
         <!-- OSGi annotations -->
@@ -122,7 +121,6 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.util.converter</artifactId>
-            <version>1.0.9</version>
             <scope>provided</scope>
         </dependency>
         <!-- Artifact is shaded and inlined, only some classes included (see above) -->
@@ -189,7 +187,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>6.1.14</version>
+            <version>5.3.39</version>
             <scope>test</scope>
         </dependency>
         <dependency>
