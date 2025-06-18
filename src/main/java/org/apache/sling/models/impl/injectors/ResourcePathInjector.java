@@ -117,10 +117,7 @@ public class ResourcePathInjector extends AbstractInjector
             if (resource != null) {
                 resources.add(resource);
             } else {
-                LOG.warn(
-                        "Could not retrieve resource at path {} for field {}. Since it is required it won't be injected.",
-                        path,
-                        fieldName);
+                LOG.debug("Could not retrieve resource at path {} for field {}.", path, fieldName);
                 // all resources should've been injected. we stop
                 return null;
             }
