@@ -25,6 +25,7 @@ import org.apache.sling.api.wrappers.SlingJakartaHttpServletRequestWrapper;
 import org.apache.sling.models.annotations.ViaProviderType;
 import org.apache.sling.models.annotations.via.ChildResource;
 import org.apache.sling.models.spi.ViaProvider;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +48,7 @@ public class ChildResourceViaProvider implements ViaProvider {
         if (original instanceof Resource resource) {
             return resource.getChild(value);
         } else if (original instanceof SlingJakartaHttpServletRequest jakartaRequest) {
-            final Resource resource = jakartaRequest.getResource();
-            if (resource == null) {
-                return null;
-            }
+            final @NotNull Resource resource = jakartaRequest.getResource();
             Resource child = resource.getChild(value);
             if (child == null) {
                 log.debug("Could not obtain child {} of resource {}", value, resource.getPath());
@@ -58,10 +56,7 @@ public class ChildResourceViaProvider implements ViaProvider {
             }
             return new ChildResourceJakartaRequestWrapper(jakartaRequest, child);
         } else if (original instanceof org.apache.sling.api.SlingHttpServletRequest javaxRequest) {
-            final Resource resource = javaxRequest.getResource();
-            if (resource == null) {
-                return null;
-            }
+            final @NotNull Resource resource = javaxRequest.getResource();
             Resource child = resource.getChild(value);
             if (child == null) {
                 log.debug("Could not obtain child {} of resource {}", value, resource.getPath());

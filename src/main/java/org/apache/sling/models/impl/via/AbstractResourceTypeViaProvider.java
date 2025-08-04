@@ -43,10 +43,7 @@ public abstract class AbstractResourceTypeViaProvider implements ViaProvider {
             }
             return new ResourceTypeForcingResourceWrapper(resource, resourceType);
         } else if (original instanceof SlingJakartaHttpServletRequest jakartaRequest) {
-            final Resource resource = jakartaRequest.getResource();
-            if (resource == null) {
-                return null;
-            }
+            final @NotNull Resource resource = jakartaRequest.getResource();
             final String resourceType = getResourceType(resource, value);
             if (resourceType == null) {
                 log.warn("Could not determine forced resource type for {} using via value {}.", resource, value);
@@ -54,10 +51,7 @@ public abstract class AbstractResourceTypeViaProvider implements ViaProvider {
             }
             return new ResourceTypeForcingJakartaRequestWrapper(jakartaRequest, resource, resourceType);
         } else if (original instanceof org.apache.sling.api.SlingHttpServletRequest javaxRequest) {
-            final Resource resource = javaxRequest.getResource();
-            if (resource == null) {
-                return null;
-            }
+            final @NotNull Resource resource = javaxRequest.getResource();
             final String resourceType = getResourceType(resource, value);
             if (resourceType == null) {
                 log.warn("Could not determine forced resource type for {} using via value {}.", resource, value);
