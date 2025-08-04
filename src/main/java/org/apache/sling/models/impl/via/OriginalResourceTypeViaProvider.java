@@ -28,7 +28,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * This {@link ViaProvider} implements the counterpart of the {@link ForcedResourceTypeViaProvider} and the
  * {@link ResourceSuperTypeViaProvider}. It is in particular helpful in models that want to inject another model using the original
- * {@link Resource}'s, {@link SlingJakartaHttpServletRequest}'s or {@link SlingHttpServletRequest}'s resource type instead of the one forced by either of the above-mentioned
+ * {@link Resource}'s, {@link SlingJakartaHttpServletRequest}'s or {@link org.apache.sling.api.SlingHttpServletRequest}'s resource type instead of the one forced by either of the above-mentioned
  * {@link ViaProvider}s
  * <p>
  * The implementation simply unwraps the {@link org.apache.sling.api.resource.ResourceWrapper},

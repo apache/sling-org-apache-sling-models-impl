@@ -51,7 +51,7 @@ abstract class AbstractInjector {
      * Retrieve the ValueMap from the given adaptable. This succeeds, if the adaptable is either
      * <ul>
      * <li>a {@link ValueMap},</li>
-     * <li>a {@link SlingJakartaHttpServletRequest} or {@link SlingHttpServletRequest}, in which case the returned {@link ValueMap} is the one derived from the request's resource or</li>
+     * <li>a {@link SlingJakartaHttpServletRequest} or {@link org.apache.sling.api.SlingHttpServletRequest}, in which case the returned {@link ValueMap} is the one derived from the request's resource or</li>
      * <li>adaptable to a {@link ValueMap}.</li>
      * </ul>
      * Otherwise {@code null} is returned.
