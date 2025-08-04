@@ -19,6 +19,7 @@
 package org.apache.sling.models.impl.via;
 
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.junit.Assert;
 import org.junit.Before;
@@ -41,12 +42,20 @@ public class ChildResourceViaProviderTest {
     private Resource childResource;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest jakartaRequest;
+
+    /**
+     * @deprecated use {@link #jakartaRequest} instead
+     */
+    @Deprecated
+    @Mock
+    private SlingHttpServletRequest javaxRequest;
 
     @Before
     public void init() {
         when(resource.getChild("child")).thenReturn(childResource);
-        when(request.getResource()).thenReturn(resource);
+        when(jakartaRequest.getResource()).thenReturn(resource);
+        when(javaxRequest.getResource()).thenReturn(resource);
     }
 
     @Test
@@ -56,8 +65,19 @@ public class ChildResourceViaProviderTest {
     }
 
     @Test
-    public void testRequest() {
-        Object adaptable = provider.getAdaptable(request, "child");
+    public void testJakartaRequest() {
+        Object adaptable = provider.getAdaptable(jakartaRequest, "child");
+        Resource adaptableResource = ((SlingJakartaHttpServletRequest) adaptable).getResource();
+        Assert.assertEquals(adaptableResource, childResource);
+    }
+
+    /**
+     * @deprecated use {@link #testJakartaRequest()} instead
+     */
+    @Deprecated
+    @Test
+    public void testJavaxRequest() {
+        Object adaptable = provider.getAdaptable(javaxRequest, "child");
         Resource adaptableResource = ((SlingHttpServletRequest) adaptable).getResource();
         Assert.assertEquals(adaptableResource, childResource);
     }

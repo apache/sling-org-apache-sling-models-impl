@@ -19,9 +19,6 @@
 package org.apache.sling.models.impl;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletRequestListener;
 
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
@@ -47,8 +44,11 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletRequestEvent;
+import jakarta.servlet.ServletRequestListener;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.adapter.Adaptable;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.adapter.AdapterManager;
@@ -240,11 +240,28 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         return result.getValue();
     }
 
+    /**
+     * @deprecated use {@link #createModelFromWrappedRequest(SlingJakartaHttpServletRequest, Resource, Class)} instead
+     */
+    @Deprecated(since = "2.0.0")
     @Override
     public @NotNull <T> T createModelFromWrappedRequest(
-            @NotNull SlingHttpServletRequest request, @NotNull Resource resource, @NotNull Class<T> targetClass) {
+            @NotNull org.apache.sling.api.SlingHttpServletRequest request,
+            @NotNull Resource resource,
+            @NotNull Class<T> targetClass) {
         return createModel(
                 new ResourceOverridingRequestWrapper(
+                        request, resource, adapterManager, scriptEngineFactory, bindingsValuesProvidersByContext),
+                targetClass);
+    }
+
+    @Override
+    public @NotNull <T> T createModelFromWrappedRequest(
+            @NotNull SlingJakartaHttpServletRequest request,
+            @NotNull Resource resource,
+            @NotNull Class<T> targetClass) {
+        return createModel(
+                new ResourceOverridingJakartaRequestWrapper(
                         request, resource, adapterManager, scriptEngineFactory, bindingsValuesProvidersByContext),
                 targetClass);
     }
@@ -275,6 +292,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         return false;
     }
 
+    /**
+     * @deprecated use {@link #isModelClass(Class)} instead
+     */
     @Override
     @Deprecated
     public boolean isModelClass(@NotNull Object adaptable, @NotNull Class<?> requestedType) {
@@ -1280,8 +1300,17 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         return viaProviders;
     }
 
+    /**
+     * @deprecated use {@link #isModelAvailableForRequest(SlingJakartaHttpServletRequest)} instead
+     */
+    @Deprecated(since = "2.0.0")
     @Override
-    public boolean isModelAvailableForRequest(@NotNull SlingHttpServletRequest request) {
+    public boolean isModelAvailableForRequest(@NotNull org.apache.sling.api.SlingHttpServletRequest request) {
+        return adapterImplementations.getModelClassForRequest(request) != null;
+    }
+
+    @Override
+    public boolean isModelAvailableForRequest(@NotNull SlingJakartaHttpServletRequest request) {
         return adapterImplementations.getModelClassForRequest(request) != null;
     }
 
@@ -1300,8 +1329,21 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         return handleBoundModelResult(internalCreateModel(resource, clazz));
     }
 
+    /**
+     * @deprecated use {@link #getModelFromRequest(SlingJakartaHttpServletRequest)} instead
+     */
+    @Deprecated(since = "2.0.0")
     @Override
-    public Object getModelFromRequest(@NotNull SlingHttpServletRequest request) {
+    public Object getModelFromRequest(@NotNull org.apache.sling.api.SlingHttpServletRequest request) {
+        Class<?> clazz = this.adapterImplementations.getModelClassForRequest(request);
+        if (clazz == null) {
+            throw new ModelClassException("Could find model registered for request path: " + request.getServletPath());
+        }
+        return handleBoundModelResult(internalCreateModel(request, clazz));
+    }
+
+    @Override
+    public Object getModelFromRequest(@NotNull SlingJakartaHttpServletRequest request) {
         Class<?> clazz = this.adapterImplementations.getModelClassForRequest(request);
         if (clazz == null) {
             throw new ModelClassException("Could find model registered for request path: " + request.getServletPath());
@@ -1343,9 +1385,28 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         return handleAndExportResult(result, name, targetClass, options);
     }
 
+    /**
+     * @deprecated use {@link #exportModelForRequest(SlingJakartaHttpServletRequest, String, Class, Map)} instead
+     */
+    @Deprecated(since = "2.0.0")
     @Override
     public <T> T exportModelForRequest(
-            SlingHttpServletRequest request, String name, Class<T> targetClass, Map<String, String> options)
+            org.apache.sling.api.SlingHttpServletRequest request,
+            String name,
+            Class<T> targetClass,
+            Map<String, String> options)
+            throws ExportException, MissingExporterException {
+        Class<?> clazz = this.adapterImplementations.getModelClassForRequest(request);
+        if (clazz == null) {
+            throw new ModelClassException("Could find model registered for request path: " + request.getServletPath());
+        }
+        Result<?> result = internalCreateModel(request, clazz);
+        return handleAndExportResult(result, name, targetClass, options);
+    }
+
+    @Override
+    public <T> T exportModelForRequest(
+            SlingJakartaHttpServletRequest request, String name, Class<T> targetClass, Map<String, String> options)
             throws ExportException, MissingExporterException {
         Class<?> clazz = this.adapterImplementations.getModelClassForRequest(request);
         if (clazz == null) {
@@ -1365,10 +1426,26 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         }
     }
 
+    /**
+     * @deprecated use {@link #getModelFromWrappedRequest(SlingJakartaHttpServletRequest, Resource, Class)} instead
+     */
+    @Deprecated(since = "2.0.0")
     @Override
     public <T> T getModelFromWrappedRequest(
-            @NotNull SlingHttpServletRequest request, @NotNull Resource resource, @NotNull Class<T> targetClass) {
+            @NotNull org.apache.sling.api.SlingHttpServletRequest request,
+            @NotNull Resource resource,
+            @NotNull Class<T> targetClass) {
         return new ResourceOverridingRequestWrapper(
+                        request, resource, adapterManager, scriptEngineFactory, bindingsValuesProvidersByContext)
+                .adaptTo(targetClass);
+    }
+
+    @Override
+    public <T> T getModelFromWrappedRequest(
+            @NotNull SlingJakartaHttpServletRequest request,
+            @NotNull Resource resource,
+            @NotNull Class<T> targetClass) {
+        return new ResourceOverridingJakartaRequestWrapper(
                         request, resource, adapterManager, scriptEngineFactory, bindingsValuesProvidersByContext)
                 .adaptTo(targetClass);
     }
@@ -1402,12 +1479,15 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             registry.seal();
 
             boolean registered = false;
-            if (adaptable instanceof SlingHttpServletRequest) {
-                final Object list = ((SlingHttpServletRequest) adaptable).getAttribute(REQUEST_MARKER_ATTRIBUTE);
-                if (list instanceof List) {
-                    ((List<DisposalCallbackRegistryImpl>) list).add(registry);
-                    registered = true;
-                }
+            Object list = null;
+            if (adaptable instanceof SlingJakartaHttpServletRequest jakartaRequest) {
+                list = jakartaRequest.getAttribute(REQUEST_MARKER_ATTRIBUTE);
+            } else if (adaptable instanceof org.apache.sling.api.SlingHttpServletRequest javaxRequest) {
+                list = javaxRequest.getAttribute(REQUEST_MARKER_ATTRIBUTE);
+            }
+            if (list instanceof List) {
+                ((List<DisposalCallbackRegistryImpl>) list).add(registry);
+                registered = true;
             }
             if (!registered) {
                 PhantomReference<Object> reference = new PhantomReference<>(handler, queue);

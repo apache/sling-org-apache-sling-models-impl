@@ -18,13 +18,13 @@
  */
 package org.apache.sling.models.impl.injectors;
 
-import javax.servlet.http.HttpServletRequest;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.wrappers.JakartaToJavaxRequestWrapper;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.Self;
@@ -48,7 +48,7 @@ public class SelfInjectorTest {
     private SelfInjector injector = new SelfInjector();
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     @Mock
     private AnnotatedElement annotatedElement;
@@ -86,27 +86,57 @@ public class SelfInjectorTest {
     }
 
     @Test
-    public void testMatchingClass() {
+    public void testJakartaMatchingClass() {
         assertSame(
                 request,
                 injector.getValue(
                         request,
                         "notRelevant",
-                        SlingHttpServletRequest.class,
+                        SlingJakartaHttpServletRequest.class,
                         firstConstructorParameter.getAnnotatedElement(),
                         registry));
         assertNull(injector.getValue(
                 request,
                 "notRelevant",
-                SlingHttpServletRequest.class,
+                SlingJakartaHttpServletRequest.class,
                 secondConstructorParameter.getAnnotatedElement(),
                 registry));
-        assertNull(
-                injector.getValue(request, "notRelevant", SlingHttpServletRequest.class, annotatedElement, registry));
+        assertNull(injector.getValue(
+                request, "notRelevant", SlingJakartaHttpServletRequest.class, annotatedElement, registry));
+    }
+
+    /**
+     * @deprecated use {@link #testJakartaMatchingClass()} instead
+     */
+    @Deprecated
+    @Test
+    public void testJavaxMatchingClass() {
+        org.apache.sling.api.SlingHttpServletRequest javaxRequest =
+                JakartaToJavaxRequestWrapper.toJavaxRequest(request);
+        assertSame(
+                javaxRequest,
+                injector.getValue(
+                        javaxRequest,
+                        "notRelevant",
+                        org.apache.sling.api.SlingHttpServletRequest.class,
+                        firstConstructorParameter.getAnnotatedElement(),
+                        registry));
+        assertNull(injector.getValue(
+                javaxRequest,
+                "notRelevant",
+                org.apache.sling.api.SlingHttpServletRequest.class,
+                secondConstructorParameter.getAnnotatedElement(),
+                registry));
+        assertNull(injector.getValue(
+                javaxRequest,
+                "notRelevant",
+                org.apache.sling.api.SlingHttpServletRequest.class,
+                annotatedElement,
+                registry));
     }
 
     @Test
-    public void testMatchingSubClass() {
+    public void testJakartaMatchingSubClass() {
         assertSame(
                 request,
                 injector.getValue(
@@ -122,6 +152,32 @@ public class SelfInjectorTest {
                 secondConstructorParameter.getAnnotatedElement(),
                 registry));
         assertNull(injector.getValue(request, "notRelevant", HttpServletRequest.class, annotatedElement, registry));
+    }
+
+    /**
+     * @deprecated use {@link #testJakartaMatchingSubClass()} instead
+     */
+    @Deprecated
+    @Test
+    public void testJavaxMatchingSubClass() {
+        org.apache.sling.api.SlingHttpServletRequest javaxRequest =
+                JakartaToJavaxRequestWrapper.toJavaxRequest(request);
+        assertSame(
+                javaxRequest,
+                injector.getValue(
+                        javaxRequest,
+                        "notRelevant",
+                        javax.servlet.http.HttpServletRequest.class,
+                        firstConstructorParameter.getAnnotatedElement(),
+                        registry));
+        assertNull(injector.getValue(
+                javaxRequest,
+                "notRelevant",
+                javax.servlet.http.HttpServletRequest.class,
+                secondConstructorParameter.getAnnotatedElement(),
+                registry));
+        assertNull(injector.getValue(
+                javaxRequest, "notRelevant", javax.servlet.http.HttpServletRequest.class, annotatedElement, registry));
     }
 
     @Test
@@ -142,30 +198,74 @@ public class SelfInjectorTest {
     }
 
     @Test
-    public void testWithNullName() {
+    public void testJakartaWithNullName() {
         assertSame(
                 request,
                 injector.getValue(
                         request,
                         null,
-                        SlingHttpServletRequest.class,
+                        SlingJakartaHttpServletRequest.class,
                         firstConstructorParameter.getAnnotatedElement(),
                         registry));
         assertNull(injector.getValue(
                 request,
                 null,
-                SlingHttpServletRequest.class,
+                SlingJakartaHttpServletRequest.class,
                 secondConstructorParameter.getAnnotatedElement(),
                 registry));
-        assertNull(injector.getValue(request, null, SlingHttpServletRequest.class, annotatedElement, registry));
+        assertNull(injector.getValue(request, null, SlingJakartaHttpServletRequest.class, annotatedElement, registry));
+    }
+
+    /**
+     * @deprecated use {@link #testJakartaWithNullName()} instead
+     */
+    @Deprecated
+    @Test
+    public void testJavaxWithNullName() {
+        org.apache.sling.api.SlingHttpServletRequest javaxRequest =
+                JakartaToJavaxRequestWrapper.toJavaxRequest(request);
+        assertSame(
+                javaxRequest,
+                injector.getValue(
+                        javaxRequest,
+                        null,
+                        org.apache.sling.api.SlingHttpServletRequest.class,
+                        firstConstructorParameter.getAnnotatedElement(),
+                        registry));
+        assertNull(injector.getValue(
+                javaxRequest,
+                null,
+                org.apache.sling.api.SlingHttpServletRequest.class,
+                secondConstructorParameter.getAnnotatedElement(),
+                registry));
+        assertNull(injector.getValue(
+                javaxRequest, null, org.apache.sling.api.SlingHttpServletRequest.class, annotatedElement, registry));
     }
 
     @Test
-    public void testMatchingClassWithSelfAnnotation() {
+    public void testJakartaMatchingClassWithSelfAnnotation() {
         when(annotatedElement.isAnnotationPresent(Self.class)).thenReturn(true);
-        Object result =
-                injector.getValue(request, "notRelevant", SlingHttpServletRequest.class, annotatedElement, registry);
+        Object result = injector.getValue(
+                request, "notRelevant", SlingJakartaHttpServletRequest.class, annotatedElement, registry);
         assertSame(request, result);
+    }
+
+    /**
+     * @deprecated use {@link #testJakartaMatchingClassWithSelfAnnotation()} instead
+     */
+    @Deprecated
+    @Test
+    public void testJavaxMatchingClassWithSelfAnnotation() {
+        org.apache.sling.api.SlingHttpServletRequest javaxRequest =
+                JakartaToJavaxRequestWrapper.toJavaxRequest(request);
+        when(annotatedElement.isAnnotationPresent(Self.class)).thenReturn(true);
+        Object result = injector.getValue(
+                javaxRequest,
+                "notRelevant",
+                org.apache.sling.api.SlingHttpServletRequest.class,
+                annotatedElement,
+                registry);
+        assertSame(javaxRequest, result);
     }
 
     @Test

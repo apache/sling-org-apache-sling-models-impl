@@ -16,16 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.models.testmodels.classes.constructorvisibility;
-
-import javax.inject.Inject;
+package org.apache.sling.models.impl.via;
 
 import org.apache.sling.api.SlingJakartaHttpServletRequest;
-import org.apache.sling.models.annotations.Model;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.wrappers.SlingJakartaHttpServletRequestWrapper;
 
-@Model(adaptables = SlingJakartaHttpServletRequest.class)
-public class PackagePrivateConstructorModel {
+class ResourceTypeForcingJakartaRequestWrapper extends SlingJakartaHttpServletRequestWrapper {
 
-    @Inject
-    PackagePrivateConstructorModel() {}
+    private final Resource resource;
+
+    ResourceTypeForcingJakartaRequestWrapper(
+            SlingJakartaHttpServletRequest request, Resource resource, String resourceType) {
+        super(request);
+        this.resource = new ResourceTypeForcingResourceWrapper(resource, resourceType);
+    }
+
+    @Override
+    public Resource getResource() {
+        return resource;
+    }
 }

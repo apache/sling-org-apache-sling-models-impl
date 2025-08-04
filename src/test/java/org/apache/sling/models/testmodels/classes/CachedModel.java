@@ -20,12 +20,12 @@ package org.apache.sling.models.testmodels.classes;
 
 import javax.inject.Inject;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 
 @Model(
-        adaptables = {SlingHttpServletRequest.class, Resource.class},
+        adaptables = {SlingJakartaHttpServletRequest.class, Resource.class},
         cache = true)
 public class CachedModel {
 

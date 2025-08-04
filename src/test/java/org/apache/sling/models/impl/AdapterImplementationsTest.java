@@ -20,7 +20,7 @@ package org.apache.sling.models.impl;
 
 import java.util.Arrays;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.spi.ImplementationPicker;
@@ -53,7 +53,7 @@ public class AdapterImplementationsTest {
     private Resource childResource;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     @Mock
     private ResourceResolver resourceResolver;
@@ -251,7 +251,7 @@ public class AdapterImplementationsTest {
         // now add a mapping for SlingHttpServletRequest -> String
         BundleContext bundleContext = MockOsgi.newBundleContext();
         underTest.registerModelToResourceType(
-                bundleContext.getBundle(), "sling/rt/one", SlingHttpServletRequest.class, String.class);
+                bundleContext.getBundle(), "sling/rt/one", SlingJakartaHttpServletRequest.class, String.class);
         underTest.registerModelToResourceType(bundleContext.getBundle(), "sling/rt/one", Resource.class, Integer.class);
         assertEquals(String.class, underTest.getModelClassForRequest(request));
         assertEquals(Integer.class, underTest.getModelClassForResource(resource));
@@ -259,7 +259,7 @@ public class AdapterImplementationsTest {
         // ensure that trying to reregister the resource type is a no-op
         BundleContext secondBundleContext = MockOsgi.newBundleContext();
         underTest.registerModelToResourceType(
-                secondBundleContext.getBundle(), "sling/rt/one", SlingHttpServletRequest.class, Integer.class);
+                secondBundleContext.getBundle(), "sling/rt/one", SlingJakartaHttpServletRequest.class, Integer.class);
         assertEquals(String.class, underTest.getModelClassForRequest(request));
 
         underTest.removeResourceTypeBindings(bundleContext.getBundle());

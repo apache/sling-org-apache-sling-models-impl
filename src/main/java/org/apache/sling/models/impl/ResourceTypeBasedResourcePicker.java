@@ -21,7 +21,7 @@ package org.apache.sling.models.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.spi.ImplementationPicker;
@@ -45,10 +45,12 @@ public class ResourceTypeBasedResourcePicker implements ImplementationPicker {
     }
 
     private Resource findResource(Object adaptable) {
-        if (adaptable instanceof Resource) {
-            return (Resource) adaptable;
-        } else if (adaptable instanceof SlingHttpServletRequest) {
-            return ((SlingHttpServletRequest) adaptable).getResource();
+        if (adaptable instanceof Resource resource) {
+            return resource;
+        } else if (adaptable instanceof SlingJakartaHttpServletRequest jakartaRequest) {
+            return jakartaRequest.getResource();
+        } else if (adaptable instanceof org.apache.sling.api.SlingHttpServletRequest javaxRequest) {
+            return javaxRequest.getResource();
         } else {
             return null;
         }

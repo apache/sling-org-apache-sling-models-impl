@@ -20,7 +20,7 @@ package org.apache.sling.models.impl;
 
 import java.util.*;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.scripting.SlingBindings;
@@ -58,7 +58,7 @@ public class OptionalObjectsTest {
     private BundleContext bundleContext;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     @Mock
     private Logger log;

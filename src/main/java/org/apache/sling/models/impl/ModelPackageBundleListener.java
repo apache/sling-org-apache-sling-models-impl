@@ -18,8 +18,6 @@
  */
 package org.apache.sling.models.impl;
 
-import javax.servlet.Servlet;
-
 import java.lang.annotation.AnnotationFormatError;
 import java.net.URL;
 import java.util.ArrayList;
@@ -31,9 +29,10 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.Servlet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Exporter;
@@ -169,7 +168,8 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
                                     ExportServlet.ExportedObjectAccessor accessor = null;
                                     if (adaptable == Resource.class) {
                                         accessor = new ExportServlet.ResourceAccessor(implType);
-                                    } else if (adaptable == SlingHttpServletRequest.class) {
+                                    } else if (adaptable == SlingJakartaHttpServletRequest.class
+                                            || adaptable == org.apache.sling.api.SlingHttpServletRequest.class) {
                                         accessor = new ExportServlet.RequestAccessor(implType);
                                     }
                                     Exporter exporterAnnotation = implType.getAnnotation(Exporter.class);

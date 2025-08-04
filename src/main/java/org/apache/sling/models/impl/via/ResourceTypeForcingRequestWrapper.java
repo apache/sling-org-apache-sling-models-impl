@@ -22,6 +22,10 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 
+/**
+ * @deprecated use {@link ResourceTypeForcingJakartaRequestWrapper} instead
+ */
+@Deprecated(since = "2.0.0")
 class ResourceTypeForcingRequestWrapper extends SlingHttpServletRequestWrapper {
 
     private final Resource resource;

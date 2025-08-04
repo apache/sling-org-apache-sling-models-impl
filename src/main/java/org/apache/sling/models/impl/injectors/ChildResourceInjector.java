@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.injectorspecific.ChildResource;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
@@ -56,8 +56,8 @@ public class ChildResourceInjector extends AbstractInjector implements Injector,
             @NotNull Type declaredType,
             @NotNull AnnotatedElement element,
             @NotNull DisposalCallbackRegistry callbackRegistry) {
-        if (adaptable instanceof Resource) {
-            Resource child = ((Resource) adaptable).getChild(name);
+        if (adaptable instanceof Resource resource) {
+            Resource child = resource.getChild(name);
             if (child != null) {
                 return getValue(child, declaredType);
             }
@@ -143,7 +143,8 @@ public class ChildResourceInjector extends AbstractInjector implements Injector,
                 return annotation.via();
             }
             // automatically go via resource, if this is the httprequest
-            if (adaptable instanceof SlingHttpServletRequest) {
+            if (adaptable instanceof SlingJakartaHttpServletRequest
+                    || adaptable instanceof org.apache.sling.api.SlingHttpServletRequest) {
                 return "resource";
             } else {
                 return null;
