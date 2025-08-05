@@ -35,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
  */
 abstract class AbstractInjector {
 
+    @SuppressWarnings("deprecation")
     protected ResourceResolver getResourceResolver(Object adaptable) {
         ResourceResolver resolver = null;
         if (adaptable instanceof Resource r) {
@@ -58,6 +59,7 @@ abstract class AbstractInjector {
      * @param adaptable Adaptable
      * @return a ValueMap or {@code null}.
      */
+    @SuppressWarnings("deprecation")
     protected @Nullable ValueMap getValueMap(Object adaptable) {
         ValueMap valueMap = null;
         if (adaptable instanceof ValueMap vm) {

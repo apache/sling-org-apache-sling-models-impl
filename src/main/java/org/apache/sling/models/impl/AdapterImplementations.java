@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -153,7 +153,7 @@ final class AdapterImplementations {
      */
     public void remove(String adapterTypeName, String implTypeName) {
         String key = adapterTypeName;
-        if (StringUtils.equals(adapterTypeName, implTypeName)) {
+        if (Strings.CS.equals(adapterTypeName, implTypeName)) {
             modelClasses.remove(key);
         } else {
             // although we already use a ConcurrentMap synchronize explicitly because we apply non-atomic operations on
@@ -249,6 +249,7 @@ final class AdapterImplementations {
         return true;
     }
 
+    @SuppressWarnings("deprecation")
     public void registerModelToResourceType(
             final Bundle bundle, final String resourceType, final Class<?> adaptableType, final Class<?> clazz) {
         if (resourceType.startsWith("/")) {

@@ -47,6 +47,7 @@ public class ChildResourceViaProviderTest {
     /**
      * @deprecated use {@link #jakartaRequest} instead
      */
+    @SuppressWarnings("deprecation")
     @Deprecated
     @Mock
     private org.apache.sling.api.SlingHttpServletRequest javaxRequest;
@@ -68,7 +69,7 @@ public class ChildResourceViaProviderTest {
     @Test
     public void testResourceWithBlank() {
         Object adaptable = provider.getAdaptable(resource, "");
-        Assert.assertEquals(adaptable, ViaProvider.ORIGINAL);
+        Assert.assertEquals(ViaProvider.ORIGINAL, adaptable);
     }
 
     @Test

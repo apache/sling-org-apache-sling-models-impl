@@ -63,6 +63,7 @@ public final class SlingObjectInjector implements Injector, StaticInjectAnnotati
         return NAME;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Object getValue(
             final @NotNull Object adaptable,

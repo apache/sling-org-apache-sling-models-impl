@@ -44,6 +44,7 @@ public class OriginalResourceTypeViaProvider implements ViaProvider {
         return OriginalResourceType.class;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Object getAdaptable(Object original, String value) {
         if (original instanceof SlingJakartaHttpServletRequest originalRequest) {

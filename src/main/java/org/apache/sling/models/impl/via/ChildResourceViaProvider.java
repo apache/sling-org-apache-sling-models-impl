@@ -40,6 +40,7 @@ public class ChildResourceViaProvider implements ViaProvider {
         return ChildResource.class;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Object getAdaptable(Object original, String value) {
         if (StringUtils.isBlank(value)) {

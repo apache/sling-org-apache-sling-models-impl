@@ -541,12 +541,10 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             final InjectCallback callback,
             final @NotNull Map<ValuePreparer, Object> preparedValues,
             final @Nullable BundleContext modelContext) {
-        if (element instanceof InjectableField) {
-            Type genericType = ((InjectableField) element).getFieldGenericType();
+        if (element instanceof InjectableField injectableField) {
+            Type genericType = injectableField.getFieldGenericType();
 
-            if (genericType instanceof ParameterizedType) {
-                ParameterizedType pType = (ParameterizedType) genericType;
-
+            if (genericType instanceof ParameterizedType pType) {
                 if (pType.getRawType().equals(Optional.class)) {
                     InjectableElement el =
                             new OptionalTypedInjectableElement(element, pType.getActualTypeArguments()[0]);
@@ -610,8 +608,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                     Object preparedValue = injectionAdaptable;
 
                     // only do the ValuePreparer optimization for the original adaptable
-                    if (injector instanceof ValuePreparer && adaptable == injectionAdaptable) {
-                        final ValuePreparer preparer = (ValuePreparer) injector;
+                    if (injector instanceof ValuePreparer preparer && adaptable == injectionAdaptable) {
                         Object fromMap = preparedValues.get(preparer);
                         if (fromMap != null) {
                             preparedValue = fromMap;
@@ -621,15 +618,14 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                         }
                     }
                     Object value = null;
-                    if (injector instanceof OSGiServiceInjector) {
-                        value = ((OSGiServiceInjector) injector)
-                                .getValue(
-                                        preparedValue,
-                                        name,
-                                        element.getType(),
-                                        element.getAnnotatedElement(),
-                                        registry,
-                                        modelContext);
+                    if (injector instanceof OSGiServiceInjector osgiServiceInjector) {
+                        value = osgiServiceInjector.getValue(
+                                preparedValue,
+                                name,
+                                element.getType(),
+                                element.getAnnotatedElement(),
+                                registry,
+                                modelContext);
                     } else {
                         value = injector.getValue(
                                 preparedValue, name, element.getType(), element.getAnnotatedElement(), registry);
@@ -1009,7 +1005,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         for (Method method : postConstructMethods) {
             method.setAccessible(true);
             Object result = method.invoke(object);
-            if (result instanceof Boolean && !((Boolean) result).booleanValue()) {
+            if (result instanceof Boolean booleanResult && !booleanResult.booleanValue()) {
                 log.debug(
                         "PostConstruct method {}.{} returned false. Returning null model.",
                         method.getDeclaringClass().getName(),
@@ -1062,8 +1058,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     private Result<Object> adaptIfNecessary(final Object value, final Class<?> type, final Type genericType) {
         final Object adaptedValue;
         if (!isAcceptableType(type, genericType, value)) {
-            if (genericType instanceof ParameterizedType) {
-                ParameterizedType parameterizedType = (ParameterizedType) genericType;
+            if (genericType instanceof ParameterizedType parameterizedType) {
                 if (value instanceof Collection
                         && (type.equals(Collection.class) || type.equals(List.class))
                         && parameterizedType.getActualTypeArguments().length == 1) {
@@ -1113,8 +1108,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                                 value.getClass(), result.getThrowable().getMessage(), messageSuffix),
                         result.getThrowable()));
             }
-        } else if (value instanceof Adaptable) {
-            adaptedValue = ((Adaptable) value).adaptTo(type);
+        } else if (value instanceof Adaptable adaptableValue) {
+            adaptedValue = adaptableValue.adaptTo(type);
             if (adaptedValue == null) {
                 return new Result<>(new ModelClassException(
                         String.format("Could not adapt from %s to %s%s", value.getClass(), type, messageSuffix)));
@@ -1464,8 +1459,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             if (list instanceof List) {
                 final List<?> callbackList = (List<?>) list;
                 for (final Object disposable : callbackList) {
-                    if (disposable instanceof DisposalCallbackRegistryImpl) {
-                        ((DisposalCallbackRegistryImpl) disposable).onDisposed();
+                    if (disposable instanceof DisposalCallbackRegistryImpl registryImpl) {
+                        registryImpl.onDisposed();
                     }
                 }
                 callbackList.clear();

@@ -70,6 +70,7 @@ public class SlingObjectInjectorRequestTest {
     @Mock
     private DisposalCallbackRegistry registry;
 
+    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         SlingBindings bindings = new SlingBindings();

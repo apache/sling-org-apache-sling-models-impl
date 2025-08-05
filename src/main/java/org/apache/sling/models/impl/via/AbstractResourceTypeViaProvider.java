@@ -30,6 +30,7 @@ public abstract class AbstractResourceTypeViaProvider implements ViaProvider {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
+    @SuppressWarnings("deprecation")
     @Override
     public Object getAdaptable(Object original, String value) {
         if (!handle(value)) {

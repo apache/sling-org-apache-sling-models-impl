@@ -139,6 +139,7 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
         return regs.toArray(new ServiceRegistration[0]);
     }
 
+    @SuppressWarnings("deprecation")
     private void analyzeClass(Bundle bundle, String className, List<ServiceRegistration> regs) {
         try {
             Class<?> implType = bundle.loadClass(className);

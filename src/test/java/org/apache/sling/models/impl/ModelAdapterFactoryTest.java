@@ -73,6 +73,7 @@ public class ModelAdapterFactoryTest {
     /**
      * @deprecated use {@link #jakartaRequest} instead
      */
+    @SuppressWarnings("deprecation")
     @Deprecated(since = "2.0.0")
     @Mock
     private org.apache.sling.api.SlingHttpServletRequest javaxRequest;
@@ -140,6 +141,7 @@ public class ModelAdapterFactoryTest {
     /**
      * Test method for {@link org.apache.sling.models.impl.ModelAdapterFactory#isModelClass(java.lang.Class)}.
      */
+    @SuppressWarnings("deprecation")
     @Test
     public void testIsModelClassClassOfQ() {
         assertTrue(factory.isModelClass(JakartaModel1.class));

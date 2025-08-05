@@ -137,6 +137,7 @@ public class ChildResourceInjector extends AbstractInjector implements Injector,
             return annotation.optional();
         }
 
+        @SuppressWarnings("deprecation")
         @Override
         public String getVia() {
             if (StringUtils.isNotBlank(annotation.via())) {
