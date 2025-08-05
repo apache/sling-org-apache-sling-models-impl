@@ -544,15 +544,12 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         if (element instanceof InjectableField injectableField) {
             Type genericType = injectableField.getFieldGenericType();
 
-            if (genericType instanceof ParameterizedType pType) {
-                if (pType.getRawType().equals(Optional.class)) {
-                    InjectableElement el =
-                            new OptionalTypedInjectableElement(element, pType.getActualTypeArguments()[0]);
-                    InjectCallback wrappedCallback = new OptionalWrappingCallback(callback, element);
+            if (genericType instanceof ParameterizedType pType
+                    && pType.getRawType().equals(Optional.class)) {
+                InjectableElement el = new OptionalTypedInjectableElement(element, pType.getActualTypeArguments()[0]);
+                InjectCallback wrappedCallback = new OptionalWrappingCallback(callback, element);
 
-                    return injectElementInternal(
-                            el, adaptable, registry, wrappedCallback, preparedValues, modelContext);
-                }
+                return injectElementInternal(el, adaptable, registry, wrappedCallback, preparedValues, modelContext);
             }
         }
 

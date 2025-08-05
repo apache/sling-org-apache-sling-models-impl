@@ -44,6 +44,7 @@ public class ResourceTypeBasedResourcePicker implements ImplementationPicker {
         return AdapterImplementations.getModelClassForResource(resource, implementationsByRT);
     }
 
+    @SuppressWarnings("deprecation")
     private Resource findResource(Object adaptable) {
         if (adaptable instanceof Resource resource) {
             return resource;
