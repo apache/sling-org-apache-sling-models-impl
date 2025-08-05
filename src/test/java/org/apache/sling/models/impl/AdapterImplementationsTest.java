@@ -23,6 +23,7 @@ import java.util.Arrays;
 import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.wrappers.JakartaToJavaxRequestWrapper;
 import org.apache.sling.models.spi.ImplementationPicker;
 import org.apache.sling.testing.mock.osgi.MockOsgi;
 import org.jetbrains.annotations.NotNull;
@@ -237,7 +238,7 @@ public class AdapterImplementationsTest {
     }
 
     @Test
-    public void testResourceTypeRegistrationForRequest() {
+    public void testResourceTypeRegistrationForJakartaRequest() {
         when(resource.getResourceType()).thenReturn("sling/rt/one");
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.getParentResourceType(resource)).thenReturn(null);
@@ -264,6 +265,50 @@ public class AdapterImplementationsTest {
 
         underTest.removeResourceTypeBindings(bundleContext.getBundle());
         assertNull(underTest.getModelClassForRequest(request));
+        assertNull(underTest.getModelClassForResource(resource));
+    }
+
+    /**
+     * @deprecated use {@link #testResourceTypeRegistrationForJakartaRequest()} instead
+     */
+    @Deprecated
+    @Test
+    public void testResourceTypeRegistrationForJavaxRequest() {
+        org.apache.sling.api.SlingHttpServletRequest javaxRequest =
+                JakartaToJavaxRequestWrapper.toJavaxRequest(request);
+
+        when(resource.getResourceType()).thenReturn("sling/rt/one");
+        when(resource.getResourceResolver()).thenReturn(resourceResolver);
+        when(resourceResolver.getParentResourceType(resource)).thenReturn(null);
+        when(resourceResolver.getSearchPath()).thenReturn(new String[] {"/apps/", "/libs/"});
+        when(javaxRequest.getResource()).thenReturn(resource);
+
+        // ensure we don't have any registrations for 'sling/rt/one'
+        assertNull(underTest.getModelClassForRequest(javaxRequest));
+        assertNull(underTest.getModelClassForResource(resource));
+
+        // now add a mapping for SlingHttpServletRequest -> String
+        BundleContext bundleContext = MockOsgi.newBundleContext();
+        underTest.registerModelToResourceType(
+                bundleContext.getBundle(),
+                "sling/rt/one",
+                org.apache.sling.api.SlingHttpServletRequest.class,
+                String.class);
+        underTest.registerModelToResourceType(bundleContext.getBundle(), "sling/rt/one", Resource.class, Integer.class);
+        assertEquals(String.class, underTest.getModelClassForRequest(javaxRequest));
+        assertEquals(Integer.class, underTest.getModelClassForResource(resource));
+
+        // ensure that trying to reregister the resource type is a no-op
+        BundleContext secondBundleContext = MockOsgi.newBundleContext();
+        underTest.registerModelToResourceType(
+                secondBundleContext.getBundle(),
+                "sling/rt/one",
+                org.apache.sling.api.SlingHttpServletRequest.class,
+                Integer.class);
+        assertEquals(String.class, underTest.getModelClassForRequest(javaxRequest));
+
+        underTest.removeResourceTypeBindings(bundleContext.getBundle());
+        assertNull(underTest.getModelClassForRequest(javaxRequest));
         assertNull(underTest.getModelClassForResource(resource));
     }
 

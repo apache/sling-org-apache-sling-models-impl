@@ -342,12 +342,18 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     @SuppressWarnings("unchecked")
     private Map<Class<?>, SoftReference<Object>> getOrCreateCache(final Object adaptable) {
         Map<Class<?>, SoftReference<Object>> adaptableCache;
-        if (adaptable instanceof ServletRequest) {
-            ServletRequest request = (ServletRequest) adaptable;
-            adaptableCache = (Map<Class<?>, SoftReference<Object>>) request.getAttribute(REQUEST_CACHE_ATTRIBUTE);
+        if (adaptable instanceof ServletRequest jakartaRequest) {
+            adaptableCache =
+                    (Map<Class<?>, SoftReference<Object>>) jakartaRequest.getAttribute(REQUEST_CACHE_ATTRIBUTE);
             if (adaptableCache == null) {
                 adaptableCache = Collections.synchronizedMap(new WeakHashMap<>());
-                request.setAttribute(REQUEST_CACHE_ATTRIBUTE, adaptableCache);
+                jakartaRequest.setAttribute(REQUEST_CACHE_ATTRIBUTE, adaptableCache);
+            }
+        } else if (adaptable instanceof javax.servlet.ServletRequest javaxRequest) {
+            adaptableCache = (Map<Class<?>, SoftReference<Object>>) javaxRequest.getAttribute(REQUEST_CACHE_ATTRIBUTE);
+            if (adaptableCache == null) {
+                adaptableCache = Collections.synchronizedMap(new WeakHashMap<>());
+                javaxRequest.setAttribute(REQUEST_CACHE_ATTRIBUTE, adaptableCache);
             }
         } else {
             adaptableCache =
