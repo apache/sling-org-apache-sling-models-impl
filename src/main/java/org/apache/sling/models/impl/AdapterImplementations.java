@@ -29,8 +29,8 @@ import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.commons.lang3.Strings;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.impl.model.ModelClass;
@@ -153,7 +153,7 @@ final class AdapterImplementations {
      */
     public void remove(String adapterTypeName, String implTypeName) {
         String key = adapterTypeName;
-        if (StringUtils.equals(adapterTypeName, implTypeName)) {
+        if (Strings.CS.equals(adapterTypeName, implTypeName)) {
             modelClasses.remove(key);
         } else {
             // although we already use a ConcurrentMap synchronize explicitly because we apply non-atomic operations on
@@ -249,6 +249,7 @@ final class AdapterImplementations {
         return true;
     }
 
+    @SuppressWarnings("deprecation")
     public void registerModelToResourceType(
             final Bundle bundle, final String resourceType, final Class<?> adaptableType, final Class<?> clazz) {
         if (resourceType.startsWith("/")) {
@@ -261,7 +262,8 @@ final class AdapterImplementations {
         if (adaptableType == Resource.class) {
             map = resourceTypeMappingsForResources;
             resourceTypeRemovalLists = resourceTypeRemovalListsForResources;
-        } else if (adaptableType == SlingHttpServletRequest.class) {
+        } else if (adaptableType == SlingJakartaHttpServletRequest.class
+                || adaptableType == org.apache.sling.api.SlingHttpServletRequest.class) {
             map = resourceTypeMappingsForRequests;
             resourceTypeRemovalLists = resourceTypeRemovalListsForRequests;
         } else {
@@ -296,7 +298,15 @@ final class AdapterImplementations {
         }
     }
 
-    public Class<?> getModelClassForRequest(final SlingHttpServletRequest request) {
+    /**
+     * @deprecated use {@link #getModelClassForRequest(SlingJakartaHttpServletRequest) instead
+     */
+    @Deprecated(since = "2.0.0")
+    public Class<?> getModelClassForRequest(final org.apache.sling.api.SlingHttpServletRequest request) {
+        return getModelClassForResource(request.getResource(), resourceTypeMappingsForRequests);
+    }
+
+    public Class<?> getModelClassForRequest(final SlingJakartaHttpServletRequest request) {
         return getModelClassForResource(request.getResource(), resourceTypeMappingsForRequests);
     }
 

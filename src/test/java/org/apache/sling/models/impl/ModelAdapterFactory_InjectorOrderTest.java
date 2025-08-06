@@ -22,7 +22,7 @@ import javax.inject.Inject;
 
 import java.util.Map;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -62,7 +62,7 @@ public class ModelAdapterFactory_InjectorOrderTest {
     private BindingsValuesProvidersByContext bindingsValuesProvidersByContext;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     @Mock
     private Resource resource;
@@ -109,7 +109,7 @@ public class ModelAdapterFactory_InjectorOrderTest {
         assertEquals((Integer) 1, model.getProp1());
     }
 
-    @Model(adaptables = SlingHttpServletRequest.class)
+    @Model(adaptables = SlingJakartaHttpServletRequest.class)
     private interface TestModel {
         @Inject
         Integer getProp1();

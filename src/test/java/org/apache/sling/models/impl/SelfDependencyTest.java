@@ -20,7 +20,7 @@ package org.apache.sling.models.impl;
 
 import java.util.Collections;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.models.impl.injectors.SelfInjector;
 import org.apache.sling.models.testmodels.classes.DirectCyclicSelfDependencyModel;
 import org.apache.sling.models.testmodels.classes.IndirectCyclicSelfDependencyModelA;
@@ -47,7 +47,7 @@ public class SelfDependencyTest {
     private ModelAdapterFactory factory;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     @SuppressWarnings("unchecked")
     @Before

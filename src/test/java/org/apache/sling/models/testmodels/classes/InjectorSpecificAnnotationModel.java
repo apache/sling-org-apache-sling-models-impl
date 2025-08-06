@@ -18,7 +18,7 @@
  */
 package org.apache.sling.models.testmodels.classes;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.models.annotations.Model;
@@ -29,7 +29,7 @@ import org.apache.sling.models.annotations.injectorspecific.ScriptVariable;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 import org.slf4j.Logger;
 
-@Model(adaptables = SlingHttpServletRequest.class)
+@Model(adaptables = SlingJakartaHttpServletRequest.class)
 public class InjectorSpecificAnnotationModel {
 
     @ValueMapValue(optional = true)

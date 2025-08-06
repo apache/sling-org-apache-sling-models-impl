@@ -23,7 +23,7 @@ import javax.inject.Inject;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
@@ -42,7 +42,7 @@ public class ParameterizedTypeFromRequestAttributeTest {
     private ModelAdapterFactory factory;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     @Before
     public void setup() {
@@ -63,7 +63,7 @@ public class ParameterizedTypeFromRequestAttributeTest {
         assertEquals(it, model.getSomeResources());
     }
 
-    @Model(adaptables = SlingHttpServletRequest.class)
+    @Model(adaptables = SlingJakartaHttpServletRequest.class)
     public static class TestModel {
 
         @Inject

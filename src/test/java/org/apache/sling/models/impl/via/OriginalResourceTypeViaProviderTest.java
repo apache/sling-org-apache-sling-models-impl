@@ -18,10 +18,11 @@
  */
 package org.apache.sling.models.impl.via;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceWrapper;
-import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.apache.sling.api.wrappers.JakartaToJavaxRequestWrapper;
+import org.apache.sling.api.wrappers.SlingJakartaHttpServletRequestWrapper;
 import org.apache.sling.models.annotations.via.OriginalResourceType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +41,7 @@ public class OriginalResourceTypeViaProviderTest {
     private Resource resource;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     @Test
     public void testReturnsCorrectMarkerInterface() {
@@ -80,17 +81,39 @@ public class OriginalResourceTypeViaProviderTest {
     }
 
     @Test
-    public void testUnwrapsRequest() {
+    public void testUnwrapsJakartaRequest() {
         // once
-        SlingHttpServletRequest testCase = new ResourceTypeForcingRequestWrapper(request, resource, "foo");
+        SlingJakartaHttpServletRequest testCase =
+                new ResourceTypeForcingJakartaRequestWrapper(request, resource, "foo");
         Object projected = provider.getAdaptable(testCase, null);
         assertEquals(request, projected);
+
+        // more than once
+        testCase = new ResourceTypeForcingJakartaRequestWrapper(testCase, resource, "bar");
+        testCase = new ResourceTypeForcingJakartaRequestWrapper(testCase, resource, "foobar");
+        projected = provider.getAdaptable(testCase, null);
+        assertEquals(request, projected);
+    }
+
+    /**
+     * @deprecated use {@link #testUnwrapsJakartaRequest()} instead
+     */
+    @Deprecated
+    @Test
+    public void testUnwrapsJavaxRequest() {
+        org.apache.sling.api.SlingHttpServletRequest javaxRequest =
+                JakartaToJavaxRequestWrapper.toJavaxRequest(request);
+        // once
+        org.apache.sling.api.SlingHttpServletRequest testCase =
+                new ResourceTypeForcingRequestWrapper(javaxRequest, resource, "foo");
+        Object projected = provider.getAdaptable(testCase, null);
+        assertEquals(javaxRequest, projected);
 
         // more than once
         testCase = new ResourceTypeForcingRequestWrapper(testCase, resource, "bar");
         testCase = new ResourceTypeForcingRequestWrapper(testCase, resource, "foobar");
         projected = provider.getAdaptable(testCase, null);
-        assertEquals(request, projected);
+        assertEquals(javaxRequest, projected);
     }
 
     @Test
@@ -101,8 +124,22 @@ public class OriginalResourceTypeViaProviderTest {
     }
 
     @Test
-    public void testDoesNotUnwrapOtherRequestWrappers() {
-        SlingHttpServletRequest testCase = new SlingHttpServletRequestWrapper(request);
+    public void testDoesNotUnwrapOtherJakartaRequestWrappers() {
+        SlingJakartaHttpServletRequest testCase = new SlingJakartaHttpServletRequestWrapper(request);
+        Object projected = provider.getAdaptable(testCase, null);
+        assertEquals(testCase, projected);
+    }
+
+    /**
+     * @deprecated use {@link #testDoesNotUnwrapOtherJakartaRequestWrappers()} instead
+     */
+    @Deprecated
+    @Test
+    public void testDoesNotUnwrapOtherJavaxRequestWrappers() {
+        org.apache.sling.api.SlingHttpServletRequest javaxRequest =
+                JakartaToJavaxRequestWrapper.toJavaxRequest(request);
+        org.apache.sling.api.SlingHttpServletRequest testCase =
+                new org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper(javaxRequest);
         Object projected = provider.getAdaptable(testCase, null);
         assertEquals(testCase, projected);
     }

@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.factory.ModelClassException;
@@ -63,7 +63,7 @@ public class ConstructorTest {
     private ModelAdapterFactory factory;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     private static final int INT_VALUE = 42;
 

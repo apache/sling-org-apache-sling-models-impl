@@ -18,11 +18,10 @@
  */
 package org.apache.sling.models.impl.injectors;
 
-import javax.servlet.ServletRequest;
-
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 
+import jakarta.servlet.ServletRequest;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
@@ -65,11 +64,12 @@ public class BindingsInjector implements Injector, StaticInjectAnnotationProcess
     }
 
     private SlingBindings getBindings(Object adaptable) {
-        if (adaptable instanceof SlingBindings) {
-            return (SlingBindings) adaptable;
-        } else if (adaptable instanceof ServletRequest) {
-            ServletRequest request = (ServletRequest) adaptable;
-            return (SlingBindings) request.getAttribute(SlingBindings.class.getName());
+        if (adaptable instanceof SlingBindings bindings) {
+            return bindings;
+        } else if (adaptable instanceof ServletRequest jakartaRequest) {
+            return (SlingBindings) jakartaRequest.getAttribute(SlingBindings.class.getName());
+        } else if (adaptable instanceof javax.servlet.ServletRequest javaxRequest) {
+            return (SlingBindings) javaxRequest.getAttribute(SlingBindings.class.getName());
         } else {
             return null;
         }

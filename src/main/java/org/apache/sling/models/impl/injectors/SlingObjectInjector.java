@@ -18,18 +18,19 @@
  */
 package org.apache.sling.models.impl.injectors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
+import org.apache.sling.api.wrappers.JakartaToJavaxRequestWrapper;
+import org.apache.sling.api.wrappers.JavaxToJakartaRequestWrapper;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.apache.sling.models.spi.AcceptsNullName;
@@ -62,6 +63,7 @@ public final class SlingObjectInjector implements Injector, StaticInjectAnnotati
         return NAME;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Object getValue(
             final @NotNull Object adaptable,
@@ -76,33 +78,47 @@ public final class SlingObjectInjector implements Injector, StaticInjectAnnotati
         }
         Class<?> requestedClass = (Class<?>) type;
 
+        SlingJakartaHttpServletRequest jakartaRequest = null;
+        Supplier<org.apache.sling.api.SlingHttpServletRequest> javaxRequestSupplier = null;
+        if (adaptable instanceof SlingJakartaHttpServletRequest jr) {
+            jakartaRequest = jr;
+            javaxRequestSupplier = () -> JakartaToJavaxRequestWrapper.toJavaxRequest(jr);
+        } else if (adaptable instanceof org.apache.sling.api.SlingHttpServletRequest r) {
+            jakartaRequest = JavaxToJakartaRequestWrapper.toJakartaRequest(r);
+            javaxRequestSupplier = () -> r;
+        }
         // validate input
-        if (adaptable instanceof SlingHttpServletRequest) {
-            SlingHttpServletRequest request = (SlingHttpServletRequest) adaptable;
+        if (jakartaRequest != null) {
             if (requestedClass.equals(ResourceResolver.class)) {
-                return request.getResourceResolver();
+                return jakartaRequest.getResourceResolver();
             }
             if (requestedClass.equals(Resource.class) && element.isAnnotationPresent(SlingObject.class)) {
-                return request.getResource();
+                return jakartaRequest.getResource();
             }
-            if (requestedClass.equals(SlingHttpServletRequest.class)
-                    || requestedClass.equals(HttpServletRequest.class)) {
-                return request;
+            if (requestedClass.equals(SlingJakartaHttpServletRequest.class)
+                    || requestedClass.equals(jakarta.servlet.http.HttpServletRequest.class)) {
+                return jakartaRequest;
             }
-            if (requestedClass.equals(SlingHttpServletResponse.class)
-                    || requestedClass.equals(HttpServletResponse.class)) {
-                return getSlingHttpServletResponse(request);
+            if (requestedClass.equals(SlingJakartaHttpServletResponse.class)
+                    || requestedClass.equals(jakarta.servlet.http.HttpServletResponse.class)) {
+                return getScriptHelperItem(jakartaRequest, SlingScriptHelper::getJakartaResponse);
+            }
+            if (requestedClass.equals(org.apache.sling.api.SlingHttpServletRequest.class)
+                    || requestedClass.equals(javax.servlet.http.HttpServletRequest.class)) {
+                return javaxRequestSupplier.get();
+            }
+            if (requestedClass.equals(org.apache.sling.api.SlingHttpServletResponse.class)
+                    || requestedClass.equals(javax.servlet.http.HttpServletResponse.class)) {
+                return getScriptHelperItem(jakartaRequest, SlingScriptHelper::getResponse);
             }
             if (requestedClass.equals(SlingScriptHelper.class)) {
-                return getSlingScriptHelper(request);
+                return getSlingJakartaScriptHelper(jakartaRequest);
             }
-        } else if (adaptable instanceof ResourceResolver) {
-            ResourceResolver resourceResolver = (ResourceResolver) adaptable;
+        } else if (adaptable instanceof ResourceResolver resourceResolver) {
             if (requestedClass.equals(ResourceResolver.class)) {
                 return resourceResolver;
             }
-        } else if (adaptable instanceof Resource) {
-            Resource resource = (Resource) adaptable;
+        } else if (adaptable instanceof Resource resource) {
             if (requestedClass.equals(ResourceResolver.class)) {
                 return resource.getResourceResolver();
             }
@@ -114,20 +130,22 @@ public final class SlingObjectInjector implements Injector, StaticInjectAnnotati
         return null;
     }
 
-    private SlingScriptHelper getSlingScriptHelper(final SlingHttpServletRequest request) {
+    private SlingScriptHelper getSlingJakartaScriptHelper(final SlingJakartaHttpServletRequest request) {
+        SlingScriptHelper value = null;
         SlingBindings bindings = (SlingBindings) request.getAttribute(SlingBindings.class.getName());
         if (bindings != null) {
-            return bindings.getSling();
+            value = bindings.getSling();
         }
-        return null;
+        return value;
     }
 
-    private SlingHttpServletResponse getSlingHttpServletResponse(final SlingHttpServletRequest request) {
-        SlingScriptHelper scriptHelper = getSlingScriptHelper(request);
+    private <T> T getScriptHelperItem(final SlingJakartaHttpServletRequest request, Function<SlingScriptHelper, T> fn) {
+        T value = null;
+        SlingScriptHelper scriptHelper = getSlingJakartaScriptHelper(request);
         if (scriptHelper != null) {
-            return scriptHelper.getResponse();
+            value = fn.apply(scriptHelper);
         }
-        return null;
+        return value;
     }
 
     @Override

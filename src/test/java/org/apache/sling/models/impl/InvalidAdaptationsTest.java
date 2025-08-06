@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
@@ -93,6 +93,6 @@ public class InvalidAdaptationsTest {
 
     private class NonModel {}
 
-    @Model(adaptables = SlingHttpServletRequest.class)
+    @Model(adaptables = SlingJakartaHttpServletRequest.class)
     private class RequestModel {}
 }

@@ -19,12 +19,12 @@
 package org.apache.sling.models.testmodels.classes;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.models.annotations.Model;
 
-@Model(adaptables = SlingHttpServletRequest.class)
+@Model(adaptables = SlingJakartaHttpServletRequest.class)
 public class SuperclassConstructorModel {
 
     private HttpServletRequest request;

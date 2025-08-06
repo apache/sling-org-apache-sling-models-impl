@@ -21,7 +21,7 @@ package org.apache.sling.models.impl;
 import java.util.Collections;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
@@ -50,7 +50,7 @@ public class ViaTest {
     private Resource childResource;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     private ModelAdapterFactory factory;
 
@@ -68,7 +68,7 @@ public class ViaTest {
 
     @Test
     public void testProjectionToResource() {
-        String value = RandomStringUtils.randomAlphanumeric(10);
+        String value = RandomStringUtils.secure().nextAlphanumeric(10);
         ValueMap map = new ValueMapDecorator(Collections.<String, Object>singletonMap("firstProperty", value));
         when(resource.adaptTo(ValueMap.class)).thenReturn(map);
 
@@ -79,7 +79,7 @@ public class ViaTest {
 
     @Test
     public void testProjectionToChildResource() {
-        String value = RandomStringUtils.randomAlphanumeric(10);
+        String value = RandomStringUtils.secure().nextAlphanumeric(10);
         ValueMap map = new ValueMapDecorator(Collections.<String, Object>singletonMap("firstProperty", value));
         when(childResource.adaptTo(ValueMap.class)).thenReturn(map);
         ChildResourceViaModel model = factory.getAdapter(resource, ChildResourceViaModel.class);

@@ -20,11 +20,11 @@ package org.apache.sling.models.testmodels.classes;
 
 import javax.inject.Inject;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Via;
 
-@Model(adaptables = SlingHttpServletRequest.class)
+@Model(adaptables = SlingJakartaHttpServletRequest.class)
 public class ViaModel {
 
     @Inject

@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
@@ -57,7 +57,7 @@ public class ResourcePathInjectionTest {
     private Resource adaptableResource;
 
     @Mock
-    SlingHttpServletRequest adaptableRequest;
+    SlingJakartaHttpServletRequest adaptableRequest;
 
     @Mock
     private Resource byPathResource;

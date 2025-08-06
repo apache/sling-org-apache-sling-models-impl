@@ -26,7 +26,7 @@
         <relativePath />
     </parent>
     <artifactId>org.apache.sling.models.impl</artifactId>
-    <version>1.7.9-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <name>Apache Sling Models Implementation</name>
     <description>Apache Sling Models Implementation</description>
 
@@ -38,14 +38,14 @@
     </scm>
     <properties>
         <project.build.outputTimestamp>2024-12-17T10:51:57Z</project.build.outputTimestamp>
-        <sling.java.version>11</sling.java.version>
+        <sling.java.version>17</sling.java.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.models.api</artifactId>
-            <version>1.5.4</version>
+            <version>2.0.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -88,18 +88,31 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.wrappers</artifactId>
+            <version>1.1.10</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
+            <version>3.18.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.api</artifactId>
-            <version>2.25.4</version>
+            <version>3.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -127,7 +140,7 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.scripting.core</artifactId>
-            <version>2.4.8</version>
+            <version>3.0.0</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -173,7 +186,7 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.servlet-helpers</artifactId>
-            <version>1.4.2</version>
+            <version>2.0.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <!-- transitive depedendencies of org.apache.sling.servlet-helpers -->

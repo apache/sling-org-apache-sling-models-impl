@@ -20,10 +20,10 @@ package org.apache.sling.models.testmodels.interfaces;
 
 import javax.inject.Inject;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.models.annotations.Model;
 
-@Model(adaptables = SlingHttpServletRequest.class, cache = true)
+@Model(adaptables = SlingJakartaHttpServletRequest.class, cache = true)
 public interface CachedModel {
 
     @Inject

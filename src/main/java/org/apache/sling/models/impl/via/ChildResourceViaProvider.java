@@ -19,12 +19,13 @@
 package org.apache.sling.models.impl.via;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.apache.sling.api.wrappers.SlingJakartaHttpServletRequestWrapper;
 import org.apache.sling.models.annotations.ViaProviderType;
 import org.apache.sling.models.annotations.via.ChildResource;
 import org.apache.sling.models.spi.ViaProvider;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,25 +40,30 @@ public class ChildResourceViaProvider implements ViaProvider {
         return ChildResource.class;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Object getAdaptable(Object original, String value) {
         if (StringUtils.isBlank(value)) {
             return ORIGINAL;
         }
-        if (original instanceof Resource) {
-            return ((Resource) original).getChild(value);
-        } else if (original instanceof SlingHttpServletRequest) {
-            final SlingHttpServletRequest request = (SlingHttpServletRequest) original;
-            final Resource resource = request.getResource();
-            if (resource == null) {
-                return null;
-            }
+        if (original instanceof Resource resource) {
+            return resource.getChild(value);
+        } else if (original instanceof SlingJakartaHttpServletRequest jakartaRequest) {
+            final @NotNull Resource resource = jakartaRequest.getResource();
             Resource child = resource.getChild(value);
             if (child == null) {
                 log.debug("Could not obtain child {} of resource {}", value, resource.getPath());
                 return null;
             }
-            return new ChildResourceRequestWrapper(request, child);
+            return new ChildResourceJakartaRequestWrapper(jakartaRequest, child);
+        } else if (original instanceof org.apache.sling.api.SlingHttpServletRequest javaxRequest) {
+            final @NotNull Resource resource = javaxRequest.getResource();
+            Resource child = resource.getChild(value);
+            if (child == null) {
+                log.debug("Could not obtain child {} of resource {}", value, resource.getPath());
+                return null;
+            }
+            return new ChildResourceRequestWrapper(javaxRequest, child);
         } else {
             log.warn(
                     "Received unexpected adaptable of type {}.",
@@ -66,11 +72,30 @@ public class ChildResourceViaProvider implements ViaProvider {
         }
     }
 
-    private class ChildResourceRequestWrapper extends SlingHttpServletRequestWrapper {
+    /**
+     * @deprecated use {@link ChildResourceJakartaRequestWrapper} instead
+     */
+    @Deprecated(since = "2.0.0")
+    private class ChildResourceRequestWrapper extends org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper {
 
         private final Resource resource;
 
-        private ChildResourceRequestWrapper(SlingHttpServletRequest request, Resource resource) {
+        private ChildResourceRequestWrapper(org.apache.sling.api.SlingHttpServletRequest request, Resource resource) {
+            super(request);
+            this.resource = resource;
+        }
+
+        @Override
+        public Resource getResource() {
+            return resource;
+        }
+    }
+
+    private class ChildResourceJakartaRequestWrapper extends SlingJakartaHttpServletRequestWrapper {
+
+        private final Resource resource;
+
+        private ChildResourceJakartaRequestWrapper(SlingJakartaHttpServletRequest request, Resource resource) {
             super(request);
             this.resource = resource;
         }

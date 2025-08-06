@@ -18,7 +18,7 @@
  */
 package org.apache.sling.models.impl;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.Model;
@@ -49,7 +49,7 @@ public class StaticInjectionAPFLoadOrderTest {
     public OsgiContext context = new OsgiContext();
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     @Mock
     private ResourceResolver resourceResolver;
@@ -139,7 +139,7 @@ public class StaticInjectionAPFLoadOrderTest {
         return factory.createModel(request, TestModel.class);
     }
 
-    @Model(adaptables = SlingHttpServletRequest.class)
+    @Model(adaptables = SlingJakartaHttpServletRequest.class)
     public static class TestModel {
 
         @SlingObject(injectionStrategy = InjectionStrategy.OPTIONAL)

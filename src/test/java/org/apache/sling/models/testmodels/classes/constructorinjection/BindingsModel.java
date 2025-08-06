@@ -21,12 +21,12 @@ package org.apache.sling.models.testmodels.classes.constructorinjection;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.models.annotations.Model;
 import org.slf4j.Logger;
 
-@Model(adaptables = SlingHttpServletRequest.class)
+@Model(adaptables = SlingJakartaHttpServletRequest.class)
 public class BindingsModel {
 
     private final SlingScriptHelper sling;

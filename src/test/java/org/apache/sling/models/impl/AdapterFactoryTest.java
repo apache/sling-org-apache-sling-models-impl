@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
@@ -66,7 +66,7 @@ public class AdapterFactoryTest {
     private Resource resource;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     private ModelAdapterFactory factory;
 
@@ -141,7 +141,7 @@ public class AdapterFactoryTest {
         factory.createModel(resource, ConstructorWithExceptionModel.class);
     }
 
-    @Model(adaptables = SlingHttpServletRequest.class)
+    @Model(adaptables = SlingJakartaHttpServletRequest.class)
     public static class NestedModelWithInvalidAdaptable {
         @Self
         DefaultStringModel nestedModel;
@@ -153,7 +153,7 @@ public class AdapterFactoryTest {
         factory.createModel(request, NestedModelWithInvalidAdaptable.class);
     }
 
-    @Model(adaptables = SlingHttpServletRequest.class)
+    @Model(adaptables = SlingJakartaHttpServletRequest.class)
     public static class NestedModelWithInvalidAdaptable2 {
         @Self
         InvalidModelWithMissingAnnotation nestedModel;
@@ -331,7 +331,7 @@ public class AdapterFactoryTest {
 
         for (long i = 0; i < maxInstances; i++) {
             CachedModelWithSelfReference model =
-                    factory.createModel(mock(SlingHttpServletRequest.class), CachedModelWithSelfReference.class);
+                    factory.createModel(mock(SlingJakartaHttpServletRequest.class), CachedModelWithSelfReference.class);
             for (int j = 0; j < model.longs.length; j++) {
                 model.longs[j] = j;
             }

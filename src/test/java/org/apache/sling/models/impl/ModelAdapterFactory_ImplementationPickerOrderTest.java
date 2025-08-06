@@ -20,7 +20,7 @@ package org.apache.sling.models.impl;
 
 import java.util.function.IntSupplier;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.spi.ImplementationPicker;
@@ -55,7 +55,7 @@ public class ModelAdapterFactory_ImplementationPickerOrderTest {
     private BindingsValuesProvidersByContext bindingsValuesProvidersByContext;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     private ModelAdapterFactory factory;
 
@@ -96,7 +96,7 @@ public class ModelAdapterFactory_ImplementationPickerOrderTest {
         }
     }
 
-    @Model(adaptables = SlingHttpServletRequest.class, adapters = IntSupplier.class)
+    @Model(adaptables = SlingJakartaHttpServletRequest.class, adapters = IntSupplier.class)
     static final class Model1 implements IntSupplier {
         @Override
         public int getAsInt() {
@@ -104,7 +104,7 @@ public class ModelAdapterFactory_ImplementationPickerOrderTest {
         }
     }
 
-    @Model(adaptables = SlingHttpServletRequest.class, adapters = IntSupplier.class)
+    @Model(adaptables = SlingJakartaHttpServletRequest.class, adapters = IntSupplier.class)
     static final class Model2 implements IntSupplier {
         @Override
         public int getAsInt() {

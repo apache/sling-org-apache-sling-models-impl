@@ -18,13 +18,13 @@
  */
 package org.apache.sling.models.testmodels.classes;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.testmodels.interfaces.AdapterType1;
 import org.apache.sling.models.testmodels.interfaces.AdapterType2;
 
 @Model(
-        adaptables = SlingHttpServletRequest.class,
+        adaptables = SlingJakartaHttpServletRequest.class,
         adapters = {AdapterType1.class, AdapterType2.class},
         cache = true)
 public class CachedModelWithAdapterTypes12 implements AdapterType1, AdapterType2 {}

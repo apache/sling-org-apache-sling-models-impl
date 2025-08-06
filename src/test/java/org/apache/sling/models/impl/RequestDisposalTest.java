@@ -19,8 +19,6 @@
 package org.apache.sling.models.impl;
 
 import javax.inject.Inject;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequestEvent;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
@@ -30,9 +28,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletRequestEvent;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.apache.sling.api.wrappers.SlingJakartaHttpServletRequestWrapper;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.spi.DisposalCallback;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
@@ -60,7 +60,7 @@ public class RequestDisposalTest {
     private Resource resource;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     @Mock
     private ServletContext servletContext;
@@ -103,12 +103,12 @@ public class RequestDisposalTest {
     @Test
     public void testWithInitializedRequest() {
         // destroy a wrapper of the root request
-        SlingHttpServletRequest destroyedRequest = new SlingHttpServletRequestWrapper(request);
+        SlingJakartaHttpServletRequest destroyedRequest = new SlingJakartaHttpServletRequestWrapper(request);
         factory.requestInitialized(new ServletRequestEvent(servletContext, destroyedRequest));
 
         // but adapt from a wrapper of a wrapper of that wrapper
-        SlingHttpServletRequest adaptableRequest =
-                new SlingHttpServletRequestWrapper(new SlingHttpServletRequestWrapper(destroyedRequest));
+        SlingJakartaHttpServletRequest adaptableRequest =
+                new SlingJakartaHttpServletRequestWrapper(new SlingJakartaHttpServletRequestWrapper(destroyedRequest));
 
         TestModel model = factory.getAdapter(adaptableRequest, TestModel.class);
         assertEquals("teststring", model.testString);
@@ -123,12 +123,12 @@ public class RequestDisposalTest {
     @Test
     public void testTwoInstancesWithInitializedRequest() {
         // destroy a wrapper of the root request
-        SlingHttpServletRequest destroyedRequest = new SlingHttpServletRequestWrapper(request);
+        SlingJakartaHttpServletRequest destroyedRequest = new SlingJakartaHttpServletRequestWrapper(request);
         factory.requestInitialized(new ServletRequestEvent(servletContext, destroyedRequest));
 
         // but adapt from a wrapper of a wrapper of that wrapper
-        SlingHttpServletRequest adaptableRequest =
-                new SlingHttpServletRequestWrapper(new SlingHttpServletRequestWrapper(destroyedRequest));
+        SlingJakartaHttpServletRequest adaptableRequest =
+                new SlingJakartaHttpServletRequestWrapper(new SlingJakartaHttpServletRequestWrapper(destroyedRequest));
 
         TestModel model = factory.getAdapter(adaptableRequest, TestModel.class);
         assertEquals("teststring", model.testString);
@@ -146,11 +146,11 @@ public class RequestDisposalTest {
     @Test
     public void testWithUnitializedRequest() {
         // destroy a wrapper of the root request
-        SlingHttpServletRequest destroyedRequest = new SlingHttpServletRequestWrapper(request);
+        SlingJakartaHttpServletRequest destroyedRequest = new SlingJakartaHttpServletRequestWrapper(request);
 
         // but adapt from a wrapper of a wrapper of that wrapper
-        SlingHttpServletRequest adaptableRequest =
-                new SlingHttpServletRequestWrapper(new SlingHttpServletRequestWrapper(destroyedRequest));
+        SlingJakartaHttpServletRequest adaptableRequest =
+                new SlingJakartaHttpServletRequestWrapper(new SlingJakartaHttpServletRequestWrapper(destroyedRequest));
 
         TestModel model = factory.getAdapter(adaptableRequest, TestModel.class);
         assertEquals("teststring", model.testString);
@@ -174,7 +174,7 @@ public class RequestDisposalTest {
         }
     }
 
-    @Model(adaptables = SlingHttpServletRequest.class)
+    @Model(adaptables = SlingJakartaHttpServletRequest.class)
     public static class TestModel {
 
         @Inject

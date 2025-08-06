@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.models.annotations.Model;
@@ -34,7 +34,7 @@ import org.apache.sling.models.annotations.injectorspecific.RequestAttribute;
 import org.apache.sling.models.annotations.injectorspecific.ScriptVariable;
 import org.slf4j.Logger;
 
-@Model(adaptables = {Resource.class, SlingHttpServletRequest.class})
+@Model(adaptables = {Resource.class, SlingJakartaHttpServletRequest.class})
 public class OptionalObjectsModel {
 
     @Inject
