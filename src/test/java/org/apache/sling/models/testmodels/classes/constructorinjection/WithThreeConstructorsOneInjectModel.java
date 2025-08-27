@@ -21,20 +21,20 @@ package org.apache.sling.models.testmodels.classes.constructorinjection;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.models.annotations.Model;
 
-@Model(adaptables = SlingHttpServletRequest.class)
+@Model(adaptables = SlingJakartaHttpServletRequest.class)
 public class WithThreeConstructorsOneInjectModel {
 
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     @Inject
     private int attribute;
 
     private String attribute2;
 
-    public WithThreeConstructorsOneInjectModel(SlingHttpServletRequest request) {
+    public WithThreeConstructorsOneInjectModel(SlingJakartaHttpServletRequest request) {
         this.request = request;
     }
 
@@ -53,7 +53,7 @@ public class WithThreeConstructorsOneInjectModel {
         return attribute2;
     }
 
-    public SlingHttpServletRequest getRequest() {
+    public SlingJakartaHttpServletRequest getRequest() {
         return request;
     }
 }

@@ -20,9 +20,11 @@ package org.apache.sling.models.impl.injectors;
 
 import java.lang.reflect.AnnotatedElement;
 
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.JakartaToJavaxRequestWrapper;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,8 +32,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ValueMapInjectorTest {
@@ -47,6 +52,12 @@ public class ValueMapInjectorTest {
     @Mock
     private DisposalCallbackRegistry registry;
 
+    @Mock
+    private Resource resource;
+
+    @Mock
+    private SlingJakartaHttpServletRequest jakartaRequest;
+
     private static final String STRING_PARAM = "param1";
     private static final String INTEGER_PARAM = "param2";
     private static final String CLASS_PARAM = "param3";
@@ -59,6 +70,9 @@ public class ValueMapInjectorTest {
         when(valueMap.get(STRING_PARAM, String.class)).thenReturn(STRING_VALUE);
         when(valueMap.get(INTEGER_PARAM, Integer.class)).thenReturn(INTEGER_VALUE);
         when(valueMap.get(CLASS_PARAM, ResourceResolver.class)).thenReturn(CLASS_INSTANCE);
+
+        when(this.resource.adaptTo(ValueMap.class)).thenReturn(valueMap);
+        when(this.jakartaRequest.getResource()).thenReturn(this.resource);
     }
 
     @Test
@@ -89,5 +103,23 @@ public class ValueMapInjectorTest {
     public void testNonValueMapAdaptable() {
         Object result = injector.getValue(mock(ResourceResolver.class), STRING_PARAM, String.class, element, registry);
         assertNull(result);
+    }
+
+    @Test
+    public void testStringParamFromJakartaRequest() {
+        Object result = this.injector.getValue(this.jakartaRequest, STRING_PARAM, String.class, element, registry);
+        assertEquals(STRING_VALUE, result);
+    }
+
+    /**
+     * @deprecated use {@link #testJakartaRequest()} instead
+     */
+    @Deprecated(since = "2.0.0")
+    @Test
+    public void testStringParamFromJavaxRequest() {
+        org.apache.sling.api.SlingHttpServletRequest javaxRequest =
+                JakartaToJavaxRequestWrapper.toJavaxRequest(this.jakartaRequest);
+        Object result = this.injector.getValue(javaxRequest, STRING_PARAM, String.class, element, registry);
+        assertEquals(STRING_VALUE, result);
     }
 }

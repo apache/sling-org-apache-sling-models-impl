@@ -19,8 +19,6 @@
 package org.apache.sling.models.impl;
 
 import javax.script.Bindings;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,12 +26,14 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletResponse;
 import org.apache.sling.api.scripting.LazyBindings;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.api.servlets.SlingJakartaSafeMethodsServlet;
 import org.apache.sling.models.factory.ExportException;
 import org.apache.sling.models.factory.MissingExporterException;
 import org.apache.sling.models.factory.ModelFactory;
@@ -43,16 +43,16 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.sling.api.scripting.SlingBindings.JAKARTA_REQUEST;
+import static org.apache.sling.api.scripting.SlingBindings.JAKARTA_RESPONSE;
 import static org.apache.sling.api.scripting.SlingBindings.LOG;
 import static org.apache.sling.api.scripting.SlingBindings.OUT;
 import static org.apache.sling.api.scripting.SlingBindings.READER;
-import static org.apache.sling.api.scripting.SlingBindings.REQUEST;
 import static org.apache.sling.api.scripting.SlingBindings.RESOURCE;
-import static org.apache.sling.api.scripting.SlingBindings.RESPONSE;
 import static org.apache.sling.api.scripting.SlingBindings.SLING;
 
 @SuppressWarnings("serial")
-class ExportServlet extends SlingSafeMethodsServlet {
+class ExportServlet extends SlingJakartaSafeMethodsServlet {
 
     private static final String APPLICATION_JSON = "application/json";
     private static final String UTF_8 = "UTF-8";
@@ -92,7 +92,7 @@ class ExportServlet extends SlingSafeMethodsServlet {
     }
 
     @Override
-    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
+    protected void doGet(SlingJakartaHttpServletRequest request, SlingJakartaHttpServletResponse response)
             throws ServletException, IOException {
         String contentType = request.getResponseContentType();
         response.setContentType(contentType);
@@ -131,15 +131,17 @@ class ExportServlet extends SlingSafeMethodsServlet {
     }
 
     private void addScriptBindings(
-            SlingScriptHelper scriptHelper, SlingHttpServletRequest request, SlingHttpServletResponse response)
+            SlingScriptHelper scriptHelper,
+            SlingJakartaHttpServletRequest request,
+            SlingJakartaHttpServletResponse response)
             throws IOException {
         Bindings bindings = new LazyBindings();
         bindings.put(SLING, scriptHelper);
         bindings.put(RESOURCE, request.getResource());
         bindings.put(
                 SlingModelsScriptEngineFactory.RESOLVER, request.getResource().getResourceResolver());
-        bindings.put(REQUEST, request);
-        bindings.put(RESPONSE, response);
+        bindings.put(JAKARTA_REQUEST, request);
+        bindings.put(JAKARTA_RESPONSE, response);
         try {
             bindings.put(READER, request.getReader());
         } catch (Exception e) {
@@ -156,7 +158,7 @@ class ExportServlet extends SlingSafeMethodsServlet {
         request.setAttribute(SlingBindings.class.getName(), slingBindings);
     }
 
-    private Map<String, String> createOptionMap(SlingHttpServletRequest request) {
+    private Map<String, String> createOptionMap(SlingJakartaHttpServletRequest request) {
         Map<String, String[]> parameterMap = request.getParameterMap();
         String[] selectors = request.getRequestPathInfo().getSelectors();
         Map<String, String> result =
@@ -180,7 +182,7 @@ class ExportServlet extends SlingSafeMethodsServlet {
 
     public interface ExportedObjectAccessor {
         String getExportedString(
-                SlingHttpServletRequest request,
+                SlingJakartaHttpServletRequest request,
                 Map<String, String> options,
                 ModelFactory modelFactory,
                 String exporterName)
@@ -197,7 +199,7 @@ class ExportServlet extends SlingSafeMethodsServlet {
 
         @Override
         public String getExportedString(
-                SlingHttpServletRequest request,
+                SlingJakartaHttpServletRequest request,
                 Map<String, String> options,
                 ModelFactory modelFactory,
                 String exporterName)
@@ -217,7 +219,7 @@ class ExportServlet extends SlingSafeMethodsServlet {
 
         @Override
         public String getExportedString(
-                SlingHttpServletRequest request,
+                SlingJakartaHttpServletRequest request,
                 Map<String, String> options,
                 ModelFactory modelFactory,
                 String exporterName)

@@ -18,11 +18,10 @@
  */
 package org.apache.sling.models.impl.injectors;
 
-import javax.servlet.ServletRequest;
-
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 
+import jakarta.servlet.ServletRequest;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.annotations.injectorspecific.RequestAttribute;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
@@ -51,10 +50,12 @@ public class RequestAttributeInjector implements Injector, StaticInjectAnnotatio
             @NotNull Type declaredType,
             @NotNull AnnotatedElement element,
             @NotNull DisposalCallbackRegistry callbackRegistry) {
-        if (!(adaptable instanceof ServletRequest)) {
-            return null;
+        if (adaptable instanceof ServletRequest jakartaRequest) {
+            return jakartaRequest.getAttribute(name);
+        } else if (adaptable instanceof javax.servlet.ServletRequest javaxRequest) {
+            return javaxRequest.getAttribute(name);
         } else {
-            return ((ServletRequest) adaptable).getAttribute(name);
+            return null;
         }
     }
 

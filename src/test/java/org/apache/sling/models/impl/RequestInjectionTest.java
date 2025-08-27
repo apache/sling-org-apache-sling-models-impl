@@ -20,7 +20,7 @@ package org.apache.sling.models.impl;
 
 import java.util.Arrays;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.models.impl.injectors.BindingsInjector;
@@ -44,7 +44,7 @@ public class RequestInjectionTest {
     private ModelAdapterFactory factory;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     @Mock
     private SlingScriptHelper sling;

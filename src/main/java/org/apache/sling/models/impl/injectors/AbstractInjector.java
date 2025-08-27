@@ -23,7 +23,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.adapter.Adaptable;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -35,12 +35,15 @@ import org.jetbrains.annotations.Nullable;
  */
 abstract class AbstractInjector {
 
+    @SuppressWarnings("deprecation")
     protected ResourceResolver getResourceResolver(Object adaptable) {
         ResourceResolver resolver = null;
-        if (adaptable instanceof Resource) {
-            resolver = ((Resource) adaptable).getResourceResolver();
-        } else if (adaptable instanceof SlingHttpServletRequest) {
-            resolver = ((SlingHttpServletRequest) adaptable).getResourceResolver();
+        if (adaptable instanceof Resource r) {
+            resolver = r.getResourceResolver();
+        } else if (adaptable instanceof SlingJakartaHttpServletRequest jakartaRequest) {
+            resolver = jakartaRequest.getResourceResolver();
+        } else if (adaptable instanceof org.apache.sling.api.SlingHttpServletRequest javaxRequest) {
+            resolver = javaxRequest.getResourceResolver();
         }
         return resolver;
     }
@@ -49,35 +52,40 @@ abstract class AbstractInjector {
      * Retrieve the ValueMap from the given adaptable. This succeeds, if the adaptable is either
      * <ul>
      * <li>a {@link ValueMap},</li>
-     * <li>a {@link SlingHttpServletRequest}, in which case the returned {@link ValueMap} is the one derived from the request's resource or</li>
+     * <li>a {@link SlingJakartaHttpServletRequest} or {@link org.apache.sling.api.SlingHttpServletRequest}, in which case the returned {@link ValueMap} is the one derived from the request's resource or</li>
      * <li>adaptable to a {@link ValueMap}.</li>
      * </ul>
      * Otherwise {@code null} is returned.
      * @param adaptable Adaptable
      * @return a ValueMap or {@code null}.
      */
+    @SuppressWarnings("deprecation")
     protected @Nullable ValueMap getValueMap(Object adaptable) {
-        if (adaptable instanceof ValueMap) {
-            return (ValueMap) adaptable;
-        } else if (adaptable instanceof SlingHttpServletRequest) {
-            final Resource resource = ((SlingHttpServletRequest) adaptable).getResource();
-            // resource may be null for mocked adaptables, therefore do a check here
-            if (resource != null) {
-                return resource.adaptTo(ValueMap.class);
-            } else {
-                return null;
-            }
-        } else if (adaptable instanceof Adaptable) {
-            return ((Adaptable) adaptable).adaptTo(ValueMap.class);
-        } else {
-            return null;
+        ValueMap valueMap = null;
+        if (adaptable instanceof ValueMap vm) {
+            valueMap = vm;
+        } else if (adaptable instanceof SlingJakartaHttpServletRequest jakartaRequest) {
+            valueMap = toValueMap(jakartaRequest.getResource());
+        } else if (adaptable instanceof org.apache.sling.api.SlingHttpServletRequest javaxRequest) {
+            valueMap = toValueMap(javaxRequest.getResource());
+        } else if (adaptable instanceof Adaptable a) {
+            valueMap = a.adaptTo(ValueMap.class);
         }
+        return valueMap;
+    }
+
+    protected @Nullable ValueMap toValueMap(final Resource resource) {
+        ValueMap valueMap = null;
+        // resource may be null for mocked adaptables, therefore do a check here
+        if (resource != null) {
+            valueMap = resource.adaptTo(ValueMap.class);
+        }
+        return valueMap;
     }
 
     protected boolean isDeclaredTypeCollection(Type declaredType) {
         boolean isCollection = false;
-        if (declaredType instanceof ParameterizedType) {
-            ParameterizedType type = (ParameterizedType) declaredType;
+        if (declaredType instanceof ParameterizedType type) {
             Class<?> collectionType = (Class<?>) type.getRawType();
             isCollection = collectionType.equals(Collection.class) || collectionType.equals(List.class);
         }

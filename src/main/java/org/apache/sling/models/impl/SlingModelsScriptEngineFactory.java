@@ -48,8 +48,9 @@ class SlingModelsScriptEngineFactory extends AbstractScriptEngineFactory impleme
     static final String RESOLVER = "resolver";
 
     /** The set of protected keys. */
-    private static final Set<String> PROTECTED_KEYS =
-            new HashSet<String>(Arrays.asList(REQUEST, RESPONSE, READER, SLING, RESOURCE, RESOLVER, OUT, LOG));
+    @SuppressWarnings("deprecation")
+    private static final Set<String> PROTECTED_KEYS = new HashSet<>(Arrays.asList(
+            REQUEST, RESPONSE, JAKARTA_REQUEST, JAKARTA_RESPONSE, READER, SLING, RESOURCE, RESOLVER, OUT, LOG));
 
     SlingModelsScriptEngineFactory(Bundle bundle) {
         super();

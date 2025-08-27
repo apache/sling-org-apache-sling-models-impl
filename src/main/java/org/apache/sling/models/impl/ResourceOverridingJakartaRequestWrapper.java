@@ -20,34 +20,32 @@ package org.apache.sling.models.impl;
 
 import javax.script.Bindings;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
-import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.apache.sling.api.wrappers.SlingJakartaHttpServletRequestWrapper;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
 
+import static org.apache.sling.api.scripting.SlingBindings.JAKARTA_REQUEST;
+import static org.apache.sling.api.scripting.SlingBindings.JAKARTA_RESPONSE;
 import static org.apache.sling.api.scripting.SlingBindings.LOG;
 import static org.apache.sling.api.scripting.SlingBindings.OUT;
 import static org.apache.sling.api.scripting.SlingBindings.READER;
-import static org.apache.sling.api.scripting.SlingBindings.REQUEST;
 import static org.apache.sling.api.scripting.SlingBindings.RESOURCE;
-import static org.apache.sling.api.scripting.SlingBindings.RESPONSE;
 import static org.apache.sling.api.scripting.SlingBindings.SLING;
 
 /**
  * This request wrapper allows to adapt the given resource and request to a Sling Model
- * @deprecated use {@link ResourceOverridingJakartaRequestWrapper} instead
  */
-@Deprecated(since = "2.0.0")
-class ResourceOverridingRequestWrapper extends SlingHttpServletRequestWrapper {
+class ResourceOverridingJakartaRequestWrapper extends SlingJakartaHttpServletRequestWrapper {
 
     private final Resource resource;
     private final AdapterManager adapterManager;
     private final Bindings bindings;
 
-    ResourceOverridingRequestWrapper(
-            SlingHttpServletRequest wrappedRequest,
+    ResourceOverridingJakartaRequestWrapper(
+            SlingJakartaHttpServletRequest wrappedRequest,
             Resource resource,
             AdapterManager adapterManager,
             SlingModelsScriptEngineFactory scriptEngineFactory,
@@ -61,12 +59,12 @@ class ResourceOverridingRequestWrapper extends SlingHttpServletRequestWrapper {
         bindings = new SlingBindings();
         if (existingBindings != null) {
             bindings.put(SLING, existingBindings.getSling());
-            bindings.put(RESPONSE, existingBindings.getResponse());
+            bindings.put(JAKARTA_RESPONSE, existingBindings.getJakartaResponse());
             bindings.put(READER, existingBindings.getReader());
             bindings.put(OUT, existingBindings.getOut());
             bindings.put(LOG, existingBindings.getLog());
         }
-        bindings.put(REQUEST, this);
+        bindings.put(JAKARTA_REQUEST, this);
         bindings.put(RESOURCE, resource);
         bindings.put(SlingModelsScriptEngineFactory.RESOLVER, resource.getResourceResolver());
 

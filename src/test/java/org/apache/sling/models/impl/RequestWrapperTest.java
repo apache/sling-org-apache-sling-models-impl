@@ -23,7 +23,7 @@ import javax.script.ScriptEngineFactory;
 
 import java.util.Collections;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
@@ -61,7 +61,7 @@ public class RequestWrapperTest {
     private Resource resource;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     @InjectMocks
     private ModelAdapterFactory factory;
@@ -79,7 +79,7 @@ public class RequestWrapperTest {
     @Test
     public void testWrapper() {
         Target expected = new Target();
-        when(adapterManager.getAdapter(any(SlingHttpServletRequest.class), eq(Target.class)))
+        when(adapterManager.getAdapter(any(SlingJakartaHttpServletRequest.class), eq(Target.class)))
                 .thenReturn(expected);
 
         Target actual = factory.getModelFromWrappedRequest(request, resource, Target.class);
@@ -98,10 +98,10 @@ public class RequestWrapperTest {
         };
     }
 
-    private ArgumentMatcher<SlingHttpServletRequest> requestHasResource(final Resource resource) {
-        return new ArgumentMatcher<SlingHttpServletRequest>() {
+    private ArgumentMatcher<SlingJakartaHttpServletRequest> requestHasResource(final Resource resource) {
+        return new ArgumentMatcher<SlingJakartaHttpServletRequest>() {
             @Override
-            public boolean matches(SlingHttpServletRequest slingHttpServletRequest) {
+            public boolean matches(SlingJakartaHttpServletRequest slingHttpServletRequest) {
                 return slingHttpServletRequest.getResource().equals(resource);
             }
         };

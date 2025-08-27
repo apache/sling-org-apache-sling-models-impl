@@ -18,7 +18,7 @@
  */
 package org.apache.sling.models.impl.via;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.spi.ViaProvider;
 import org.jetbrains.annotations.NotNull;
@@ -30,31 +30,35 @@ public abstract class AbstractResourceTypeViaProvider implements ViaProvider {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
+    @SuppressWarnings("deprecation")
     @Override
     public Object getAdaptable(Object original, String value) {
         if (!handle(value)) {
             return ORIGINAL;
         }
-        if (original instanceof Resource) {
-            final Resource resource = (Resource) original;
+        if (original instanceof Resource resource) {
             final String resourceType = getResourceType(resource, value);
             if (resourceType == null) {
                 log.warn("Could not determine forced resource type for {} using via value {}.", resource, value);
                 return null;
             }
             return new ResourceTypeForcingResourceWrapper(resource, resourceType);
-        } else if (original instanceof SlingHttpServletRequest) {
-            final SlingHttpServletRequest request = (SlingHttpServletRequest) original;
-            final Resource resource = request.getResource();
-            if (resource == null) {
-                return null;
-            }
+        } else if (original instanceof SlingJakartaHttpServletRequest jakartaRequest) {
+            final @NotNull Resource resource = jakartaRequest.getResource();
             final String resourceType = getResourceType(resource, value);
             if (resourceType == null) {
                 log.warn("Could not determine forced resource type for {} using via value {}.", resource, value);
                 return null;
             }
-            return new ResourceTypeForcingRequestWrapper(request, resource, resourceType);
+            return new ResourceTypeForcingJakartaRequestWrapper(jakartaRequest, resource, resourceType);
+        } else if (original instanceof org.apache.sling.api.SlingHttpServletRequest javaxRequest) {
+            final @NotNull Resource resource = javaxRequest.getResource();
+            final String resourceType = getResourceType(resource, value);
+            if (resourceType == null) {
+                log.warn("Could not determine forced resource type for {} using via value {}.", resource, value);
+                return null;
+            }
+            return new ResourceTypeForcingRequestWrapper(javaxRequest, resource, resourceType);
         } else {
             log.warn(
                     "Received unexpected adaptable of type {}.",

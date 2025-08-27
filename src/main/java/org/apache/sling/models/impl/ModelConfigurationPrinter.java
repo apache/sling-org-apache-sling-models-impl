@@ -18,13 +18,12 @@
  */
 package org.apache.sling.models.impl;
 
-import javax.servlet.Servlet;
-
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.Servlet;
 import org.apache.sling.models.annotations.ViaProviderType;
 import org.apache.sling.models.spi.ImplementationPicker;
 import org.apache.sling.models.spi.Injector;

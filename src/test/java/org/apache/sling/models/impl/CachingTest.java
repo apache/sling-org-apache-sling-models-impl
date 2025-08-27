@@ -24,7 +24,7 @@ import java.util.Enumeration;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.apache.sling.api.wrappers.SlingJakartaHttpServletRequestWrapper;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
@@ -35,7 +35,7 @@ import org.apache.sling.models.testmodels.classes.UncachedModel;
 import org.apache.sling.models.testmodels.interfaces.AdapterType1;
 import org.apache.sling.models.testmodels.interfaces.AdapterType2;
 import org.apache.sling.models.testmodels.interfaces.AdapterType3;
-import org.apache.sling.servlethelpers.MockSlingHttpServletRequest;
+import org.apache.sling.servlethelpers.MockSlingJakartaHttpServletRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,9 +54,9 @@ import static org.mockito.Mockito.when;
 public class CachingTest {
 
     @Spy
-    private MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(null);
+    private MockSlingJakartaHttpServletRequest request = new MockSlingJakartaHttpServletRequest(null);
 
-    private SlingHttpServletRequestWrapper requestWrapper;
+    private SlingJakartaHttpServletRequestWrapper requestWrapper;
 
     @Mock
     private Resource resource;
@@ -84,7 +84,7 @@ public class CachingTest {
                 AdapterType3.class);
 
         when(request.getAttribute("testValue")).thenReturn("test");
-        requestWrapper = new SlingHttpServletRequestWrapper(request);
+        requestWrapper = new SlingJakartaHttpServletRequestWrapper(request);
 
         ValueMap vm = new ValueMapDecorator(Collections.singletonMap("testValue", "test"));
         when(resource.adaptTo(ValueMap.class)).thenReturn(vm);

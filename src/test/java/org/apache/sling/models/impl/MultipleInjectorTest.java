@@ -22,7 +22,7 @@ import javax.inject.Inject;
 
 import java.util.Arrays;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Source;
@@ -52,7 +52,7 @@ public class MultipleInjectorTest {
     private RequestAttributeInjector attributesInjector;
 
     @Mock
-    private SlingHttpServletRequest request;
+    private SlingJakartaHttpServletRequest request;
 
     private ModelAdapterFactory factory;
 
@@ -111,14 +111,14 @@ public class MultipleInjectorTest {
         factory.createModel(request, ForTwoInjectorsWithInvalidSource.class);
     }
 
-    @Model(adaptables = SlingHttpServletRequest.class)
+    @Model(adaptables = SlingJakartaHttpServletRequest.class)
     public static class ForTwoInjectors {
 
         @Inject
         private String firstAttribute;
     }
 
-    @Model(adaptables = SlingHttpServletRequest.class)
+    @Model(adaptables = SlingJakartaHttpServletRequest.class)
     public static class ForTwoInjectorsWithSource {
 
         @Inject
@@ -126,7 +126,7 @@ public class MultipleInjectorTest {
         private String firstAttribute;
     }
 
-    @Model(adaptables = SlingHttpServletRequest.class)
+    @Model(adaptables = SlingJakartaHttpServletRequest.class)
     public static class ForTwoInjectorsWithInvalidSource {
 
         @Inject

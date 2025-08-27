@@ -18,18 +18,18 @@
  */
 package org.apache.sling.models.testmodels.classes;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 
-@Model(adaptables = SlingHttpServletRequest.class, cache = true)
+@Model(adaptables = SlingJakartaHttpServletRequest.class, cache = true)
 public class CachedModelWithSelfReference {
     // This can be tuned to make it run faster or slower.
     // The larger this is, the fewer number of instances needed to test.
     public static int numberOfLongs = 4000;
 
     @Self
-    SlingHttpServletRequest request;
+    SlingJakartaHttpServletRequest request;
 
     // Add a big array of longs to the class, to make it take fewer iterations to fill the heap
     public long[] longs = new long[numberOfLongs];

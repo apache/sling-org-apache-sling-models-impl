@@ -20,7 +20,8 @@ package org.apache.sling.models.impl.injectors;
 
 import java.lang.reflect.AnnotatedElement;
 
-import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.SlingJakartaHttpServletRequest;
+import org.apache.sling.api.SlingJakartaHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.scripting.SlingScriptHelper;
@@ -61,17 +62,47 @@ public class SlingObjectInjectorResourceResolverTest {
         assertNull(result);
     }
 
+    /**
+     * @deprecated use {@link #testJakartaRequest()} instead
+     */
+    @Deprecated(since = "2.0.0")
     @Test
-    public void testRequest() {
+    public void testJavaxRequest() {
         Object result = this.injector.getValue(
-                this.resourceResolver, null, SlingHttpServletResponse.class, this.annotatedElement, registry);
+                this.resourceResolver,
+                null,
+                org.apache.sling.api.SlingHttpServletRequest.class,
+                this.annotatedElement,
+                registry);
+        assertNull(result);
+    }
+
+    /**
+     * @deprecated use {@link #testJakartaResponse()} instead
+     */
+    @Deprecated(since = "2.0.0")
+    @Test
+    public void testJavaxResponse() {
+        Object result = this.injector.getValue(
+                this.resourceResolver,
+                null,
+                org.apache.sling.api.SlingHttpServletResponse.class,
+                this.annotatedElement,
+                registry);
         assertNull(result);
     }
 
     @Test
-    public void testResponse() {
+    public void testJakartaRequest() {
         Object result = this.injector.getValue(
-                this.resourceResolver, null, SlingHttpServletResponse.class, this.annotatedElement, registry);
+                this.resourceResolver, null, SlingJakartaHttpServletRequest.class, this.annotatedElement, registry);
+        assertNull(result);
+    }
+
+    @Test
+    public void testJakartaResponse() {
+        Object result = this.injector.getValue(
+                this.resourceResolver, null, SlingJakartaHttpServletResponse.class, this.annotatedElement, registry);
         assertNull(result);
     }
 
