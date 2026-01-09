@@ -33,7 +33,7 @@
 
     <properties>
         <sling.starter.version>14-SNAPSHOT</sling.starter.version>
-        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
 
         <starter.min.bundles.count>200</starter.min.bundles.count>
         <it.startTimeoutSeconds>60</it.startTimeoutSeconds>
