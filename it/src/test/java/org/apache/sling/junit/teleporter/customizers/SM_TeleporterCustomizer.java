@@ -18,6 +18,7 @@
  */
 package org.apache.sling.junit.teleporter.customizers;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.TimeoutException;
 
@@ -48,13 +49,12 @@ public class SM_TeleporterCustomizer implements TeleporterRule.Customizer {
         cst.includeDependencyPrefix("org.apache.sling.models.testing");
 
         // additionally check for the registration of mandatory sling models components
-        try {
-            OsgiConsoleClient osgiClient = new OsgiConsoleClient(
-                    URI.create(S.getServerBaseUrl()), S.getServerUsername(), S.getServerPassword());
+        try (OsgiConsoleClient osgiClient =
+                new OsgiConsoleClient(URI.create(S.getServerBaseUrl()), S.getServerUsername(), S.getServerPassword())) {
             for (Class clazz : EXPECTED_COMPONENTS) {
                 osgiClient.waitComponentRegistered(clazz.getName(), 20000, 200);
             }
-        } catch (ClientException | TimeoutException | InterruptedException ex) {
+        } catch (ClientException | TimeoutException | InterruptedException | IOException ex) {
             throw new RuntimeException("Error waiting for expected components.", ex);
         }
     }

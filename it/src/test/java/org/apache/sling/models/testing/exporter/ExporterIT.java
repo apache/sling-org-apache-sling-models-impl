@@ -18,9 +18,6 @@
  */
 package org.apache.sling.models.testing.exporter;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -31,6 +28,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.sling.api.SlingConstants;

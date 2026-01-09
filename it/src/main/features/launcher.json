@@ -1,0 +1,24 @@
+{
+    "bundles": [
+        {
+            "id": "org.apache.sling/org.apache.sling.models.api/${models.api.version}",
+            "start-order": 20
+        },
+        {
+            "id": "org.apache.sling/org.apache.sling.models.impl/${project.version}",
+            "start-order": 20
+        },
+        {
+            "id": "org.apache.sling/org.apache.sling.models.impl.it/${project.version}",
+            "start-order": 20
+        }
+    ],
+    "configurations": {
+        "org.apache.sling.serviceusermapping.impl.ServiceUserMapperImpl.amended~junit": {
+            "user.mapping": [
+                "org.apache.sling.junit.core=models-it"
+            ]
+        }
+    },
+    "repoinit:TEXT|true": "@file"
+}
