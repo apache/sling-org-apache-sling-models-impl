@@ -38,6 +38,7 @@
         <sling.starter.version>14-SNAPSHOT</sling.starter.version>
         <starter.min.bundles.count>200</starter.min.bundles.count>
         <it.startTimeoutSeconds>60</it.startTimeoutSeconds>
+        <models.log.level>info</models.log.level>
     </properties>
 
     <dependencies>
@@ -251,7 +252,7 @@
                 <extensions>true</extensions>
 
                 <configuration>
-                    <replacePropertyVariables>models.api.version</replacePropertyVariables>
+                    <replacePropertyVariables>models.api.version,models.log.level</replacePropertyVariables>
                     <skipAddFeatureDependencies>true</skipAddFeatureDependencies>
                     <aggregates>
                         <aggregate>
@@ -369,4 +370,22 @@
 
         </plugins>
     </build>
+
+    <profiles>
+        <!--
+          Debugging profile:
+          - Run on port 8080 (not random port)
+          - Waits for user input after tests are completed to allow inspection before shutting down the Sling instance
+          - Sets log level for Sling Models to DEBUG
+         -->
+        <profile>
+            <id>debug</id>
+            <properties>
+                <http.port>8080</http.port>
+                <feature-launcher.waitForInput>true</feature-launcher.waitForInput>
+                <models.log.level>debug</models.log.level>
+            </properties>
+        </profile>
+    </profiles>
+
 </project>

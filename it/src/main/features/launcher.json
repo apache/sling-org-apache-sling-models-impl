@@ -14,10 +14,16 @@
         }
     ],
     "configurations": {
-        "org.apache.sling.serviceusermapping.impl.ServiceUserMapperImpl.amended~junit": {
+        "org.apache.sling.serviceusermapping.impl.ServiceUserMapperImpl.amended~integration-tests": {
             "user.mapping": [
                 "org.apache.sling.junit.core=models-it"
             ]
+        },
+        "org.apache.sling.commons.log.LogManager.factory.config~integration-tests": {
+            "org.apache.sling.commons.log.names": [
+                "org.apache.sling.models"
+            ],
+            "org.apache.sling.commons.log.level": "${models.log.level}"
         }
     },
     "repoinit:TEXT|true": "@file"
