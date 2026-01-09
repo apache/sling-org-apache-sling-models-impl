@@ -35,6 +35,7 @@
     <modules>
         <module>parent</module>
         <module>impl</module>
-        <module>it</module>
+        <module>it/test-models</module>
+        <module>it/integration-tests</module>
     </modules>
 </project>

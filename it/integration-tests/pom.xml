@@ -24,15 +24,12 @@
         <groupId>org.apache.sling</groupId>
         <artifactId>org.apache.sling.models.impl.parent</artifactId>
         <version>2.0.1-SNAPSHOT</version>
-        <relativePath>../parent/pom.xml</relativePath>
+        <relativePath>../../parent/pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.sling.models.impl.it</artifactId>
+    <artifactId>org.apache.sling.models.impl.it.integration-tests</artifactId>
 
-    <name>Apache Sling Models Implementation - Integration Tests</name>
-    <description>Apache Sling Models Integration Tests - builds a bundle
-        with Sling server-side tests, and executes them via a
-        remote test proxy that runs in the integration-tests phase.</description>
+    <name>Apache Sling Models Implementation - IT - Integration Tests</name>
 
     <properties>
         <sling.starter.version>14-SNAPSHOT</sling.starter.version>
@@ -42,39 +39,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.framework</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.service.component</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- OSGi annotations -->
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.annotation.versioning</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.service.component.annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.service.metatype.annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.servlets.annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- Additional bundles needed by the Sling instance under test -->
         <dependency>
             <groupId>org.apache.sling</groupId>
@@ -129,6 +93,12 @@
             <version>2.0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.models.impl.it.test-models</artifactId>
+            <version>2.0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- actual dependencies -->
         <dependency>
@@ -139,11 +109,6 @@
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.jcr</groupId>
-            <artifactId>jcr</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -159,12 +124,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-atinject_1.0_spec</artifactId>
-            <version>1.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
@@ -174,6 +133,7 @@
             <artifactId>annotations</artifactId>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
@@ -183,13 +143,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-        </dependency>
-        <!-- This dependency is not actually used within Sling. It's used for ModelWithOptionalImport test case to test a model with a class that is not resolved. -->
-        <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>1.9.4</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -213,16 +166,6 @@
                 <artifactId>bnd-baseline-maven-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.rat</groupId>
-                <artifactId>apache-rat-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>src/main/resources/org/apache/sling/models/it/noclasses/foo.txt</exclude>
-                    </excludes>
                 </configuration>
             </plugin>
 
@@ -317,7 +260,7 @@
                             <id>sling-starter-oak-tar</id>
                             <feature>
                                 <groupId>org.apache.sling</groupId>
-                                <artifactId>org.apache.sling.models.impl.it</artifactId>
+                                <artifactId>org.apache.sling.models.impl.it.integration-tests</artifactId>
                                 <version>${project.version}</version>
                                 <classifier>app</classifier>
                                 <type>slingosgifeature</type>
