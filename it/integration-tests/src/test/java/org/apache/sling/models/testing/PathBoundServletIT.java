@@ -53,4 +53,14 @@ public class PathBoundServletIT {
             Assert.assertEquals(200, response.getStatus());
         }
     }
+
+    @Test
+    public void testDoubledServletsJakarta() throws Exception {
+        try (ResourceResolver resolver = rrFactory.getServiceResourceResolver(null); ) {
+            FakeResponse response = new FakeResponse();
+            slingRequestProcessor.processRequest(new FakeRequest("/apps/rtpickerrequest-jakarta"), response, resolver);
+
+            Assert.assertEquals(200, response.getStatus());
+        }
+    }
 }
