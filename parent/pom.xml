@@ -22,18 +22,34 @@
 
     <parent>
         <groupId>org.apache.sling</groupId>
-        <artifactId>org.apache.sling.models.impl.parent</artifactId>
-        <version>2.0.1-SNAPSHOT</version>
-        <relativePath>parent/pom.xml</relativePath>
+        <artifactId>sling-bundle-parent</artifactId>
+        <version>62</version>
+        <relativePath />
     </parent>
 
-    <artifactId>org.apache.sling.models.impl.reactor</artifactId>
+    <artifactId>org.apache.sling.models.impl.parent</artifactId>
     <version>2.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Apache Sling Models Implementation - Reactor</name>
+    <name>Apache Sling Models Implementation - Parent</name>
 
-    <modules>
-        <module>parent</module>
-        <module>impl</module>
-    </modules>
+    <scm>
+        <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-models-impl.git</connection>
+        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-models-impl.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/apache/sling-org-apache-sling-models-impl.git</url>
+    </scm>
+
+    <properties>
+        <project.build.outputTimestamp>2025-08-27T03:14:05Z</project.build.outputTimestamp>
+        <sling.java.version>17</sling.java.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.models.api</artifactId>
+            <version>2.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>
