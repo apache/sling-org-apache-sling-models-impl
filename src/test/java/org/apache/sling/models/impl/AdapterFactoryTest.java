@@ -336,5 +336,6 @@ public class AdapterFactoryTest {
                 model.longs[j] = j;
             }
         }
+        Assert.assertTrue(maxInstances > 0);
     }
 }
