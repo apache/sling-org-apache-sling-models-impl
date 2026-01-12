@@ -305,6 +305,17 @@
                             </fileSets>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>report-aggregate-merged</id>
+                        <goals>
+                            <goal>report-aggregate</goal>
+                        </goals>
+                        <phase>verify</phase>
+                        <configuration>
+                            <dataFile>${project.build.directory}/jacoco-merged.exec</dataFile>
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-merged</outputDirectory>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 
