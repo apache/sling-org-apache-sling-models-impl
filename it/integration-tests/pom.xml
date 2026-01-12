@@ -184,6 +184,7 @@
                         <configuration>
                             <portNames>
                                 <portName>http.port</portName>
+                                <portName>jacoco.port</portName>
                             </portNames>
                         </configuration>
                     </execution>
@@ -252,6 +253,10 @@
                 </executions>
             </plugin>
 
+            <!--
+               Record integration test code coverage via jacoco, using TCP server
+               We cannot rely on the default file-based approach as the sling JVM is stopped forcefully, preventing proper file write on shutdown.
+            -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -262,10 +267,42 @@
                             <goal>prepare-agent-integration</goal>
                         </goals>
                         <configuration>
-                            <append>true</append>
-                            <destFile>${project.build.directory}/jacoco-launcher.exec</destFile>
                             <propertyName>jacoco.launcher.command</propertyName>
-                            <dumpOnExit>true</dumpOnExit>
+                            <output>tcpserver</output>
+                            <address>localhost</address>
+                            <port>${jacoco.port}</port>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>dump-coverage-launcher</id>
+                        <goals>
+                            <goal>dump</goal>
+                        </goals>
+                        <phase>post-integration-test</phase>
+                        <configuration>
+                            <address>localhost</address>
+                            <port>${jacoco.port}</port>
+                            <destFile>${project.build.directory}/jacoco-launcher.exec</destFile>
+                            <append>true</append>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>merge-it-and-launcher</id>
+                        <goals>
+                            <goal>merge</goal>
+                        </goals>
+                        <phase>post-integration-test</phase>
+                        <configuration>
+                            <destFile>${project.build.directory}/jacoco-merged.exec</destFile>
+                            <fileSets>
+                                <fileSet>
+                                    <directory>${project.build.directory}</directory>
+                                    <includes>
+                                        <include>jacoco-it.exec</include>
+                                        <include>jacoco-launcher.exec</include>
+                                    </includes>
+                                </fileSet>
+                            </fileSets>
                         </configuration>
                     </execution>
                 </executions>
