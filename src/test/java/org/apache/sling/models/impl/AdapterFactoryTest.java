@@ -93,7 +93,7 @@ public class AdapterFactoryTest {
     }
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         factory = createModelAdapterFactory();
         factory.injectors = Arrays.asList(new ValueMapInjector(), new SelfInjector());
         factory.modelExporters = Arrays.<ModelExporter>asList(
@@ -109,37 +109,37 @@ public class AdapterFactoryTest {
     }
 
     @Test
-    public void testIsModelClass() {
+    void testIsModelClass() {
         Assertions.assertTrue(factory.isModelClass(DefaultStringModel.class));
         Assertions.assertFalse(factory.isModelClass(InvalidModelWithMissingAnnotation.class));
     }
 
     @Test
-    public void testCanCreateFromAdaptable() {
+    void testCanCreateFromAdaptable() {
         Assertions.assertTrue(factory.canCreateFromAdaptable(resource, DefaultStringModel.class));
         Assertions.assertFalse(factory.canCreateFromAdaptable(request, DefaultStringModel.class));
     }
 
     @Test
-    public void testCanCreateFromAdaptableWithInvalidModel() {
+    void testCanCreateFromAdaptableWithInvalidModel() {
         Assertions.assertFalse(factory.canCreateFromAdaptable(resource, InvalidModelWithMissingAnnotation.class));
     }
 
     @Test
-    public void testCreateFromNonModelClass() {
+    void testCreateFromNonModelClass() {
         Assertions.assertThrows(
                 ModelClassException.class,
                 () -> factory.createModel(resource, InvalidModelWithMissingAnnotation.class));
     }
 
     @Test
-    public void testCreateFromInvalidAdaptable() {
+    void testCreateFromInvalidAdaptable() {
         Assertions.assertThrows(
                 InvalidAdaptableException.class, () -> factory.createModel(request, DefaultStringModel.class));
     }
 
     @Test
-    public void testCreateWithConstructorException() {
+    void testCreateWithConstructorException() {
         // Internally all exceptions are wrapped within RuntimeExceptions
         Assertions.assertThrows(
                 RuntimeException.class, () -> factory.createModel(resource, ConstructorWithExceptionModel.class));
@@ -152,7 +152,7 @@ public class AdapterFactoryTest {
     }
 
     @Test
-    public void testCreatedNestedModelWithInvalidAdaptable() {
+    void testCreatedNestedModelWithInvalidAdaptable() {
         // nested model can only be adapted from another adaptable
         Assertions.assertThrows(
                 MissingElementsException.class,
@@ -166,7 +166,7 @@ public class AdapterFactoryTest {
     }
 
     @Test
-    public void testCreatedNestedModelWithInvalidAdaptable2() {
+    void testCreatedNestedModelWithInvalidAdaptable2() {
         // nested model is in fact no valid model
         Assertions.assertThrows(
                 MissingElementsException.class,
@@ -184,7 +184,7 @@ public class AdapterFactoryTest {
     }
 
     @Test
-    public void testCreatedNestedModel() {
+    void testCreatedNestedModel() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("required", "required");
         ValueMap vm = new ValueMapDecorator(map);
@@ -196,7 +196,7 @@ public class AdapterFactoryTest {
     }
 
     @Test
-    public void testCreatedNestedModelWithMissingElements() {
+    void testCreatedNestedModelWithMissingElements() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("invalid", "required");
         ValueMap vm = new ValueMapDecorator(map);
@@ -207,7 +207,7 @@ public class AdapterFactoryTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testSelectExporterByName() throws Exception {
+    void testSelectExporterByName() throws Exception {
         Result<Object> result = mock(Result.class);
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
@@ -219,7 +219,7 @@ public class AdapterFactoryTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testSelectExporterByType() throws Exception {
+    void testSelectExporterByType() throws Exception {
         Result<Object> result = mock(Result.class);
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
@@ -231,7 +231,7 @@ public class AdapterFactoryTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testSelectExporterByNameAndWrongType() throws Exception {
+    void testSelectExporterByNameAndWrongType() throws Exception {
         Result<Object> result = mock(Result.class);
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
@@ -318,7 +318,7 @@ public class AdapterFactoryTest {
     }
 
     @Test
-    public void testCreateCachedModelWillNotCrashTheVMWithOOM() {
+    void testCreateCachedModelWillNotCrashTheVMWithOOM() {
         /*
          * LOAD_FACTOR is used to ensure the test will try create instances of the model to fill up
          * HEAP_SIZE * LOAD_FACTOR memory. This should be a number > 1.0, to ensure that memory would be
