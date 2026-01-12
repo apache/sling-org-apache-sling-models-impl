@@ -110,8 +110,8 @@ public class AdapterFactoryTest {
 
     @Test
     public void testIsModelClass() {
-        Assertions.assertTrue(factory.isModelClass(resource, DefaultStringModel.class));
-        Assertions.assertFalse(factory.isModelClass(resource, InvalidModelWithMissingAnnotation.class));
+        Assertions.assertTrue(factory.isModelClass(DefaultStringModel.class));
+        Assertions.assertFalse(factory.isModelClass(InvalidModelWithMissingAnnotation.class));
     }
 
     @Test
