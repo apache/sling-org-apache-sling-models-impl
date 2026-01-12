@@ -56,6 +56,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.util.converter.Converter;
 import org.osgi.util.converter.Converters;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -307,7 +308,7 @@ public class AdapterFactoryTest {
     }
 
     @Test
-    public void testCreateCachedModelWillNotCrashTheVMWithOOM() throws Exception {
+    public void testCreateCachedModelWillNotCrashTheVMWithOOM() {
         /*
          * LOAD_FACTOR is used to ensure the test will try create instances of the model to fill up
          * HEAP_SIZE * LOAD_FACTOR memory. This should be a number > 1.0, to ensure that memory would be
@@ -329,13 +330,16 @@ public class AdapterFactoryTest {
         long maxHeapSize = Runtime.getRuntime().maxMemory();
         long maxInstances = (long) ((maxHeapSize / instanceSize) * LOAD_FACTOR);
 
-        for (long i = 0; i < maxInstances; i++) {
-            CachedModelWithSelfReference model =
-                    factory.createModel(mock(SlingJakartaHttpServletRequest.class), CachedModelWithSelfReference.class);
-            for (int j = 0; j < model.longs.length; j++) {
-                model.longs[j] = j;
+        assertDoesNotThrow(() -> {
+            for (long i = 0; i < maxInstances; i++) {
+                CachedModelWithSelfReference model = factory.createModel(
+                        mock(SlingJakartaHttpServletRequest.class), CachedModelWithSelfReference.class);
+                for (int j = 0; j < model.longs.length; j++) {
+                    model.longs[j] = j;
+                }
             }
-        }
+        });
+        // Guard against silent failure: ensure heap is sufficient to run the test loop at least once
         Assert.assertTrue(maxInstances > 0);
     }
 }
