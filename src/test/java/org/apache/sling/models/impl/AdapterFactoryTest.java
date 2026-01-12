@@ -56,7 +56,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.util.converter.Converter;
 import org.osgi.util.converter.Converters;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -212,7 +211,7 @@ public class AdapterFactoryTest {
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
 
-        String exported = assertDoesNotThrow(() ->
+        String exported = Assertions.assertDoesNotThrow(() ->
                 factory.handleAndExportResult(result, "second", String.class, Collections.<String, String>emptyMap()));
         Assertions.assertEquals("Export from second", exported);
     }
@@ -224,7 +223,7 @@ public class AdapterFactoryTest {
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
 
-        Integer exported = assertDoesNotThrow(() ->
+        Integer exported = Assertions.assertDoesNotThrow(() ->
                 factory.handleAndExportResult(result, "first", Integer.class, Collections.<String, String>emptyMap()));
         Assertions.assertEquals(Integer.valueOf(42), exported);
     }
@@ -340,7 +339,7 @@ public class AdapterFactoryTest {
         long maxHeapSize = Runtime.getRuntime().maxMemory();
         long maxInstances = (long) ((maxHeapSize / instanceSize) * LOAD_FACTOR);
 
-        assertDoesNotThrow(() -> {
+        Assertions.assertDoesNotThrow(() -> {
             for (long i = 0; i < maxInstances; i++) {
                 CachedModelWithSelfReference model = factory.createModel(
                         mock(SlingJakartaHttpServletRequest.class), CachedModelWithSelfReference.class);
