@@ -33,7 +33,6 @@
 
     <properties>
         <sling.starter.version>14-SNAPSHOT</sling.starter.version>
-        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
 
         <starter.min.bundles.count>200</starter.min.bundles.count>
         <it.startTimeoutSeconds>60</it.startTimeoutSeconds>
@@ -147,15 +146,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- ensure that the jacoco java agent is available, which is required to instrument the launchpad for code coverage -->
-        <dependency>
-            <groupId>org.jacoco</groupId>
-            <artifactId>org.jacoco.agent</artifactId>
-            <version>${jacoco-maven-plugin.version}</version>
-            <classifier>runtime</classifier>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -263,6 +253,25 @@
             </plugin>
 
             <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prepare-agent-integration-launcher</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                        <configuration>
+                            <append>true</append>
+                            <destFile>${project.build.directory}/jacoco-launcher.exec</destFile>
+                            <propertyName>jacoco.launcher.command</propertyName>
+                            <dumpOnExit>true</dumpOnExit>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>feature-launcher-maven-plugin</artifactId>
                 <version>1.0.1-SNAPSHOT</version>
@@ -280,9 +289,7 @@
                             <launcherArguments>
                                 <vmOptions>
                                     <value>--add-opens java.base/java.lang=ALL-UNNAMED</value>
-                                    <!-- To enable the JaCoCo java-agent, we cannot use its maven plugin, since the launchpad java process is started from within the feature-launcher-maven-plugin.
-                                    We have to manually construct the javaagent parameter here, and enable output of coverage data to a separate .exec file -->
-                                    <value>-javaagent:${settings.localRepository}/org/jacoco/org.jacoco.agent/${jacoco-maven-plugin.version}/org.jacoco.agent-${jacoco-maven-plugin.version}-runtime.jar=destfile=${project.build.directory}/jacoco-it.exec</value>
+                                    <value>${jacoco.launcher.command}</value>
                                 </vmOptions>
                                 <frameworkProperties>
                                     <org.osgi.service.http.port>${http.port}</org.osgi.service.http.port>
