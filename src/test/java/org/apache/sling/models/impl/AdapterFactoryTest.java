@@ -207,31 +207,31 @@ public class AdapterFactoryTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void testSelectExporterByName() throws Exception {
+    void testSelectExporterByName() {
         Result<Object> result = mock(Result.class);
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
 
-        String exported =
-                factory.handleAndExportResult(result, "second", String.class, Collections.<String, String>emptyMap());
+        String exported = assertDoesNotThrow(() ->
+                factory.handleAndExportResult(result, "second", String.class, Collections.<String, String>emptyMap()));
         Assertions.assertEquals("Export from second", exported);
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    void testSelectExporterByType() throws Exception {
+    void testSelectExporterByType() {
         Result<Object> result = mock(Result.class);
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
 
-        Integer exported =
-                factory.handleAndExportResult(result, "first", Integer.class, Collections.<String, String>emptyMap());
+        Integer exported = assertDoesNotThrow(() ->
+                factory.handleAndExportResult(result, "first", Integer.class, Collections.<String, String>emptyMap()));
         Assertions.assertEquals(Integer.valueOf(42), exported);
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    void testSelectExporterByNameAndWrongType() throws Exception {
+    void testSelectExporterByNameAndWrongType() {
         Result<Object> result = mock(Result.class);
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
