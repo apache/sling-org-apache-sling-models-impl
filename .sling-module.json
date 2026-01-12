@@ -1,5 +1,6 @@
 {
   "jenkins": {
-    "jdks": [17, 21]
+    "jdks": [17, 21],
+    "mavenGoal": "install"
   }
 }
