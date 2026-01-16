@@ -44,13 +44,13 @@ import org.apache.sling.models.testmodels.classes.InvalidModelWithMissingAnnotat
 import org.apache.sling.models.testmodels.classes.ResourceModelWithRequiredField;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.converter.Converter;
@@ -59,7 +59,7 @@ import org.osgi.util.converter.Converters;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AdapterFactoryTest {
 
     @Mock
@@ -91,8 +91,8 @@ public class AdapterFactoryTest {
         return factory;
     }
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = createModelAdapterFactory();
         factory.injectors = Arrays.asList(new ValueMapInjector(), new SelfInjector());
         factory.modelExporters = Arrays.<ModelExporter>asList(
@@ -108,37 +108,40 @@ public class AdapterFactoryTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testIsModelClass() {
-        Assert.assertTrue(factory.isModelClass(resource, DefaultStringModel.class));
-        Assert.assertFalse(factory.isModelClass(resource, InvalidModelWithMissingAnnotation.class));
+    void testIsModelClass() {
+        Assertions.assertTrue(factory.isModelClass(DefaultStringModel.class));
+        Assertions.assertFalse(factory.isModelClass(InvalidModelWithMissingAnnotation.class));
     }
 
     @Test
-    public void testCanCreateFromAdaptable() {
-        Assert.assertTrue(factory.canCreateFromAdaptable(resource, DefaultStringModel.class));
-        Assert.assertFalse(factory.canCreateFromAdaptable(request, DefaultStringModel.class));
+    void testCanCreateFromAdaptable() {
+        Assertions.assertTrue(factory.canCreateFromAdaptable(resource, DefaultStringModel.class));
+        Assertions.assertFalse(factory.canCreateFromAdaptable(request, DefaultStringModel.class));
     }
 
     @Test
-    public void testCanCreateFromAdaptableWithInvalidModel() {
-        Assert.assertFalse(factory.canCreateFromAdaptable(resource, InvalidModelWithMissingAnnotation.class));
+    void testCanCreateFromAdaptableWithInvalidModel() {
+        Assertions.assertFalse(factory.canCreateFromAdaptable(resource, InvalidModelWithMissingAnnotation.class));
     }
 
-    @Test(expected = ModelClassException.class)
-    public void testCreateFromNonModelClass() {
-        factory.createModel(resource, InvalidModelWithMissingAnnotation.class);
+    @Test
+    void testCreateFromNonModelClass() {
+        Assertions.assertThrows(
+                ModelClassException.class,
+                () -> factory.createModel(resource, InvalidModelWithMissingAnnotation.class));
     }
 
-    @Test(expected = InvalidAdaptableException.class)
-    public void testCreateFromInvalidAdaptable() {
-        factory.createModel(request, DefaultStringModel.class);
+    @Test
+    void testCreateFromInvalidAdaptable() {
+        Assertions.assertThrows(
+                InvalidAdaptableException.class, () -> factory.createModel(request, DefaultStringModel.class));
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testCreateWithConstructorException() {
+    @Test
+    void testCreateWithConstructorException() {
         // Internally all exceptions are wrapped within RuntimeExceptions
-        factory.createModel(resource, ConstructorWithExceptionModel.class);
+        Assertions.assertThrows(
+                RuntimeException.class, () -> factory.createModel(resource, ConstructorWithExceptionModel.class));
     }
 
     @Model(adaptables = SlingJakartaHttpServletRequest.class)
@@ -147,10 +150,12 @@ public class AdapterFactoryTest {
         DefaultStringModel nestedModel;
     }
 
-    @Test(expected = MissingElementsException.class)
-    public void testCreatedNestedModelWithInvalidAdaptable() {
+    @Test
+    void testCreatedNestedModelWithInvalidAdaptable() {
         // nested model can only be adapted from another adaptable
-        factory.createModel(request, NestedModelWithInvalidAdaptable.class);
+        Assertions.assertThrows(
+                MissingElementsException.class,
+                () -> factory.createModel(request, NestedModelWithInvalidAdaptable.class));
     }
 
     @Model(adaptables = SlingJakartaHttpServletRequest.class)
@@ -159,10 +164,12 @@ public class AdapterFactoryTest {
         InvalidModelWithMissingAnnotation nestedModel;
     }
 
-    @Test(expected = MissingElementsException.class)
-    public void testCreatedNestedModelWithInvalidAdaptable2() {
+    @Test
+    void testCreatedNestedModelWithInvalidAdaptable2() {
         // nested model is in fact no valid model
-        factory.createModel(request, NestedModelWithInvalidAdaptable2.class);
+        Assertions.assertThrows(
+                MissingElementsException.class,
+                () -> factory.createModel(request, NestedModelWithInvalidAdaptable2.class));
     }
 
     @Model(adaptables = Resource.class)
@@ -176,59 +183,62 @@ public class AdapterFactoryTest {
     }
 
     @Test
-    public void testCreatedNestedModel() {
+    void testCreatedNestedModel() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("required", "required");
         ValueMap vm = new ValueMapDecorator(map);
         when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
 
         NestedModel model = factory.createModel(resource, NestedModel.class);
-        Assert.assertNotNull(model);
-        Assert.assertEquals("required", model.getNestedModel().getRequired());
+        Assertions.assertNotNull(model);
+        Assertions.assertEquals("required", model.getNestedModel().getRequired());
     }
 
-    @Test(expected = MissingElementsException.class)
-    public void testCreatedNestedModelWithMissingElements() {
+    @Test
+    void testCreatedNestedModelWithMissingElements() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("invalid", "required");
         ValueMap vm = new ValueMapDecorator(map);
         when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
 
-        factory.createModel(resource, NestedModel.class);
+        Assertions.assertThrows(MissingElementsException.class, () -> factory.createModel(resource, NestedModel.class));
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testSelectExporterByName() throws Exception {
+    void testSelectExporterByName() {
         Result<Object> result = mock(Result.class);
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
 
-        String exported =
-                factory.handleAndExportResult(result, "second", String.class, Collections.<String, String>emptyMap());
-        Assert.assertEquals("Export from second", exported);
+        String exported = Assertions.assertDoesNotThrow(() ->
+                factory.handleAndExportResult(result, "second", String.class, Collections.<String, String>emptyMap()));
+        Assertions.assertEquals("Export from second", exported);
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testSelectExporterByType() throws Exception {
+    void testSelectExporterByType() {
         Result<Object> result = mock(Result.class);
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
 
-        Integer exported =
-                factory.handleAndExportResult(result, "first", Integer.class, Collections.<String, String>emptyMap());
-        Assert.assertEquals(Integer.valueOf(42), exported);
+        Integer exported = Assertions.assertDoesNotThrow(() ->
+                factory.handleAndExportResult(result, "first", Integer.class, Collections.<String, String>emptyMap()));
+        Assertions.assertEquals(Integer.valueOf(42), exported);
     }
 
-    @Test(expected = MissingExporterException.class)
+    @Test
     @SuppressWarnings("unchecked")
-    public void testSelectExporterByNameAndWrongType() throws Exception {
+    void testSelectExporterByNameAndWrongType() {
         Result<Object> result = mock(Result.class);
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
 
-        factory.handleAndExportResult(result, "second", Integer.class, Collections.<String, String>emptyMap());
+        Assertions.assertThrows(
+                MissingExporterException.class,
+                () -> factory.handleAndExportResult(
+                        result, "second", Integer.class, Collections.<String, String>emptyMap()));
     }
 
     private static class FirstStringExporter implements ModelExporter {
@@ -307,7 +317,7 @@ public class AdapterFactoryTest {
     }
 
     @Test
-    public void testCreateCachedModelWillNotCrashTheVMWithOOM() throws Exception {
+    void testCreateCachedModelWillNotCrashTheVMWithOOM() {
         /*
          * LOAD_FACTOR is used to ensure the test will try create instances of the model to fill up
          * HEAP_SIZE * LOAD_FACTOR memory. This should be a number > 1.0, to ensure that memory would be
@@ -329,12 +339,16 @@ public class AdapterFactoryTest {
         long maxHeapSize = Runtime.getRuntime().maxMemory();
         long maxInstances = (long) ((maxHeapSize / instanceSize) * LOAD_FACTOR);
 
-        for (long i = 0; i < maxInstances; i++) {
-            CachedModelWithSelfReference model =
-                    factory.createModel(mock(SlingJakartaHttpServletRequest.class), CachedModelWithSelfReference.class);
-            for (int j = 0; j < model.longs.length; j++) {
-                model.longs[j] = j;
+        Assertions.assertDoesNotThrow(() -> {
+            for (long i = 0; i < maxInstances; i++) {
+                CachedModelWithSelfReference model = factory.createModel(
+                        mock(SlingJakartaHttpServletRequest.class), CachedModelWithSelfReference.class);
+                for (int j = 0; j < model.longs.length; j++) {
+                    model.longs[j] = j;
+                }
             }
-        }
+        });
+        // Guard against silent failure: ensure heap is sufficient to run the test loop at least once
+        Assertions.assertTrue(maxInstances > 0);
     }
 }
