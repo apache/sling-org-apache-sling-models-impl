@@ -25,17 +25,21 @@ import java.lang.reflect.AnnotatedElement;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BindingsInjectorTest {
+@ExtendWith(MockitoExtension.class)
+class BindingsInjectorTest {
 
     private BindingsInjector injector = new BindingsInjector();
 
@@ -58,40 +62,40 @@ public class BindingsInjectorTest {
     private static final int INTEGER_VALUE = 42;
     private static final ResourceResolver CLASS_INSTANCE = mock(ResourceResolver.class);
 
-    @Before
-    public void setUp() {
-        when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
-        when(bindings.get(STRING_PARAM)).thenReturn(STRING_VALUE);
-        when(bindings.get(INTEGER_PARAM)).thenReturn(INTEGER_VALUE);
-        when(bindings.get(CLASS_PARAM)).thenReturn(CLASS_INSTANCE);
+    @BeforeEach
+    void setUp() {
+        lenient().when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
+        lenient().when(bindings.get(STRING_PARAM)).thenReturn(STRING_VALUE);
+        lenient().when(bindings.get(INTEGER_PARAM)).thenReturn(INTEGER_VALUE);
+        lenient().when(bindings.get(CLASS_PARAM)).thenReturn(CLASS_INSTANCE);
     }
 
     @Test
-    public void testStringParam() {
+    void testStringParam() {
         Object result = injector.getValue(request, STRING_PARAM, String.class, element, registry);
         assertEquals(STRING_VALUE, result);
     }
 
     @Test
-    public void testIntegerParam() {
+    void testIntegerParam() {
         Object result = injector.getValue(request, INTEGER_PARAM, Integer.class, element, registry);
         assertEquals(INTEGER_VALUE, result);
     }
 
     @Test
-    public void testClassInstance() {
+    void testClassInstance() {
         Object result = injector.getValue(request, CLASS_PARAM, ResourceResolver.class, element, registry);
         assertSame(CLASS_INSTANCE, result);
     }
 
     @Test
-    public void testNonRequestAdaptable() {
+    void testNonRequestAdaptable() {
         Object result = injector.getValue(mock(ResourceResolver.class), STRING_PARAM, String.class, element, registry);
         assertNull(result);
     }
 
     @Test
-    public void testRequestThatDoesNotContainBindings() {
+    void testRequestThatDoesNotContainBindings() {
         when(request.getAttribute(SlingBindings.class.getName())).thenReturn(null);
         Object result = injector.getValue(request, STRING_PARAM, String.class, element, registry);
         assertNull(result);
