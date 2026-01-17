@@ -26,16 +26,16 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SlingObjectInjectorResourceResolverTest {
+@ExtendWith(MockitoExtension.class)
+class SlingObjectInjectorResourceResolverTest {
 
     private final SlingObjectInjector injector = new SlingObjectInjector();
 
@@ -49,14 +49,14 @@ public class SlingObjectInjectorResourceResolverTest {
     private DisposalCallbackRegistry registry;
 
     @Test
-    public void testResourceResolver() {
+    void testResourceResolver() {
         Object result = this.injector.getValue(
                 this.resourceResolver, null, ResourceResolver.class, this.annotatedElement, registry);
         assertSame(this.resourceResolver, result);
     }
 
     @Test
-    public void testResource() {
+    void testResource() {
         Object result =
                 this.injector.getValue(this.resourceResolver, null, Resource.class, this.annotatedElement, registry);
         assertNull(result);
@@ -67,7 +67,7 @@ public class SlingObjectInjectorResourceResolverTest {
      */
     @Deprecated(since = "2.0.0")
     @Test
-    public void testJavaxRequest() {
+    void testJavaxRequest() {
         Object result = this.injector.getValue(
                 this.resourceResolver,
                 null,
@@ -82,7 +82,7 @@ public class SlingObjectInjectorResourceResolverTest {
      */
     @Deprecated(since = "2.0.0")
     @Test
-    public void testJavaxResponse() {
+    void testJavaxResponse() {
         Object result = this.injector.getValue(
                 this.resourceResolver,
                 null,
@@ -93,28 +93,28 @@ public class SlingObjectInjectorResourceResolverTest {
     }
 
     @Test
-    public void testJakartaRequest() {
+    void testJakartaRequest() {
         Object result = this.injector.getValue(
                 this.resourceResolver, null, SlingJakartaHttpServletRequest.class, this.annotatedElement, registry);
         assertNull(result);
     }
 
     @Test
-    public void testJakartaResponse() {
+    void testJakartaResponse() {
         Object result = this.injector.getValue(
                 this.resourceResolver, null, SlingJakartaHttpServletResponse.class, this.annotatedElement, registry);
         assertNull(result);
     }
 
     @Test
-    public void testScriptHelper() {
+    void testScriptHelper() {
         Object result = this.injector.getValue(
                 this.resourceResolver, null, SlingScriptHelper.class, this.annotatedElement, registry);
         assertNull(result);
     }
 
     @Test
-    public void testInvalid() {
+    void testInvalid() {
         Object result = this.injector.getValue(this, null, SlingScriptHelper.class, this.annotatedElement, registry);
         assertNull(result);
     }
