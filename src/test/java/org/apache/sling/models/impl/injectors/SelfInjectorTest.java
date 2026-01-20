@@ -31,19 +31,19 @@ import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.apache.sling.models.impl.model.ConstructorParameter;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SelfInjectorTest {
+@ExtendWith(MockitoExtension.class)
+class SelfInjectorTest {
 
     private SelfInjector injector = new SelfInjector();
 
@@ -62,8 +62,8 @@ public class SelfInjectorTest {
     private ConstructorParameter firstConstructorParameter;
     private ConstructorParameter secondConstructorParameter;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         lenient().when(modelAnnotation.defaultInjectionStrategy()).thenReturn(DefaultInjectionStrategy.REQUIRED);
         firstConstructorParameter = new ConstructorParameter(
                 new Annotation[0],
@@ -86,7 +86,7 @@ public class SelfInjectorTest {
     }
 
     @Test
-    public void testJakartaMatchingClass() {
+    void testJakartaMatchingClass() {
         assertSame(
                 request,
                 injector.getValue(
@@ -110,7 +110,7 @@ public class SelfInjectorTest {
      */
     @Deprecated
     @Test
-    public void testJavaxMatchingClass() {
+    void testJavaxMatchingClass() {
         org.apache.sling.api.SlingHttpServletRequest javaxRequest =
                 JakartaToJavaxRequestWrapper.toJavaxRequest(request);
         assertSame(
@@ -136,7 +136,7 @@ public class SelfInjectorTest {
     }
 
     @Test
-    public void testJakartaMatchingSubClass() {
+    void testJakartaMatchingSubClass() {
         assertSame(
                 request,
                 injector.getValue(
@@ -159,7 +159,7 @@ public class SelfInjectorTest {
      */
     @Deprecated
     @Test
-    public void testJavaxMatchingSubClass() {
+    void testJavaxMatchingSubClass() {
         org.apache.sling.api.SlingHttpServletRequest javaxRequest =
                 JakartaToJavaxRequestWrapper.toJavaxRequest(request);
         assertSame(
@@ -181,7 +181,7 @@ public class SelfInjectorTest {
     }
 
     @Test
-    public void testNotMatchingClass() {
+    void testNotMatchingClass() {
         assertNull(injector.getValue(
                 request,
                 "notRelevant",
@@ -198,7 +198,7 @@ public class SelfInjectorTest {
     }
 
     @Test
-    public void testJakartaWithNullName() {
+    void testJakartaWithNullName() {
         assertSame(
                 request,
                 injector.getValue(
@@ -221,7 +221,7 @@ public class SelfInjectorTest {
      */
     @Deprecated
     @Test
-    public void testJavaxWithNullName() {
+    void testJavaxWithNullName() {
         org.apache.sling.api.SlingHttpServletRequest javaxRequest =
                 JakartaToJavaxRequestWrapper.toJavaxRequest(request);
         assertSame(
@@ -243,7 +243,7 @@ public class SelfInjectorTest {
     }
 
     @Test
-    public void testJakartaMatchingClassWithSelfAnnotation() {
+    void testJakartaMatchingClassWithSelfAnnotation() {
         when(annotatedElement.isAnnotationPresent(Self.class)).thenReturn(true);
         Object result = injector.getValue(
                 request, "notRelevant", SlingJakartaHttpServletRequest.class, annotatedElement, registry);
@@ -255,7 +255,7 @@ public class SelfInjectorTest {
      */
     @Deprecated
     @Test
-    public void testJavaxMatchingClassWithSelfAnnotation() {
+    void testJavaxMatchingClassWithSelfAnnotation() {
         org.apache.sling.api.SlingHttpServletRequest javaxRequest =
                 JakartaToJavaxRequestWrapper.toJavaxRequest(request);
         when(annotatedElement.isAnnotationPresent(Self.class)).thenReturn(true);
@@ -269,7 +269,7 @@ public class SelfInjectorTest {
     }
 
     @Test
-    public void testNotMatchingClassWithSelfAnnotation() {
+    void testNotMatchingClassWithSelfAnnotation() {
         when(annotatedElement.isAnnotationPresent(Self.class)).thenReturn(true);
         Object result = injector.getValue(request, "notRelevant", ResourceResolver.class, annotatedElement, registry);
         assertSame(request, result);
