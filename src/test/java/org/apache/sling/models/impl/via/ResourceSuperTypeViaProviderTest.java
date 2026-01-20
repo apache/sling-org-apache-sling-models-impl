@@ -21,19 +21,17 @@ package org.apache.sling.models.impl.via;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.via.ResourceSuperType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- *
- */
-@RunWith(MockitoJUnitRunner.class)
-public class ResourceSuperTypeViaProviderTest {
+@ExtendWith(MockitoExtension.class)
+class ResourceSuperTypeViaProviderTest {
 
     private ResourceSuperTypeViaProvider provider = new ResourceSuperTypeViaProvider();
 
@@ -47,7 +45,7 @@ public class ResourceSuperTypeViaProviderTest {
      * Test method for {@link org.apache.sling.models.impl.via.ResourceSuperTypeViaProvider#handle(java.lang.String)}.
      */
     @Test
-    public void testHandle() {
+    void testHandle() {
         assertTrue(provider.handle("foo"));
     }
 
@@ -55,7 +53,7 @@ public class ResourceSuperTypeViaProviderTest {
      * Test method for {@link org.apache.sling.models.impl.via.ResourceSuperTypeViaProvider#getResourceType(org.apache.sling.api.resource.Resource, java.lang.String)}.
      */
     @Test
-    public void testGetResourceType() {
+    void testGetResourceType() {
         Mockito.when(resourceResolver.getParentResourceType(resource)).thenReturn("test1");
         Mockito.when(resource.getResourceResolver()).thenReturn(resourceResolver);
         assertEquals("test1", provider.getResourceType(resource, "foo"));
@@ -65,7 +63,7 @@ public class ResourceSuperTypeViaProviderTest {
      * Test method for {@link org.apache.sling.models.impl.via.ResourceSuperTypeViaProvider#getType()}.
      */
     @Test
-    public void testGetType() {
+    void testGetType() {
         assertEquals(ResourceSuperType.class, provider.getType());
     }
 }

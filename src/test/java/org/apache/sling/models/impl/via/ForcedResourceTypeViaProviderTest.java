@@ -20,18 +20,17 @@ package org.apache.sling.models.impl.via;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.via.ForcedResourceType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- *
- */
-@RunWith(MockitoJUnitRunner.class)
-public class ForcedResourceTypeViaProviderTest {
+@ExtendWith(MockitoExtension.class)
+class ForcedResourceTypeViaProviderTest {
 
     private ForcedResourceTypeViaProvider provider = new ForcedResourceTypeViaProvider();
 
@@ -42,7 +41,7 @@ public class ForcedResourceTypeViaProviderTest {
      * Test method for {@link org.apache.sling.models.impl.via.ForcedResourceTypeViaProvider#handle(java.lang.String)}.
      */
     @Test
-    public void testHandle() {
+    void testHandle() {
         assertTrue(provider.handle("foo"));
         assertFalse(provider.handle(""));
     }
@@ -51,7 +50,7 @@ public class ForcedResourceTypeViaProviderTest {
      * Test method for {@link org.apache.sling.models.impl.via.ForcedResourceTypeViaProvider#getResourceType(org.apache.sling.api.resource.Resource, java.lang.String)}.
      */
     @Test
-    public void testGetResourceType() {
+    void testGetResourceType() {
         assertEquals("foo", provider.getResourceType(resource, "foo"));
     }
 
@@ -59,7 +58,7 @@ public class ForcedResourceTypeViaProviderTest {
      * Test method for {@link org.apache.sling.models.impl.via.ForcedResourceTypeViaProvider#getType()}.
      */
     @Test
-    public void testGetType() {
+    void testGetType() {
         assertEquals(ForcedResourceType.class, provider.getType());
     }
 }

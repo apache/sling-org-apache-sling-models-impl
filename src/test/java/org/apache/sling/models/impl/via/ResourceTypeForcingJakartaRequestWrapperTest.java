@@ -20,20 +20,20 @@ package org.apache.sling.models.impl.via;
 
 import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ResourceTypeForcingJakartaRequestWrapperTest {
+@ExtendWith(MockitoExtension.class)
+class ResourceTypeForcingJakartaRequestWrapperTest {
 
     @Mock
     private Resource resource;
@@ -45,7 +45,7 @@ public class ResourceTypeForcingJakartaRequestWrapperTest {
      * Test method for {@link org.apache.sling.models.impl.via.ResourceTypeForcingJakartaRequestWrapper#getResource()}.
      */
     @Test
-    public void testGetResource() {
+    void testGetResource() {
         // once
         ResourceTypeForcingJakartaRequestWrapper testCase =
                 new ResourceTypeForcingJakartaRequestWrapper(request, resource, "foo");

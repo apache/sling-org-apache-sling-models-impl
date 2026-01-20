@@ -20,14 +20,14 @@ package org.apache.sling.models.impl.via;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
@@ -36,8 +36,8 @@ import static org.junit.Assert.assertTrue;
  * @deprecated use {@link ResourceTypeForcingJakartaRequestWrapperTest)} instead
  */
 @Deprecated(since = "2.0.0")
-@RunWith(MockitoJUnitRunner.class)
-public class ResourceTypeForcingRequestWrapperTest {
+@ExtendWith(MockitoExtension.class)
+class ResourceTypeForcingRequestWrapperTest {
 
     @Mock
     private Resource resource;
@@ -49,7 +49,7 @@ public class ResourceTypeForcingRequestWrapperTest {
      * Test method for {@link org.apache.sling.models.impl.via.ResourceTypeForcingRequestWrapper#getResource()}.
      */
     @Test
-    public void testGetResource() {
+    void testGetResource() {
         // once
         ResourceTypeForcingRequestWrapper testCase = new ResourceTypeForcingRequestWrapper(request, resource, "foo");
         Resource wrappedResource = testCase.getResource();
