@@ -26,19 +26,19 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.wrappers.JakartaToJavaxRequestWrapper;
 import org.apache.sling.models.annotations.injectorspecific.ResourcePath;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ResourcePathInjectorTest {
+@ExtendWith(MockitoExtension.class)
+class ResourcePathInjectorTest {
 
     private ResourcePathInjector injector = new ResourcePathInjector();
 
@@ -54,19 +54,19 @@ public class ResourcePathInjectorTest {
     @Mock
     private SlingJakartaHttpServletRequest jakartaRequest;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ResourcePath mockResourcePath = Mockito.mock(ResourcePath.class);
-        when(mockResourcePath.path()).thenReturn("/resource1");
-        when(element.getAnnotation(ResourcePath.class)).thenReturn(mockResourcePath);
+        lenient().when(mockResourcePath.path()).thenReturn("/resource1");
+        lenient().when(element.getAnnotation(ResourcePath.class)).thenReturn(mockResourcePath);
 
         ResourceResolver mockRR = mock(ResourceResolver.class);
-        when(mockRR.getResource("/resource1")).thenReturn(resource);
-        when(jakartaRequest.getResourceResolver()).thenReturn(mockRR);
+        lenient().when(mockRR.getResource("/resource1")).thenReturn(resource);
+        lenient().when(jakartaRequest.getResourceResolver()).thenReturn(mockRR);
     }
 
     @Test
-    public void testResourcePathFromJakartaRequest() {
+    void testResourcePathFromJakartaRequest() {
         Object result = this.injector.getValue(this.jakartaRequest, null, Resource.class, element, registry);
         assertEquals(result, this.resource);
     }
@@ -76,7 +76,7 @@ public class ResourcePathInjectorTest {
      */
     @Deprecated(since = "2.0.0")
     @Test
-    public void testResourcePathFromJavaxRequest() {
+    void testResourcePathFromJavaxRequest() {
         org.apache.sling.api.SlingHttpServletRequest javaxRequest =
                 JakartaToJavaxRequestWrapper.toJavaxRequest(this.jakartaRequest);
         Object result = this.injector.getValue(javaxRequest, null, Resource.class, element, registry);

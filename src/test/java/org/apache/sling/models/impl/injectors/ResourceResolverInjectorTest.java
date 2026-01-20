@@ -25,13 +25,13 @@ import org.apache.sling.api.SlingJakartaHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,8 +41,8 @@ import static org.mockito.Mockito.when;
  * Leaving unit test to ensure the same behavior.
  *
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ResourceResolverInjectorTest {
+@ExtendWith(MockitoExtension.class)
+class ResourceResolverInjectorTest {
 
     private SlingObjectInjector injector = new SlingObjectInjector();
 
@@ -53,7 +53,7 @@ public class ResourceResolverInjectorTest {
     private DisposalCallbackRegistry registry;
 
     @Test
-    public void testFromResource() {
+    void testFromResource() {
         Resource resource = mock(Resource.class);
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
@@ -63,7 +63,7 @@ public class ResourceResolverInjectorTest {
     }
 
     @Test
-    public void testFromJakartaRequest() {
+    void testFromJakartaRequest() {
         SlingJakartaHttpServletRequest jakartaRequest = mock(SlingJakartaHttpServletRequest.class);
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
         when(jakartaRequest.getResourceResolver()).thenReturn(resourceResolver);
@@ -78,7 +78,7 @@ public class ResourceResolverInjectorTest {
      */
     @Deprecated
     @Test
-    public void testFromJavaxRequest() {
+    void testFromJavaxRequest() {
         org.apache.sling.api.SlingHttpServletRequest javaxRequest =
                 mock(org.apache.sling.api.SlingHttpServletRequest.class);
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
@@ -89,7 +89,7 @@ public class ResourceResolverInjectorTest {
     }
 
     @Test
-    public void testFromSomethingElse() {
+    void testFromSomethingElse() {
         SlingJakartaHttpServletResponse response = mock(SlingJakartaHttpServletResponse.class);
 
         Object result = injector.getValue(response, "resourceResolver", ResourceResolver.class, element, registry);
