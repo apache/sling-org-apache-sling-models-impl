@@ -44,7 +44,6 @@ import org.apache.sling.models.testmodels.classes.InvalidModelWithMissingAnnotat
 import org.apache.sling.models.testmodels.classes.ResourceModelWithRequiredField;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,6 +55,12 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.util.converter.Converter;
 import org.osgi.util.converter.Converters;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -109,39 +114,37 @@ public class AdapterFactoryTest {
 
     @Test
     void testIsModelClass() {
-        Assertions.assertTrue(factory.isModelClass(DefaultStringModel.class));
-        Assertions.assertFalse(factory.isModelClass(InvalidModelWithMissingAnnotation.class));
+        assertTrue(factory.isModelClass(DefaultStringModel.class));
+        assertFalse(factory.isModelClass(InvalidModelWithMissingAnnotation.class));
     }
 
     @Test
     void testCanCreateFromAdaptable() {
-        Assertions.assertTrue(factory.canCreateFromAdaptable(resource, DefaultStringModel.class));
-        Assertions.assertFalse(factory.canCreateFromAdaptable(request, DefaultStringModel.class));
+        assertTrue(factory.canCreateFromAdaptable(resource, DefaultStringModel.class));
+        assertFalse(factory.canCreateFromAdaptable(request, DefaultStringModel.class));
     }
 
     @Test
     void testCanCreateFromAdaptableWithInvalidModel() {
-        Assertions.assertFalse(factory.canCreateFromAdaptable(resource, InvalidModelWithMissingAnnotation.class));
+        assertFalse(factory.canCreateFromAdaptable(resource, InvalidModelWithMissingAnnotation.class));
     }
 
     @Test
     void testCreateFromNonModelClass() {
-        Assertions.assertThrows(
+        assertThrows(
                 ModelClassException.class,
                 () -> factory.createModel(resource, InvalidModelWithMissingAnnotation.class));
     }
 
     @Test
     void testCreateFromInvalidAdaptable() {
-        Assertions.assertThrows(
-                InvalidAdaptableException.class, () -> factory.createModel(request, DefaultStringModel.class));
+        assertThrows(InvalidAdaptableException.class, () -> factory.createModel(request, DefaultStringModel.class));
     }
 
     @Test
     void testCreateWithConstructorException() {
         // Internally all exceptions are wrapped within RuntimeExceptions
-        Assertions.assertThrows(
-                RuntimeException.class, () -> factory.createModel(resource, ConstructorWithExceptionModel.class));
+        assertThrows(RuntimeException.class, () -> factory.createModel(resource, ConstructorWithExceptionModel.class));
     }
 
     @Model(adaptables = SlingJakartaHttpServletRequest.class)
@@ -153,7 +156,7 @@ public class AdapterFactoryTest {
     @Test
     void testCreatedNestedModelWithInvalidAdaptable() {
         // nested model can only be adapted from another adaptable
-        Assertions.assertThrows(
+        assertThrows(
                 MissingElementsException.class,
                 () -> factory.createModel(request, NestedModelWithInvalidAdaptable.class));
     }
@@ -167,7 +170,7 @@ public class AdapterFactoryTest {
     @Test
     void testCreatedNestedModelWithInvalidAdaptable2() {
         // nested model is in fact no valid model
-        Assertions.assertThrows(
+        assertThrows(
                 MissingElementsException.class,
                 () -> factory.createModel(request, NestedModelWithInvalidAdaptable2.class));
     }
@@ -190,8 +193,8 @@ public class AdapterFactoryTest {
         when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
 
         NestedModel model = factory.createModel(resource, NestedModel.class);
-        Assertions.assertNotNull(model);
-        Assertions.assertEquals("required", model.getNestedModel().getRequired());
+        assertNotNull(model);
+        assertEquals("required", model.getNestedModel().getRequired());
     }
 
     @Test
@@ -201,7 +204,7 @@ public class AdapterFactoryTest {
         ValueMap vm = new ValueMapDecorator(map);
         when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
 
-        Assertions.assertThrows(MissingElementsException.class, () -> factory.createModel(resource, NestedModel.class));
+        assertThrows(MissingElementsException.class, () -> factory.createModel(resource, NestedModel.class));
     }
 
     @Test
@@ -211,9 +214,9 @@ public class AdapterFactoryTest {
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
 
-        String exported = Assertions.assertDoesNotThrow(() ->
+        String exported = assertDoesNotThrow(() ->
                 factory.handleAndExportResult(result, "second", String.class, Collections.<String, String>emptyMap()));
-        Assertions.assertEquals("Export from second", exported);
+        assertEquals("Export from second", exported);
     }
 
     @Test
@@ -223,9 +226,9 @@ public class AdapterFactoryTest {
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
 
-        Integer exported = Assertions.assertDoesNotThrow(() ->
+        Integer exported = assertDoesNotThrow(() ->
                 factory.handleAndExportResult(result, "first", Integer.class, Collections.<String, String>emptyMap()));
-        Assertions.assertEquals(Integer.valueOf(42), exported);
+        assertEquals(Integer.valueOf(42), exported);
     }
 
     @Test
@@ -235,7 +238,7 @@ public class AdapterFactoryTest {
         when(result.wasSuccessful()).thenReturn(true);
         when(result.getValue()).thenReturn(new Object());
 
-        Assertions.assertThrows(
+        assertThrows(
                 MissingExporterException.class,
                 () -> factory.handleAndExportResult(
                         result, "second", Integer.class, Collections.<String, String>emptyMap()));
@@ -339,7 +342,7 @@ public class AdapterFactoryTest {
         long maxHeapSize = Runtime.getRuntime().maxMemory();
         long maxInstances = (long) ((maxHeapSize / instanceSize) * LOAD_FACTOR);
 
-        Assertions.assertDoesNotThrow(() -> {
+        assertDoesNotThrow(() -> {
             for (long i = 0; i < maxInstances; i++) {
                 CachedModelWithSelfReference model = factory.createModel(
                         mock(SlingJakartaHttpServletRequest.class), CachedModelWithSelfReference.class);
@@ -349,6 +352,6 @@ public class AdapterFactoryTest {
             }
         });
         // Guard against silent failure: ensure heap is sufficient to run the test loop at least once
-        Assertions.assertTrue(maxInstances > 0);
+        assertTrue(maxInstances > 0);
     }
 }

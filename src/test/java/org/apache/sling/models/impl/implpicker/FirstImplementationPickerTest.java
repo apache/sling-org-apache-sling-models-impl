@@ -20,31 +20,31 @@ package org.apache.sling.models.impl.implpicker;
 
 import org.apache.sling.models.impl.FirstImplementationPicker;
 import org.apache.sling.models.spi.ImplementationPicker;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class FirstImplementationPickerTest {
+class FirstImplementationPickerTest {
 
     private static final Class<?> SAMPLE_ADAPTER = Comparable.class;
     private static final Object SAMPLE_ADAPTABLE = new Object();
 
     private ImplementationPicker underTest;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         underTest = new FirstImplementationPicker();
     }
 
     @Test
-    public void testPickOneImplementation() {
+    void testPickOneImplementation() {
         Class<?>[] implementations = new Class<?>[] {String.class};
         assertEquals(String.class, underTest.pick(SAMPLE_ADAPTER, implementations, SAMPLE_ADAPTABLE));
     }
 
     @Test
-    public void testPickMultipleImplementations() {
+    void testPickMultipleImplementations() {
         Class<?>[] implementations = new Class<?>[] {Integer.class, Long.class, String.class};
         assertEquals(Integer.class, underTest.pick(SAMPLE_ADAPTER, implementations, SAMPLE_ADAPTABLE));
     }

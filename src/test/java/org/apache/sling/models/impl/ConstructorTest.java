@@ -43,22 +43,24 @@ import org.apache.sling.models.testmodels.classes.constructorinjection.NoNameMod
 import org.apache.sling.models.testmodels.classes.constructorinjection.ViaRequestSuffixModel;
 import org.apache.sling.models.testmodels.classes.constructorinjection.WithThreeConstructorsOneInjectModel;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ConstructorTest {
+@ExtendWith(MockitoExtension.class)
+class ConstructorTest {
 
     private ModelAdapterFactory factory;
 
@@ -69,11 +71,11 @@ public class ConstructorTest {
 
     private static final String STRING_VALUE = "myValue";
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
 
-        when(request.getAttribute("attribute")).thenReturn(INT_VALUE);
-        when(request.getAttribute("attribute2")).thenReturn(STRING_VALUE);
+        lenient().when(request.getAttribute("attribute")).thenReturn(INT_VALUE);
+        lenient().when(request.getAttribute("attribute2")).thenReturn(STRING_VALUE);
 
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.injectors = Arrays.asList(new RequestAttributeInjector(), new SelfInjector());
@@ -90,7 +92,7 @@ public class ConstructorTest {
     }
 
     @Test
-    public void testConstructorInjection() {
+    void testConstructorInjection() {
         WithOneConstructorModel model = factory.getAdapter(request, WithOneConstructorModel.class);
         assertNotNull(model);
         assertEquals(request, model.getRequest());
@@ -98,7 +100,7 @@ public class ConstructorTest {
     }
 
     @Test
-    public void testThreeConstructorsInjection() {
+    void testThreeConstructorsInjection() {
         WithThreeConstructorsModel model = factory.getAdapter(request, WithThreeConstructorsModel.class);
         assertNotNull(model);
         assertEquals(request, model.getRequest());
@@ -106,7 +108,7 @@ public class ConstructorTest {
     }
 
     @Test
-    public void testTwoConstructorsInjection() {
+    void testTwoConstructorsInjection() {
         WithTwoConstructorsModel model = factory.getAdapter(request, WithTwoConstructorsModel.class);
         assertNotNull(model);
         assertEquals(request, model.getRequest());
@@ -114,7 +116,7 @@ public class ConstructorTest {
     }
 
     @Test
-    public void testSuperclassConstructorsInjection() {
+    void testSuperclassConstructorsInjection() {
         SuperclassConstructorModel model = factory.getAdapter(request, SuperclassConstructorModel.class);
         assertNotNull(model);
         assertEquals(request, model.getRequest());
@@ -122,14 +124,14 @@ public class ConstructorTest {
     }
 
     @Test
-    public void testInvalidConstructorInjector() {
+    void testInvalidConstructorInjector() {
         InvalidConstructorModel model = factory.getAdapter(request, InvalidConstructorModel.class);
         assertNull(model);
     }
 
-    @Test(expected = ModelClassException.class)
-    public void testInvalidConstructorInjectorException() {
-        factory.createModel(request, InvalidConstructorModel.class);
+    @Test
+    void testInvalidConstructorInjectorException() {
+        assertThrows(ModelClassException.class, () -> factory.createModel(request, InvalidConstructorModel.class));
     }
 
     /**
@@ -137,7 +139,7 @@ public class ConstructorTest {
      * Test mixing of constructor injection and field injection as well.
      */
     @Test
-    public void testThreeConstructorsOneInjectInjection() {
+    void testThreeConstructorsOneInjectInjection() {
         WithThreeConstructorsOneInjectModel model =
                 factory.getAdapter(request, WithThreeConstructorsOneInjectModel.class);
         assertNotNull(model);
@@ -147,7 +149,7 @@ public class ConstructorTest {
     }
 
     @Test
-    public void testMultiThreadedConstructorInjection() throws InterruptedException, ExecutionException {
+    void testMultiThreadedConstructorInjection() throws InterruptedException, ExecutionException {
 
         class ModelCreator implements Callable<String> {
             @Override
@@ -191,14 +193,14 @@ public class ConstructorTest {
     }
 
     @Test
-    public void testNoNameModel() {
+    void testNoNameModel() {
         NoNameModel model = factory.getAdapter(request, NoNameModel.class);
         assertNull(model);
     }
 
     @Test
     @SuppressWarnings("null")
-    public void testViaInjectionModel() throws Exception {
+    void testViaInjectionModel() {
         Resource suffixResource = mock(Resource.class);
         when(suffixResource.getPath()).thenReturn("/the/suffix");
 
