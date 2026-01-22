@@ -18,26 +18,24 @@
  */
 package org.apache.sling.models.impl.via;
 
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.ViaProviderType;
 import org.apache.sling.models.spi.ViaProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- *
- */
-@RunWith(MockitoJUnitRunner.class)
-public class AbstractResourceTypeViaProviderTest {
+@ExtendWith(MockitoExtension.class)
+class AbstractResourceTypeViaProviderTest {
     private AbstractResourceTypeViaProvider provider = new AbstractResourceTypeViaProvider() {
         @Override
         public Class<? extends ViaProviderType> getType() {
@@ -59,13 +57,12 @@ public class AbstractResourceTypeViaProviderTest {
      * Test method for {@link org.apache.sling.models.impl.via.AbstractResourceTypeViaProvider#getAdaptable(java.lang.Object, java.lang.String)}.
      */
     @Test
-    public void testGetAdaptableWhenNotHandled() {
+    void testGetAdaptableWhenNotHandled() {
         assertEquals(ViaProvider.ORIGINAL, provider.getAdaptable("hello", "nothandled"));
     }
 
     @Test
-    public void testGetAdaptableForResource() {
-        Resource mockResource = Mockito.mock(Resource.class);
+    void testGetAdaptableForResource(@Mock Resource mockResource) {
         Object adaptable = provider.getAdaptable(mockResource, "handled");
         assertTrue(adaptable instanceof ResourceTypeForcingResourceWrapper);
 
@@ -73,8 +70,7 @@ public class AbstractResourceTypeViaProviderTest {
     }
 
     @Test
-    public void testGetAdaptableForJakartaRequest() {
-        SlingJakartaHttpServletRequest mockJakartaRequest = Mockito.mock(SlingJakartaHttpServletRequest.class);
+    void testGetAdaptableForJakartaRequest(@Mock SlingJakartaHttpServletRequest mockJakartaRequest) {
         Object adaptable = provider.getAdaptable(mockJakartaRequest, "handled");
         assertTrue(adaptable instanceof ResourceTypeForcingJakartaRequestWrapper);
 
@@ -86,9 +82,7 @@ public class AbstractResourceTypeViaProviderTest {
      */
     @Deprecated(since = "2.0.0")
     @Test
-    public void testGetAdaptableForJavaxRequest() {
-        org.apache.sling.api.SlingHttpServletRequest mockJavaxRequest =
-                Mockito.mock(org.apache.sling.api.SlingHttpServletRequest.class);
+    void testGetAdaptableForJavaxRequest(@Mock SlingHttpServletRequest mockJavaxRequest) {
         Object adaptable = provider.getAdaptable(mockJavaxRequest, "handled");
         assertTrue(adaptable instanceof ResourceTypeForcingRequestWrapper);
 
@@ -96,7 +90,7 @@ public class AbstractResourceTypeViaProviderTest {
     }
 
     @Test
-    public void testGetAdaptableForOther() {
+    void testGetAdaptableForOther() {
         assertNull(provider.getAdaptable(new Object(), "nullResourceType"));
     }
 }

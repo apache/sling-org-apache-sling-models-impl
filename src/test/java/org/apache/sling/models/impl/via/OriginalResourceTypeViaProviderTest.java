@@ -24,16 +24,16 @@ import org.apache.sling.api.resource.ResourceWrapper;
 import org.apache.sling.api.wrappers.JakartaToJavaxRequestWrapper;
 import org.apache.sling.api.wrappers.SlingJakartaHttpServletRequestWrapper;
 import org.apache.sling.models.annotations.via.OriginalResourceType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OriginalResourceTypeViaProviderTest {
+@ExtendWith(MockitoExtension.class)
+class OriginalResourceTypeViaProviderTest {
 
     private OriginalResourceTypeViaProvider provider = new OriginalResourceTypeViaProvider();
 
@@ -44,30 +44,30 @@ public class OriginalResourceTypeViaProviderTest {
     private SlingJakartaHttpServletRequest request;
 
     @Test
-    public void testReturnsCorrectMarkerInterface() {
+    void testReturnsCorrectMarkerInterface() {
         assertEquals(OriginalResourceType.class, provider.getType());
     }
 
     @Test
-    public void testReturnsOriginalResourceIfNotWrapped() {
+    void testReturnsOriginalResourceIfNotWrapped() {
         Object projected = provider.getAdaptable(resource, null);
         assertEquals(resource, projected);
     }
 
     @Test
-    public void testReturnsOriginalRequestIfNotWrapped() {
+    void testReturnsOriginalRequestIfNotWrapped() {
         Object projected = provider.getAdaptable(request, null);
         assertEquals(request, projected);
     }
 
     @Test
-    public void testReturnsNullIfNeitherRequestOrResource() {
+    void testReturnsNullIfNeitherRequestOrResource() {
         Object projected = provider.getAdaptable(new Object(), null);
         assertNull(projected);
     }
 
     @Test
-    public void testUnwrapsResource() {
+    void testUnwrapsResource() {
         // once
         Resource testCase = new ResourceTypeForcingResourceWrapper(resource, "foo");
         Object projected = provider.getAdaptable(testCase, null);
@@ -81,7 +81,7 @@ public class OriginalResourceTypeViaProviderTest {
     }
 
     @Test
-    public void testUnwrapsJakartaRequest() {
+    void testUnwrapsJakartaRequest() {
         // once
         SlingJakartaHttpServletRequest testCase =
                 new ResourceTypeForcingJakartaRequestWrapper(request, resource, "foo");
@@ -100,7 +100,7 @@ public class OriginalResourceTypeViaProviderTest {
      */
     @Deprecated
     @Test
-    public void testUnwrapsJavaxRequest() {
+    void testUnwrapsJavaxRequest() {
         org.apache.sling.api.SlingHttpServletRequest javaxRequest =
                 JakartaToJavaxRequestWrapper.toJavaxRequest(request);
         // once
@@ -117,14 +117,14 @@ public class OriginalResourceTypeViaProviderTest {
     }
 
     @Test
-    public void testDoesNotUnwrapOtherResourceWrappers() {
+    void testDoesNotUnwrapOtherResourceWrappers() {
         Resource testCase = new ResourceWrapper(resource);
         Object projected = provider.getAdaptable(testCase, null);
         assertEquals(testCase, projected);
     }
 
     @Test
-    public void testDoesNotUnwrapOtherJakartaRequestWrappers() {
+    void testDoesNotUnwrapOtherJakartaRequestWrappers() {
         SlingJakartaHttpServletRequest testCase = new SlingJakartaHttpServletRequestWrapper(request);
         Object projected = provider.getAdaptable(testCase, null);
         assertEquals(testCase, projected);
@@ -135,7 +135,7 @@ public class OriginalResourceTypeViaProviderTest {
      */
     @Deprecated
     @Test
-    public void testDoesNotUnwrapOtherJavaxRequestWrappers() {
+    void testDoesNotUnwrapOtherJavaxRequestWrappers() {
         org.apache.sling.api.SlingHttpServletRequest javaxRequest =
                 JakartaToJavaxRequestWrapper.toJavaxRequest(request);
         org.apache.sling.api.SlingHttpServletRequest testCase =

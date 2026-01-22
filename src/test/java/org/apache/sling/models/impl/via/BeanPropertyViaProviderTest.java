@@ -20,17 +20,15 @@ package org.apache.sling.models.impl.via;
 
 import org.apache.sling.models.annotations.via.BeanProperty;
 import org.apache.sling.models.spi.ViaProvider;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-/**
- *
- */
-@RunWith(MockitoJUnitRunner.class)
-public class BeanPropertyViaProviderTest {
+@ExtendWith(MockitoExtension.class)
+class BeanPropertyViaProviderTest {
 
     private BeanPropertyViaProvider provider = new BeanPropertyViaProvider();
 
@@ -38,7 +36,7 @@ public class BeanPropertyViaProviderTest {
      * Test method for {@link org.apache.sling.models.impl.via.BeanPropertyViaProvider#getType()}.
      */
     @Test
-    public void testGetType() {
+    void testGetType() {
         assertEquals(BeanProperty.class, provider.getType());
     }
 
@@ -46,7 +44,7 @@ public class BeanPropertyViaProviderTest {
      * Test method for {@link org.apache.sling.models.impl.via.BeanPropertyViaProvider#getAdaptable(java.lang.Object, java.lang.String)}.
      */
     @Test
-    public void testGetAdaptable() {
+    void testGetAdaptable() {
         // not handled
         assertEquals(ViaProvider.ORIGINAL, provider.getAdaptable(new Object(), ""));
 

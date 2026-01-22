@@ -21,17 +21,18 @@ package org.apache.sling.models.impl.via;
 import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.spi.ViaProvider;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.lenient;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ChildResourceViaProviderTest {
+@ExtendWith(MockitoExtension.class)
+class ChildResourceViaProviderTest {
 
     private ChildResourceViaProvider provider = new ChildResourceViaProvider();
 
@@ -53,40 +54,40 @@ public class ChildResourceViaProviderTest {
     private org.apache.sling.api.SlingHttpServletRequest javaxRequest;
 
     @SuppressWarnings("deprecation")
-    @Before
-    public void init() {
-        when(resource.getChild("child")).thenReturn(childResource);
-        when(jakartaRequest.getResource()).thenReturn(resource);
-        when(javaxRequest.getResource()).thenReturn(resource);
+    @BeforeEach
+    void init() {
+        lenient().when(resource.getChild("child")).thenReturn(childResource);
+        lenient().when(jakartaRequest.getResource()).thenReturn(resource);
+        lenient().when(javaxRequest.getResource()).thenReturn(resource);
     }
 
     @Test
-    public void testResource() {
+    void testResource() {
         Object adaptable = provider.getAdaptable(resource, "child");
-        Assert.assertEquals(adaptable, childResource);
+        assertEquals(adaptable, childResource);
     }
 
     @Test
-    public void testResourceWithBlank() {
+    void testResourceWithBlank() {
         Object adaptable = provider.getAdaptable(resource, "");
-        Assert.assertEquals(ViaProvider.ORIGINAL, adaptable);
+        assertEquals(ViaProvider.ORIGINAL, adaptable);
     }
 
     @Test
-    public void testResourceWithOtherAdaptable() {
-        Assert.assertNull(provider.getAdaptable(new Object(), "child"));
+    void testResourceWithOtherAdaptable() {
+        assertNull(provider.getAdaptable(new Object(), "child"));
     }
 
     @Test
-    public void testJakartaRequest() {
+    void testJakartaRequest() {
         Object adaptable = provider.getAdaptable(jakartaRequest, "child");
         Resource adaptableResource = ((SlingJakartaHttpServletRequest) adaptable).getResource();
-        Assert.assertEquals(adaptableResource, childResource);
+        assertEquals(adaptableResource, childResource);
     }
 
     @Test
-    public void testJakartaRequestWhenChildDoesNotExist() {
-        Assert.assertNull(provider.getAdaptable(jakartaRequest, "notexisting"));
+    void testJakartaRequestWhenChildDoesNotExist() {
+        assertNull(provider.getAdaptable(jakartaRequest, "notexisting"));
     }
 
     /**
@@ -94,10 +95,10 @@ public class ChildResourceViaProviderTest {
      */
     @Deprecated
     @Test
-    public void testJavaxRequest() {
+    void testJavaxRequest() {
         Object adaptable = provider.getAdaptable(javaxRequest, "child");
         Resource adaptableResource = ((org.apache.sling.api.SlingHttpServletRequest) adaptable).getResource();
-        Assert.assertEquals(adaptableResource, childResource);
+        assertEquals(adaptableResource, childResource);
     }
 
     /**
@@ -105,7 +106,7 @@ public class ChildResourceViaProviderTest {
      */
     @Deprecated
     @Test
-    public void testJavaxRequestWhenChildDoesNotExist() {
-        Assert.assertNull(provider.getAdaptable(javaxRequest, "notexisting"));
+    void testJavaxRequestWhenChildDoesNotExist() {
+        assertNull(provider.getAdaptable(javaxRequest, "notexisting"));
     }
 }
