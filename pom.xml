@@ -422,7 +422,7 @@
                                 <artifact>
                                     <file>${project.build.directory}/it-testbundle.jar</file>
                                     <type>jar</type>
-                                    <classifier>ittestbundle</classifier>
+                                    <classifier>it-testbundle</classifier>
                                 </artifact>
                             </artifacts>
                         </configuration>
