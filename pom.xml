@@ -36,16 +36,18 @@
         <tag>org.apache.sling.models.impl-1.7.2</tag>
         <url>https://github.com/apache/sling-org-apache-sling-models-impl.git</url>
     </scm>
+
     <properties>
         <project.build.outputTimestamp>2025-08-27T03:14:05Z</project.build.outputTimestamp>
         <sling.java.version>17</sling.java.version>
+        <models.api.version>2.0.0</models.api.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.models.api</artifactId>
-            <version>2.0.0</version>
+            <version>${models.api.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
