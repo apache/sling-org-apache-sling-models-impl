@@ -28,29 +28,29 @@ import org.apache.sling.models.impl.injector.CustomAnnotation;
 import org.apache.sling.models.impl.injector.CustomAnnotationInjector;
 import org.apache.sling.models.impl.injector.SimpleInjector;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SuppressWarnings("deprecation")
-@RunWith(MockitoJUnitRunner.class)
-public class CustomInjectorTest {
+@ExtendWith(MockitoExtension.class)
+class CustomInjectorTest {
 
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
                 TestModel.class, CustomAnnotationModel.class);
     }
 
     @Test
-    public void testInjectorWhichDoesNotImplementAnnotationProcessor() {
+    void testInjectorWhichDoesNotImplementAnnotationProcessor() {
         factory.injectors = Arrays.asList(new SimpleInjector());
 
         TestModel model = factory.getAdapter(new Object(), TestModel.class);
@@ -59,7 +59,7 @@ public class CustomInjectorTest {
     }
 
     @Test
-    public void testInjectorWithCustomAnnotation() {
+    void testInjectorWithCustomAnnotation() {
         CustomAnnotationInjector injector = new CustomAnnotationInjector();
 
         factory.injectors = Arrays.asList(new SimpleInjector(), injector);

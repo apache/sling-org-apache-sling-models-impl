@@ -27,20 +27,20 @@ import org.apache.sling.api.wrappers.JakartaToJavaxRequestWrapper;
 import org.apache.sling.models.spi.ImplementationPicker;
 import org.apache.sling.testing.mock.osgi.MockOsgi;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.osgi.framework.BundleContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AdapterImplementationsTest {
+@ExtendWith(MockitoExtension.class)
+class AdapterImplementationsTest {
 
     private static final Class<?> SAMPLE_ADAPTER = Comparable.class;
     private static final Object SAMPLE_ADAPTABLE = new Object();
@@ -59,13 +59,13 @@ public class AdapterImplementationsTest {
     @Mock
     private ResourceResolver resourceResolver;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         underTest = new AdapterImplementations();
     }
 
     @Test
-    public void testNoMapping() {
+    void testNoMapping() {
         assertNull(underTest.lookup(SAMPLE_ADAPTER, SAMPLE_ADAPTABLE, Arrays.asList(new FirstImplementationPicker())));
 
         // make sure this raises no exception
@@ -73,7 +73,7 @@ public class AdapterImplementationsTest {
     }
 
     @Test
-    public void testSingleMapping() {
+    void testSingleMapping() {
         underTest.addAll(String.class, SAMPLE_ADAPTER);
 
         assertEquals(
@@ -88,7 +88,7 @@ public class AdapterImplementationsTest {
     }
 
     @Test
-    public void testMultipleMappings() {
+    void testMultipleMappings() {
         underTest.addAll(String.class, SAMPLE_ADAPTER);
         underTest.addAll(Integer.class, SAMPLE_ADAPTER);
         underTest.addAll(Long.class, SAMPLE_ADAPTER);
@@ -114,7 +114,7 @@ public class AdapterImplementationsTest {
     }
 
     @Test
-    public void testRemoveAll() {
+    void testRemoveAll() {
         underTest.addAll(String.class, SAMPLE_ADAPTER);
         underTest.addAll(Integer.class, SAMPLE_ADAPTER);
         underTest.addAll(Long.class, SAMPLE_ADAPTER);
@@ -125,7 +125,7 @@ public class AdapterImplementationsTest {
     }
 
     @Test
-    public void testMultipleImplementationPickers() {
+    void testMultipleImplementationPickers() {
         underTest.addAll(String.class, SAMPLE_ADAPTER);
         underTest.addAll(Integer.class, SAMPLE_ADAPTER);
         underTest.addAll(Long.class, SAMPLE_ADAPTER);
@@ -144,7 +144,7 @@ public class AdapterImplementationsTest {
     }
 
     @Test
-    public void testSimpleModel() {
+    void testSimpleModel() {
         underTest.addAll(SAMPLE_ADAPTER, SAMPLE_ADAPTER);
 
         assertEquals(
@@ -155,7 +155,7 @@ public class AdapterImplementationsTest {
     }
 
     @Test
-    public void testResourceTypeRegistrationForResource() {
+    void testResourceTypeRegistrationForResource() {
         when(resource.getResourceType()).thenReturn("sling/rt/one");
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
         when(childResource.getResourceType()).thenReturn("sling/rt/child");
@@ -187,7 +187,7 @@ public class AdapterImplementationsTest {
     }
 
     @Test
-    public void testResourceTypeRegistrationForAbsolutePath() {
+    void testResourceTypeRegistrationForAbsolutePath() {
         when(resource.getResourceType()).thenReturn("sling/rt/one");
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
         when(childResource.getResourceType()).thenReturn("sling/rt/child");
@@ -213,7 +213,7 @@ public class AdapterImplementationsTest {
     }
 
     @Test
-    public void testResourceTypeRegistrationForResourceHavingAbsolutePath() {
+    void testResourceTypeRegistrationForResourceHavingAbsolutePath() {
         when(resource.getResourceType()).thenReturn("/apps/sling/rt/one");
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
         when(childResource.getResourceType()).thenReturn("/apps/sling/rt/child");
@@ -238,7 +238,7 @@ public class AdapterImplementationsTest {
     }
 
     @Test
-    public void testResourceTypeRegistrationForJakartaRequest() {
+    void testResourceTypeRegistrationForJakartaRequest() {
         when(resource.getResourceType()).thenReturn("sling/rt/one");
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.getParentResourceType(resource)).thenReturn(null);
@@ -273,7 +273,7 @@ public class AdapterImplementationsTest {
      */
     @Deprecated
     @Test
-    public void testResourceTypeRegistrationForJavaxRequest() {
+    void testResourceTypeRegistrationForJavaxRequest() {
         org.apache.sling.api.SlingHttpServletRequest javaxRequest =
                 JakartaToJavaxRequestWrapper.toJavaxRequest(request);
 
@@ -313,7 +313,7 @@ public class AdapterImplementationsTest {
     }
 
     @Test
-    public void testResourceTypeRegistrationForResourceWithoutResourceType() {
+    void testResourceTypeRegistrationForResourceWithoutResourceType() {
         lenient().when(resource.getResourceType()).thenReturn(null);
         lenient().when(resource.getResourceResolver()).thenReturn(resourceResolver);
         lenient().when(resourceResolver.getSearchPath()).thenReturn(new String[] {"/apps/", "/libs/"});

@@ -36,22 +36,22 @@ import org.apache.sling.models.testmodels.interfaces.AdapterType1;
 import org.apache.sling.models.testmodels.interfaces.AdapterType2;
 import org.apache.sling.models.testmodels.interfaces.AdapterType3;
 import org.apache.sling.servlethelpers.MockSlingJakartaHttpServletRequest;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CachingTest {
+@ExtendWith(MockitoExtension.class)
+class CachingTest {
 
     @Spy
     private MockSlingJakartaHttpServletRequest request = new MockSlingJakartaHttpServletRequest(null);
@@ -63,8 +63,8 @@ public class CachingTest {
 
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.injectors = Arrays.asList(new RequestAttributeInjector(), new ValueMapInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
@@ -83,15 +83,15 @@ public class CachingTest {
                 AdapterType2.class,
                 AdapterType3.class);
 
-        when(request.getAttribute("testValue")).thenReturn("test");
+        lenient().when(request.getAttribute("testValue")).thenReturn("test");
         requestWrapper = new SlingJakartaHttpServletRequestWrapper(request);
 
         ValueMap vm = new ValueMapDecorator(Collections.singletonMap("testValue", "test"));
-        when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
+        lenient().when(resource.adaptTo(ValueMap.class)).thenReturn(vm);
     }
 
     @Test
-    public void testCachedClass() {
+    void testCachedClass() {
         CachedModel cached1 = factory.getAdapter(request, CachedModel.class);
         CachedModel cached2 = factory.getAdapter(request, CachedModel.class);
 
@@ -103,7 +103,7 @@ public class CachingTest {
     }
 
     @Test
-    public void testCachedClassWithResource() {
+    void testCachedClassWithResource() {
         CachedModel cached1 = factory.getAdapter(resource, CachedModel.class);
         CachedModel cached2 = factory.getAdapter(resource, CachedModel.class);
 
@@ -115,7 +115,7 @@ public class CachingTest {
     }
 
     @Test
-    public void testNoCachedClass() {
+    void testNoCachedClass() {
         UncachedModel uncached1 = factory.getAdapter(request, UncachedModel.class);
         UncachedModel uncached2 = factory.getAdapter(request, UncachedModel.class);
 
@@ -127,7 +127,7 @@ public class CachingTest {
     }
 
     @Test
-    public void testNoCachedClassWithResource() {
+    void testNoCachedClassWithResource() {
         UncachedModel uncached1 = factory.getAdapter(resource, UncachedModel.class);
         UncachedModel uncached2 = factory.getAdapter(resource, UncachedModel.class);
 
@@ -139,7 +139,7 @@ public class CachingTest {
     }
 
     @Test
-    public void testCachedInterface() {
+    void testCachedInterface() {
         org.apache.sling.models.testmodels.interfaces.CachedModel cached1 =
                 factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.CachedModel.class);
         org.apache.sling.models.testmodels.interfaces.CachedModel cached2 =
@@ -153,7 +153,7 @@ public class CachingTest {
     }
 
     @Test
-    public void testNoCachedInterface() {
+    void testNoCachedInterface() {
         org.apache.sling.models.testmodels.interfaces.UncachedModel uncached1 =
                 factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.UncachedModel.class);
         org.apache.sling.models.testmodels.interfaces.UncachedModel uncached2 =
@@ -167,7 +167,7 @@ public class CachingTest {
     }
 
     @Test
-    public void testCachedClassWithRequestWrapper() {
+    void testCachedClassWithRequestWrapper() {
         CachedModel cached1 = factory.getAdapter(request, CachedModel.class);
         CachedModel cached2 = factory.getAdapter(requestWrapper, CachedModel.class);
 
@@ -187,7 +187,7 @@ public class CachingTest {
     }
 
     @Test
-    public void testCachedInterfaceWithRequestWrapper() {
+    void testCachedInterfaceWithRequestWrapper() {
         org.apache.sling.models.testmodels.interfaces.CachedModel cached1 =
                 factory.getAdapter(request, org.apache.sling.models.testmodels.interfaces.CachedModel.class);
         org.apache.sling.models.testmodels.interfaces.CachedModel cached2 =
@@ -201,7 +201,7 @@ public class CachingTest {
     }
 
     @Test
-    public void testCachedModelWithAdapterTypes() {
+    void testCachedModelWithAdapterTypes() {
         // test 2 model implementations that share a common adapter type, with an implementation picker that selects
         // exactly one of the
         // implementations for the common adapter type. verify that the models are cached accordingly

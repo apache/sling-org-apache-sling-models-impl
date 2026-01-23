@@ -26,23 +26,23 @@ import org.apache.sling.models.impl.injectors.SelfInjector;
 import org.apache.sling.models.testmodels.classes.constructorvisibility.PackagePrivateConstructorModel;
 import org.apache.sling.models.testmodels.classes.constructorvisibility.PrivateConstructorModel;
 import org.apache.sling.models.testmodels.classes.constructorvisibility.ProtectedConstructorModel;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ConstructorVisibilityTest {
+@ExtendWith(MockitoExtension.class)
+class ConstructorVisibilityTest {
     private ModelAdapterFactory factory;
 
     @Mock
     private SlingJakartaHttpServletRequest request;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.injectors = Arrays.asList(new RequestAttributeInjector(), new SelfInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
@@ -50,19 +50,19 @@ public class ConstructorVisibilityTest {
     }
 
     @Test
-    public void testNonPublicConstructorProtectedModel() {
+    void testNonPublicConstructorProtectedModel() {
         ProtectedConstructorModel model = factory.createModel(request, ProtectedConstructorModel.class);
         assertNotNull(model);
     }
 
     @Test
-    public void testNonPublicConstructorPackagePrivateModel() {
+    void testNonPublicConstructorPackagePrivateModel() {
         PackagePrivateConstructorModel model = factory.createModel(request, PackagePrivateConstructorModel.class);
         assertNotNull(model);
     }
 
     @Test
-    public void testNonPublicConstructorPrivateModel() {
+    void testNonPublicConstructorPrivateModel() {
         PrivateConstructorModel model = factory.createModel(request, PrivateConstructorModel.class);
         assertNotNull(model);
     }

@@ -34,29 +34,29 @@ import org.apache.sling.models.factory.MissingElementException;
 import org.apache.sling.models.factory.MissingElementsException;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("deprecation")
-@RunWith(MockitoJUnitRunner.class)
-public class AnnotationConflictsTest {
+@ExtendWith(MockitoExtension.class)
+class AnnotationConflictsTest {
 
     private ModelAdapterFactory factory;
 
     @Mock
     private Resource resource;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         ValueMapInjector injector = new ValueMapInjector();
         factory.injectors = Arrays.asList(injector);
@@ -72,7 +72,7 @@ public class AnnotationConflictsTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testSucessfulAdaptations() {
+    void testSucessfulAdaptations() {
         for (Class<?> clazz : this.getClass().getDeclaredClasses()) {
             if (!clazz.isInterface() && clazz.getSimpleName().startsWith("Successful")) {
                 successful((Class<Methods>) clazz);
@@ -82,7 +82,7 @@ public class AnnotationConflictsTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testFailingAdaptations() {
+    void testFailingAdaptations() {
         for (Class<?> clazz : this.getClass().getDeclaredClasses()) {
             if (!clazz.isInterface() && clazz.getSimpleName().startsWith("Failing")) {
                 failing((Class<Methods>) clazz);
@@ -274,14 +274,14 @@ public class AnnotationConflictsTest {
         when(resource.adaptTo(ValueMap.class)).thenReturn(map);
 
         Methods model = factory.createModel(resource, modelClass);
-        assertNotNull("Adaptation to " + modelClass.getSimpleName() + " was not null.", model);
+        assertNotNull(model, "Adaptation to " + modelClass.getSimpleName() + " was not null.");
         assertNull(
-                "Adaptation to " + modelClass.getSimpleName() + " had a non-null emptyText value.",
-                model.getEmptyText());
+                model.getEmptyText(),
+                "Adaptation to " + modelClass.getSimpleName() + " had a non-null emptyText value.");
         assertEquals(
-                "Adaptation to " + modelClass.getSimpleName() + " had an unexpected value in the otherText value.",
                 "hello",
-                model.getOtherText());
+                model.getOtherText(),
+                "Adaptation to " + modelClass.getSimpleName() + " had an unexpected value in the otherText value.");
     }
 
     private <T extends Methods> void failing(Class<T> modelClass) {
@@ -294,15 +294,16 @@ public class AnnotationConflictsTest {
             factory.createModel(resource, modelClass);
         } catch (MissingElementsException e) {
             assertEquals(
-                    "Adaptation to " + modelClass.getSimpleName() + " failed, but with the wrong number of exceptions.",
                     1,
-                    e.getMissingElements().size());
+                    e.getMissingElements().size(),
+                    "Adaptation to " + modelClass.getSimpleName()
+                            + " failed, but with the wrong number of exceptions.");
             MissingElementException me = e.getMissingElements().iterator().next();
             assertTrue(
-                    "Adaptation to " + modelClass.getSimpleName() + " didn't fail due to emptyText.",
-                    me.getElement().toString().endsWith("emptyText"));
+                    me.getElement().toString().endsWith("emptyText"),
+                    "Adaptation to " + modelClass.getSimpleName() + " didn't fail due to emptyText.");
             thrown = true;
         }
-        assertTrue("Adaptation to " + modelClass.getSimpleName() + " was successful.", thrown);
+        assertTrue(thrown, "Adaptation to " + modelClass.getSimpleName() + " was successful.");
     }
 }
