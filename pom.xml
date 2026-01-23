@@ -290,6 +290,12 @@
             <version>3.0.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
+            <version>4.8.184</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -367,6 +373,29 @@
                 </configuration>
             </plugin>
 
+            <!-- Generate IT Test Bundle on the fly via TinyBundles -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>generate-it-testbundle</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <classpathScope>test</classpathScope>
+                            <mainClass>org.apache.sling.models.it.GenerateTestBundle</mainClass>
+                            <arguments>
+                                <argument>${project.build.directory}/it-testbundle.jar</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -381,6 +410,21 @@
                             <portNames>
                                 <portName>http.port</portName>
                             </portNames>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>attach-it-testbundle</id>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/it-testbundle.jar</file>
+                                    <type>jar</type>
+                                    <classifier>ittestbundle</classifier>
+                                </artifact>
+                            </artifacts>
                         </configuration>
                     </execution>
                 </executions>
@@ -443,7 +487,7 @@
                             <goal>analyse-features</goal>
                             <goal>attach-features</goal>
                         </goals>
-                        <phase>prepare-package</phase>
+                        <phase>pre-integration-test</phase>
                     </execution>
                 </executions>
             </plugin>

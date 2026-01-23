@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.models.it;
+package org.apache.sling.models.it.testing;
 
 import javax.jcr.Node;
 import javax.jcr.Session;
@@ -26,31 +26,25 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.junit.rules.TeleporterRule;
-import org.apache.sling.models.factory.ModelFactory;
 import org.apache.sling.models.it.testbundle.models.ConstructorInjectionTestModel;
 import org.apache.sling.models.it.testbundle.models.FieldInjectionTestModel;
-import org.apache.sling.models.it.testbundle.models.implextend.InvalidImplementsInterfacePropertyModel;
-import org.apache.sling.models.it.testbundle.models.implextend.SampleServiceInterface;
+import org.apache.sling.models.it.testbundle.models.InterfaceInjectionTestModel;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
-public class ModelFactorySimpleIT {
+public class SimpleIT {
 
     @Rule
     public final TeleporterRule teleporter = TeleporterRule.forClass(getClass(), "SM_Teleporter");
 
-    private ModelFactory modelFactory;
-
     private String value;
+    private String childValue;
     private ResourceResolver resolver;
     private Resource resource;
     private Node createdNode;
@@ -59,14 +53,16 @@ public class ModelFactorySimpleIT {
     @SuppressWarnings("null")
     public void setUp() throws Exception {
         ResourceResolverFactory rrFactory = teleporter.getService(ResourceResolverFactory.class);
-        modelFactory = teleporter.getService(ModelFactory.class);
         value = RandomStringUtils.randomAlphanumeric(10);
+        childValue = RandomStringUtils.randomAlphanumeric(10);
 
         resolver = rrFactory.getServiceResourceResolver(null);
         Session session = resolver.adaptTo(Session.class);
         Node rootNode = session.getRootNode();
         createdNode = rootNode.addNode("test_" + RandomStringUtils.randomAlphanumeric(10));
         createdNode.setProperty("testProperty", value);
+        Node child = createdNode.addNode("child");
+        child.setProperty("childProperty", childValue);
         session.save();
 
         resource = resolver.getResource(createdNode.getPath());
@@ -83,8 +79,19 @@ public class ModelFactorySimpleIT {
     }
 
     @Test
-    public void testCreateModel() {
-        FieldInjectionTestModel model = modelFactory.createModel(resource, FieldInjectionTestModel.class);
+    public void testFieldInjection() {
+        FieldInjectionTestModel model = resource.adaptTo(FieldInjectionTestModel.class);
+
+        assertNotNull("Model is null", model);
+        assertEquals("Test Property is not set correctly", value, model.getTestProperty());
+        assertEquals("Child Test Property is not set correctly", childValue, model.getChildProperty());
+        assertNotNull("Filters is null", model.getFilters());
+        assertSame("Adaptable is not injected", resource, model.getResource());
+    }
+
+    @Test
+    public void testInterfaceInjection() {
+        InterfaceInjectionTestModel model = resource.adaptTo(InterfaceInjectionTestModel.class);
 
         assertNotNull("Model is null", model);
         assertEquals("Test Property is not set correctly", value, model.getTestProperty());
@@ -92,39 +99,13 @@ public class ModelFactorySimpleIT {
         assertSame("Adaptable is not injected", resource, model.getResource());
     }
 
-    @Ignore
-    private static final class DummyClass {}
-
     @Test
-    public void testIsModelClass() {
-        assertTrue("Model is not detected as such", modelFactory.isModelClass(ConstructorInjectionTestModel.class));
-        assertFalse("Dummy class incorrectly detected as model class", modelFactory.isModelClass(DummyClass.class));
-        assertFalse(
-                "Model with invalid adaptable incorrectly detected as model class",
-                modelFactory.isModelClass(InvalidImplementsInterfacePropertyModel.class));
-        assertTrue(
-                "Model is not detected as such",
-                modelFactory.isModelClass(SampleServiceInterface.class)); // being provided by two adapters
-    }
+    public void testConstructorInjection() {
+        ConstructorInjectionTestModel model = resource.adaptTo(ConstructorInjectionTestModel.class);
 
-    @Test
-    public void testCanCreateFromAdaptable() {
-        assertTrue(
-                "Model is not detected as such",
-                modelFactory.canCreateFromAdaptable(resource, ConstructorInjectionTestModel.class));
-        assertTrue(
-                "Model is not detected as such",
-                modelFactory.canCreateFromAdaptable(resource, SampleServiceInterface.class));
-        assertFalse(
-                "Model is incorrectly detected",
-                modelFactory.canCreateFromAdaptable(
-                        new String(), ConstructorInjectionTestModel.class)); // invalid adaptable
-    }
-
-    @Test()
-    public void testCanCreateFromAdaptableWithModelExceptin() {
-        assertFalse(
-                "Model is incorrectly detected",
-                modelFactory.canCreateFromAdaptable(resource, DummyClass.class)); // no model class
+        assertNotNull("Model is null", model);
+        assertEquals("Test Property is not set correctly", value, model.getTestProperty());
+        assertNotNull("Filters is null", model.getFilters());
+        assertSame("Adaptable is not injected", resource, model.getResource());
     }
 }

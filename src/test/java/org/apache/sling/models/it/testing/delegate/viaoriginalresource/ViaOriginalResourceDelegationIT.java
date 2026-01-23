@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.models.it.delegate.viaoriginalresource;
+package org.apache.sling.models.it.testing.delegate.viaoriginalresource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,12 +29,12 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.junit.rules.TeleporterRule;
 import org.apache.sling.models.factory.ModelFactory;
-import org.apache.sling.models.it.rtbound.FakeRequest;
 import org.apache.sling.models.it.testbundle.delegate.viaoriginalresource.A;
 import org.apache.sling.models.it.testbundle.delegate.viaoriginalresource.models.A1Impl;
 import org.apache.sling.models.it.testbundle.delegate.viaoriginalresource.models.AImpl;
 import org.apache.sling.models.it.testbundle.delegate.viaoriginalresource.models.B1Impl;
 import org.apache.sling.models.it.testbundle.delegate.viaoriginalresource.models.BImpl;
+import org.apache.sling.models.it.testing.rtbound.FakeRequest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.models.it;
+package org.apache.sling.models.it.testing;
 
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.engine.SlingRequestProcessor;
 import org.apache.sling.junit.rules.TeleporterRule;
-import org.apache.sling.models.it.helper.FakeRequest;
-import org.apache.sling.models.it.helper.FakeResponse;
+import org.apache.sling.models.it.testing.helper.FakeRequest;
+import org.apache.sling.models.it.testing.helper.FakeResponse;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;

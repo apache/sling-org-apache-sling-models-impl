@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.models.it.rtbound;
+package org.apache.sling.models.it.testing.helper;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
@@ -27,6 +27,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
@@ -37,112 +38,23 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.ResourceBundle;
 
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.request.RequestDispatcherOptions;
-import org.apache.sling.api.request.RequestParameter;
-import org.apache.sling.api.request.RequestParameterMap;
-import org.apache.sling.api.request.RequestPathInfo;
-import org.apache.sling.api.request.RequestProgressTracker;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.jetbrains.annotations.NotNull;
+public class FakeRequest implements HttpServletRequest {
 
-public class FakeRequest implements SlingHttpServletRequest {
+    private final String path;
 
-    private final Resource resource;
-    private final Map<String, Object> attributes = new HashMap<>();
+    private final StringBuffer requestUrl;
 
-    public FakeRequest(Resource r) {
-        this.resource = r;
-    }
+    private final Map<String, Object> attributes = new HashMap<String, Object>();
 
-    @Override
-    public @NotNull Resource getResource() {
-        return resource;
-    }
-
-    @Override
-    @SuppressWarnings("null")
-    public @NotNull ResourceResolver getResourceResolver() {
-        return null;
-    }
-
-    @Override
-    @SuppressWarnings("null")
-    public @NotNull RequestPathInfo getRequestPathInfo() {
-        return null;
-    }
-
-    @Override
-    public RequestParameter getRequestParameter(@NotNull String s) {
-        return null;
-    }
-
-    @Override
-    public RequestParameter[] getRequestParameters(@NotNull String s) {
-        return new RequestParameter[0];
-    }
-
-    @Override
-    @SuppressWarnings("null")
-    public @NotNull RequestParameterMap getRequestParameterMap() {
-        return null;
-    }
-
-    @Override
-    public RequestDispatcher getRequestDispatcher(
-            @NotNull String s, RequestDispatcherOptions requestDispatcherOptions) {
-        return null;
-    }
-
-    @Override
-    public RequestDispatcher getRequestDispatcher(
-            @NotNull Resource resource, RequestDispatcherOptions requestDispatcherOptions) {
-        return null;
-    }
-
-    @Override
-    public RequestDispatcher getRequestDispatcher(@NotNull Resource resource) {
-        return null;
-    }
-
-    @Override
-    public Cookie getCookie(String s) {
-        return null;
-    }
-
-    @Override
-    public String getResponseContentType() {
-        return null;
-    }
-
-    @Override
-    @SuppressWarnings("null")
-    public @NotNull Enumeration<String> getResponseContentTypes() {
-        return null;
-    }
-
-    @Override
-    public ResourceBundle getResourceBundle(Locale locale) {
-        return null;
-    }
-
-    @Override
-    public ResourceBundle getResourceBundle(String s, Locale locale) {
-        return null;
-    }
-
-    @Override
-    @SuppressWarnings("null")
-    public RequestProgressTracker getRequestProgressTracker() {
-        return null;
+    public FakeRequest(String path) {
+        this.path = path;
+        this.requestUrl = new StringBuffer("http://notarealhost").append(path);
     }
 
     @Override
@@ -156,17 +68,17 @@ public class FakeRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    public long getDateHeader(String s) {
+    public long getDateHeader(String name) {
         return 0;
     }
 
     @Override
-    public String getHeader(String s) {
+    public String getHeader(String name) {
         return null;
     }
 
     @Override
-    public Enumeration<String> getHeaders(String s) {
+    public Enumeration<String> getHeaders(String name) {
         return null;
     }
 
@@ -176,18 +88,18 @@ public class FakeRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    public int getIntHeader(String s) {
+    public int getIntHeader(String name) {
         return 0;
     }
 
     @Override
     public String getMethod() {
-        return null;
+        return "GET";
     }
 
     @Override
     public String getPathInfo() {
-        return null;
+        return path;
     }
 
     @Override
@@ -211,7 +123,7 @@ public class FakeRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    public boolean isUserInRole(String s) {
+    public boolean isUserInRole(String role) {
         return false;
     }
 
@@ -232,16 +144,16 @@ public class FakeRequest implements SlingHttpServletRequest {
 
     @Override
     public StringBuffer getRequestURL() {
-        return null;
+        return requestUrl;
     }
 
     @Override
     public String getServletPath() {
-        return null;
+        return "";
     }
 
     @Override
-    public HttpSession getSession(boolean b) {
+    public HttpSession getSession(boolean create) {
         return null;
     }
 
@@ -271,8 +183,8 @@ public class FakeRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    public Object getAttribute(String s) {
-        return attributes.get(s);
+    public Object getAttribute(String name) {
+        return attributes.get(name);
     }
 
     @Override
@@ -286,7 +198,7 @@ public class FakeRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    public void setCharacterEncoding(String s) throws UnsupportedEncodingException {}
+    public void setCharacterEncoding(String env) throws UnsupportedEncodingException {}
 
     @Override
     public int getContentLength() {
@@ -304,7 +216,7 @@ public class FakeRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    public String getParameter(String s) {
+    public String getParameter(String name) {
         return null;
     }
 
@@ -314,13 +226,13 @@ public class FakeRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    public String[] getParameterValues(String s) {
+    public String[] getParameterValues(String name) {
         return new String[0];
     }
 
     @Override
     public Map<String, String[]> getParameterMap() {
-        return null;
+        return Collections.emptyMap();
     }
 
     @Override
@@ -359,12 +271,14 @@ public class FakeRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    public void setAttribute(String s, Object o) {
-        attributes.put(s, o);
+    public void setAttribute(String name, Object o) {
+        attributes.put(name, o);
     }
 
     @Override
-    public void removeAttribute(String s) {}
+    public void removeAttribute(String name) {
+        attributes.remove(name);
+    }
 
     @Override
     public Locale getLocale() {
@@ -373,7 +287,7 @@ public class FakeRequest implements SlingHttpServletRequest {
 
     @Override
     public Enumeration<Locale> getLocales() {
-        return null;
+        return Collections.emptyEnumeration();
     }
 
     @Override
@@ -382,12 +296,12 @@ public class FakeRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    public RequestDispatcher getRequestDispatcher(String s) {
+    public RequestDispatcher getRequestDispatcher(String path) {
         return null;
     }
 
     @Override
-    public String getRealPath(String s) {
+    public String getRealPath(String path) {
         return null;
     }
 
@@ -409,44 +323,6 @@ public class FakeRequest implements SlingHttpServletRequest {
     @Override
     public int getLocalPort() {
         return 0;
-    }
-
-    @Override
-    @SuppressWarnings("null")
-    public <AdapterType> AdapterType adaptTo(@NotNull Class<AdapterType> aClass) {
-        return null;
-    }
-
-    @Override
-    public String changeSessionId() {
-        return null;
-    }
-
-    @Override
-    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
-        return false;
-    }
-
-    @Override
-    public void login(String username, String password) throws ServletException {}
-
-    @Override
-    public void logout() throws ServletException {}
-
-    @Override
-    public Collection<Part> getParts() throws IOException, ServletException {
-        return null;
-    }
-
-    @Override
-    public Part getPart(String name) throws IOException, ServletException {
-        return null;
-    }
-
-    @Override
-    @SuppressWarnings("null")
-    public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
-        return null;
     }
 
     @Override
@@ -491,8 +367,34 @@ public class FakeRequest implements SlingHttpServletRequest {
     }
 
     @Override
+    public String changeSessionId() {
+        return null;
+    }
+
+    @Override
+    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+        return false;
+    }
+
+    @Override
+    public void login(String username, String password) throws ServletException {}
+
+    @Override
+    public void logout() throws ServletException {}
+
+    @Override
+    public Collection<Part> getParts() throws IOException, ServletException {
+        return null;
+    }
+
+    @Override
+    public Part getPart(String name) throws IOException, ServletException {
+        return null;
+    }
+
+    @Override
     @SuppressWarnings("null")
-    public List<RequestParameter> getRequestParameterList() {
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
         return null;
     }
 }

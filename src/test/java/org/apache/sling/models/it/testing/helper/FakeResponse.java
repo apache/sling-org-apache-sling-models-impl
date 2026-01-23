@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.models.it.helper;
+package org.apache.sling.models.it.testing.helper;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;

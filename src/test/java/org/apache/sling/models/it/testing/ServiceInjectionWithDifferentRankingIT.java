@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.models.it;
+package org.apache.sling.models.it.testing;
 
 import javax.jcr.Node;
 import javax.jcr.Session;

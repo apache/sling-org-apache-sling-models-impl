@@ -9,7 +9,7 @@
             "start-order": 20
         },
         {
-            "id": "org.apache.sling/org.apache.sling.models.impl.it.test-models/${project.version}",
+            "id": "org.apache.sling/org.apache.sling.models.impl/${project.version}//ittestbundle",
             "start-order": 20
         }
     ],

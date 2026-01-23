@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.models.it.rtboundpicker;
+package org.apache.sling.models.it.testing.delegate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,23 +29,26 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.junit.rules.TeleporterRule;
-import org.apache.sling.models.it.testbundle.rtboundpicker.BaseComponent;
-import org.apache.sling.models.it.testbundle.rtboundpicker.SubRTComponent;
-import org.apache.sling.models.it.testbundle.rtboundpicker.TestComponent;
-import org.junit.Assert;
+import org.apache.sling.models.it.testbundle.delegate.resource.DelegateBaseModel;
+import org.apache.sling.models.it.testbundle.delegate.resource.DelegateExtendedModel;
+import org.apache.sling.models.it.testbundle.delegate.resource.DelegateInterface;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class ResourceTypePickerIT {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+public class DelegateResourceIT {
 
     @Rule
     public final TeleporterRule teleporter = TeleporterRule.forClass(getClass(), "SM_Teleporter");
 
     private ResourceResolverFactory rrFactory;
 
-    private final String baseComponentPath = "/content/rtpicker/baseComponent";
-    private final String childComponentPath = "/content/rtpicker/childComponent";
+    private final String baseComponentPath = "/content/delegate/baseComponent";
+    private final String extendedComponentPath = "/content/delegate/extendedComponent";
 
     @Before
     @SuppressWarnings("null")
@@ -53,19 +56,26 @@ public class ResourceTypePickerIT {
         rrFactory = teleporter.getService(ResourceResolverFactory.class);
         try (ResourceResolver adminResolver = rrFactory.getServiceResourceResolver(null); ) {
             Map<String, Object> properties = new HashMap<String, Object>();
+            properties.put("text", "baseTESTValue");
+            properties.put("other", "baseOther");
             properties.put(
                     SlingConstants.NAMESPACE_PREFIX + ":" + SlingConstants.PROPERTY_RESOURCE_TYPE,
-                    "sling/rtpicker/base");
+                    "sling/delegate/base");
             ResourceUtil.getOrCreateResource(adminResolver, baseComponentPath, properties, null, false);
             properties.clear();
 
+            properties.put("text", "extendedTESTValue");
+            properties.put("other", "extendedOther");
             properties.put(
                     SlingConstants.NAMESPACE_PREFIX + ":" + SlingConstants.PROPERTY_RESOURCE_TYPE,
-                    "sling/rtpicker/sub");
+                    "sling/delegate/extended");
+            ResourceUtil.getOrCreateResource(adminResolver, extendedComponentPath, properties, null, false);
+            properties.clear();
+
             properties.put(
                     SlingConstants.NAMESPACE_PREFIX + ":" + SlingConstants.PROPERTY_RESOURCE_SUPER_TYPE,
-                    "sling/rtpicker/base");
-            ResourceUtil.getOrCreateResource(adminResolver, childComponentPath, properties, null, false);
+                    "sling/delegate/base");
+            ResourceUtil.getOrCreateResource(adminResolver, "/apps/sling/delegate/extended", properties, null, false);
             properties.clear();
 
             adminResolver.commit();
@@ -73,19 +83,23 @@ public class ResourceTypePickerIT {
     }
 
     @Test
-    public void testClientModelCreateFromResource() throws LoginException {
+    public void testCreateDelegateModel() throws LoginException {
         try (ResourceResolver resolver = rrFactory.getServiceResourceResolver(null); ) {
             final Resource baseComponentResource = resolver.getResource(baseComponentPath);
-            Assert.assertNotNull(baseComponentResource);
-            TestComponent baseModel = baseComponentResource.adaptTo(TestComponent.class);
-            Assert.assertNotNull("Model should not be null", baseModel);
-            Assert.assertTrue("Model should be a BaseComponent", baseModel instanceof BaseComponent);
+            assertNotNull(baseComponentResource);
+            final DelegateInterface modelFromBase = baseComponentResource.adaptTo(DelegateInterface.class);
+            assertNotNull("Model should not be null", modelFromBase);
+            assertTrue("Model should be DelegateBaseModel", modelFromBase instanceof DelegateBaseModel);
+            assertEquals("baseTESTValue", modelFromBase.getText());
+            assertEquals("baseOther", modelFromBase.getOther());
 
-            final Resource childComponentResource = resolver.getResource(childComponentPath);
-            Assert.assertNotNull(childComponentResource);
-            baseModel = childComponentResource.adaptTo(TestComponent.class);
-            Assert.assertNotNull("Model should not be null", baseModel);
-            Assert.assertTrue("Model should be a SubRTComponent", baseModel instanceof SubRTComponent);
+            final Resource extendedComponentResource = resolver.getResource(extendedComponentPath);
+            assertNotNull(extendedComponentResource);
+            final DelegateInterface modelFromExtended = extendedComponentResource.adaptTo(DelegateInterface.class);
+            assertNotNull("Model should not be null", modelFromExtended);
+            assertTrue("Model should be DelegateExtendedModel", modelFromExtended instanceof DelegateExtendedModel);
+            assertEquals("EXTENDEDTESTVALUE", modelFromExtended.getText());
+            assertEquals("extendedOther", modelFromExtended.getOther());
         }
     }
 }
