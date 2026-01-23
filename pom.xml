@@ -391,8 +391,8 @@
                 <artifactId>slingfeature-maven-plugin</artifactId>
                 <version>1.9.2</version>
                 <extensions>true</extensions>
-
                 <configuration>
+                    <features>src/test/it-features</features>
                     <replacePropertyVariables>models.api.version,it.models.log.level</replacePropertyVariables>
                     <skipAddFeatureDependencies>true</skipAddFeatureDependencies>
                     <aggregates>
@@ -482,6 +482,28 @@
                         <goals>
                             <goal>start</goal>
                             <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <launchpad.http.server.url>http://localhost:${http.port}</launchpad.http.server.url>
+                        <starter.http.test.ports>false:${http.port}</starter.http.test.ports>
+                        <starter.min.bundles.count>${starter.min.bundles.count}</starter.min.bundles.count>
+                        <!-- Comma-separated list of paths to check for 200 status -->
+                        <starter.check.paths>/system/console/bundles,</starter.check.paths>
+                    </systemPropertyVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
                         </goals>
                     </execution>
                 </executions>
