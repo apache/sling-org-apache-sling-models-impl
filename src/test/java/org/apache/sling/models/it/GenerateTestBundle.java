@@ -33,6 +33,7 @@ import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.servlets.annotations.SlingServletPaths;
 import org.ops4j.pax.tinybundles.TinyBundle;
 import org.ops4j.pax.tinybundles.TinyBundles;
 import org.osgi.framework.Constants;
@@ -64,6 +65,9 @@ public class GenerateTestBundle {
                 // add dummy files to please verify-legal-files check
                 .addResource("META-INF/LICENSE", new ByteArrayInputStream(DUMMY_TEXT.getBytes(StandardCharsets.UTF_8)))
                 .addResource("META-INF/NOTICE", new ByteArrayInputStream(DUMMY_TEXT.getBytes(StandardCharsets.UTF_8)));
+
+        // workaround to ensure Component Property Type from this annotation is applied properly
+        bundle.addClass(SlingServletPaths.class);
 
         // add all testbundle classes
         Set<String> modelClassNames = new TreeSet<>();
