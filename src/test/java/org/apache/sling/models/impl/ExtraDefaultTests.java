@@ -23,32 +23,32 @@ import javax.inject.Inject;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Default;
 import org.apache.sling.models.annotations.Model;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ExtraDefaultTests {
+@ExtendWith(MockitoExtension.class)
+class ExtraDefaultTests {
 
     @Mock
     private Resource resource;
 
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
                 EmptyDefaultsModel.class, WrongTypeDefaultsModel.class);
     }
 
     @Test
-    public void testEmptyDefaults() {
+    void testEmptyDefaultsPrimitiveArrays() {
         EmptyDefaultsModel model = factory.getAdapter(resource, EmptyDefaultsModel.class);
         assertNotNull(model);
         assertNotNull(model.booleanArray);
@@ -63,6 +63,12 @@ public class ExtraDefaultTests {
         assertEquals(0, model.longArray.length);
         assertNotNull(model.shortArray);
         assertEquals(0, model.shortArray.length);
+    }
+
+    @Test
+    void testEmptyDefaultsWrapperArrays() {
+        EmptyDefaultsModel model = factory.getAdapter(resource, EmptyDefaultsModel.class);
+        assertNotNull(model);
         assertNotNull(model.booleanWrapperArray);
         assertEquals(0, model.booleanWrapperArray.length);
         assertNotNull(model.doubleWrapperArray);
@@ -77,6 +83,12 @@ public class ExtraDefaultTests {
         assertEquals(0, model.shortWrapperArray.length);
         assertNotNull(model.stringArray);
         assertEquals(0, model.stringArray.length);
+    }
+
+    @Test
+    void testEmptyDefaultsScalars() {
+        EmptyDefaultsModel model = factory.getAdapter(resource, EmptyDefaultsModel.class);
+        assertNotNull(model);
         assertEquals(false, model.singleBoolean);
         assertEquals(0d, model.singleDouble, 0.0001);
         assertEquals(0f, model.singleFloat, 0.0001);
@@ -93,7 +105,7 @@ public class ExtraDefaultTests {
     }
 
     @Test
-    public void testWrongDefaultValues() {
+    void testWrongDefaultValues() {
         WrongTypeDefaultsModel model = factory.getAdapter(resource, WrongTypeDefaultsModel.class);
         assertNotNull(model);
         assertNotNull(model.booleanArray);

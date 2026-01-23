@@ -43,14 +43,13 @@ import org.apache.sling.models.testmodels.classes.implextend.InvalidImplementsIn
 import org.apache.sling.models.testmodels.classes.implextend.InvalidSampleServiceInterface;
 import org.apache.sling.models.testmodels.classes.implextend.SampleServiceInterface;
 import org.apache.sling.models.testmodels.classes.implextend.SimplePropertyModel;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -58,17 +57,18 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ImplementsExtendsTest {
+@ExtendWith(MockitoExtension.class)
+class ImplementsExtendsTest {
 
     @Mock
     private BundleContext bundleContext;
@@ -86,18 +86,19 @@ public class ImplementsExtendsTest {
     private ImplementationPicker firstImplementationPicker = new FirstImplementationPicker();
 
     @SuppressWarnings("unchecked")
-    @Before
-    public void setup() throws ClassNotFoundException, MalformedURLException {
-        when(bundleContext.registerService(anyString(), any(), any(Dictionary.class)))
-                .then(new Answer<ServiceRegistration>() {
+    @BeforeEach
+    void setup() throws ClassNotFoundException, MalformedURLException {
+        lenient()
+                .when(bundleContext.registerService(anyString(), any(), any(Dictionary.class)))
+                .then(new Answer<ServiceRegistration<?>>() {
                     @Override
                     public ServiceRegistration<?> answer(InvocationOnMock invocation) throws Throwable {
                         final Dictionary<String, Object> props =
                                 (Dictionary<String, Object>) invocation.getArguments()[2];
-                        ServiceRegistration reg = mock(ServiceRegistration.class);
-                        ServiceReference ref = mock(ServiceReference.class);
-                        when(reg.getReference()).thenReturn(ref);
-                        when(ref.getProperty(anyString())).thenAnswer(new Answer<Object>() {
+                        ServiceRegistration<?> reg = mock(ServiceRegistration.class);
+                        ServiceReference<?> ref = mock(ServiceReference.class);
+                        lenient().doReturn(ref).when(reg).getReference();
+                        lenient().when(ref.getProperty(anyString())).thenAnswer(new Answer<Object>() {
                             @Override
                             public Object answer(InvocationOnMock invocation) throws Throwable {
                                 String key = (String) invocation.getArguments()[0];
@@ -115,7 +116,7 @@ public class ImplementsExtendsTest {
         // simulate bundle add for ModelPackageBundleListener
         Dictionary<String, String> headers = new Hashtable<String, String>();
         headers.put(ModelPackageBundleListener.PACKAGE_HEADER, "org.apache.sling.models.testmodels.classes.implextend");
-        when(bundle.getHeaders()).thenReturn(headers);
+        lenient().when(bundle.getHeaders()).thenReturn(headers);
 
         Vector<URL> classUrls = new Vector<URL>();
         classUrls.add(getClassUrl(ExtendsClassPropertyModel.class));
@@ -125,9 +126,11 @@ public class ImplementsExtendsTest {
         classUrls.add(getClassUrl(InvalidSampleServiceInterface.class));
         classUrls.add(getClassUrl(SampleServiceInterface.class));
         classUrls.add(getClassUrl(SimplePropertyModel.class));
-        when(bundle.findEntries(anyString(), anyString(), anyBoolean())).thenReturn(classUrls.elements());
+        lenient()
+                .when(bundle.findEntries(anyString(), anyString(), anyBoolean()))
+                .thenReturn(classUrls.elements());
 
-        when(bundle.loadClass(anyString())).then(new Answer<Class<?>>() {
+        lenient().when(bundle.loadClass(anyString())).then(new Answer<Class<?>>() {
             @Override
             public Class<?> answer(InvocationOnMock invocation) throws ClassNotFoundException {
                 String className = (String) invocation.getArguments()[0];
@@ -143,27 +146,24 @@ public class ImplementsExtendsTest {
         return new URL(path);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         // simulate bundle remove for ModelPackageBundleListener
         factory.listener.removedBundle(bundle, bundleEvent, registeredAdapterFactories);
 
         // make sure adaption is not longer possible: implementation class mapping is removed
         Resource res = getMockResourceWithProps();
-        try {
-            factory.getAdapter(res, SampleServiceInterface.class);
-            Assert.fail(
-                    "Getting the model for interface 'SampleServiceInterface' should fail after the accroding adapter factory has been unregistered");
-        } catch (ModelClassException e) {
-
-        }
+        assertThrows(
+                ModelClassException.class,
+                () -> factory.getAdapter(res, SampleServiceInterface.class),
+                "Getting the model for interface 'SampleServiceInterface' should fail after the accroding adapter factory has been unregistered");
     }
 
     /**
      * Try to adapt to interface, with an different implementation class that has the @Model annotation
      */
     @Test
-    public void testImplementsInterfaceModel() {
+    void testImplementsInterfaceModel() {
         Resource res = getMockResourceWithProps();
         SampleServiceInterface model = factory.getAdapter(res, SampleServiceInterface.class);
         assertNotNull(model);
@@ -177,7 +177,7 @@ public class ImplementsExtendsTest {
      * This causes the extend adaptation to fail.
      */
     @Test
-    public void testImplementsNoPickerWithAdapterEqualsImplementation() {
+    void testImplementsNoPickerWithAdapterEqualsImplementation() {
         factory.implementationPickers = Collections.emptyList();
 
         Resource res = getMockResourceWithProps();
@@ -192,12 +192,12 @@ public class ImplementsExtendsTest {
      * Try to adapt in a case where there is no picker available.
      * The case where the class is the adapter still works.
      */
-    @Test(expected = ModelClassException.class)
-    public void testImplementsNoPickerWithDifferentImplementations() {
+    @Test
+    void testImplementsNoPickerWithDifferentImplementations() {
         factory.implementationPickers = Collections.emptyList();
 
         Resource res = getMockResourceWithProps();
-        factory.getAdapter(res, SampleServiceInterface.class);
+        assertThrows(ModelClassException.class, () -> factory.getAdapter(res, SampleServiceInterface.class));
     }
 
     /**
@@ -217,17 +217,17 @@ public class ImplementsExtendsTest {
     /**
      * Test implementation class with a mapping that is not valid (an interface that is not implemented).
      */
-    @Test(expected = ModelClassException.class)
-    public void testInvalidImplementsInterfaceModel() {
+    @Test
+    void testInvalidImplementsInterfaceModel() {
         Resource res = getMockResourceWithProps();
-        factory.getAdapter(res, InvalidSampleServiceInterface.class);
+        assertThrows(ModelClassException.class, () -> factory.getAdapter(res, InvalidSampleServiceInterface.class));
     }
 
     /**
      * Test to adapt to a superclass of the implementation class with the appropriate mapping in the @Model annotation.
      */
     @Test
-    public void testExtendsClassModel() {
+    void testExtendsClassModel() {
         Resource res = getMockResourceWithProps();
 
         // this is not having a model annotation nor does implement an interface/extend a class with a model annotation
@@ -246,7 +246,7 @@ public class ImplementsExtendsTest {
      * Try to adapt to interface, with an different implementation class that has the @Model annotation
      */
     @Test
-    public void testImplementsInterfaceModelWithPickLastImplementationPicker() {
+    void testImplementsInterfaceModelWithPickLastImplementationPicker() {
         factory.implementationPickers =
                 Arrays.asList(new AdapterImplementationsTest.LastImplementationPicker(), firstImplementationPicker);
 
@@ -265,7 +265,7 @@ public class ImplementsExtendsTest {
         ValueMap vm = new ValueMapDecorator(map);
 
         Resource res = mock(Resource.class);
-        when(res.adaptTo(ValueMap.class)).thenReturn(vm);
+        lenient().when(res.adaptTo(ValueMap.class)).thenReturn(vm);
         return res;
     }
 }
