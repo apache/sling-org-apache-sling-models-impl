@@ -31,28 +31,29 @@ import org.apache.sling.models.factory.InvalidAdaptableException;
 import org.apache.sling.models.factory.ModelClassException;
 import org.apache.sling.models.impl.injectors.ChildResourceInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
-@RunWith(MockitoJUnitRunner.class)
-public class InvalidAdaptationsTest {
+@ExtendWith(MockitoExtension.class)
+class InvalidAdaptationsTest {
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.injectors = Arrays.asList(new ValueMapInjector(), new ChildResourceInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(NonModel.class, RequestModel.class);
     }
 
     @Test
-    public void testNonModelClass() {
+    void testNonModelClass() {
         Map<String, Object> emptyMap = Collections.<String, Object>emptyMap();
 
         Resource res = mock(Resource.class);
@@ -61,18 +62,18 @@ public class InvalidAdaptationsTest {
         assertNull(factory.getAdapter(res, NonModel.class));
     }
 
-    @Test(expected = ModelClassException.class)
-    public void testNonModelClassException() {
+    @Test
+    void testNonModelClassException() {
         Map<String, Object> emptyMap = Collections.<String, Object>emptyMap();
 
         Resource res = mock(Resource.class);
         lenient().when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
 
-        assertNull(factory.createModel(res, NonModel.class));
+        assertThrows(ModelClassException.class, () -> factory.createModel(res, NonModel.class));
     }
 
     @Test
-    public void testWrongAdaptableClass() {
+    void testWrongAdaptableClass() {
         Map<String, Object> emptyMap = Collections.<String, Object>emptyMap();
 
         Resource res = mock(Resource.class);
@@ -81,14 +82,14 @@ public class InvalidAdaptationsTest {
         assertNull(factory.getAdapter(res, RequestModel.class));
     }
 
-    @Test(expected = InvalidAdaptableException.class)
-    public void testWrongAdaptableClassException() {
+    @Test
+    void testWrongAdaptableClassException() {
         Map<String, Object> emptyMap = Collections.<String, Object>emptyMap();
 
         Resource res = mock(Resource.class);
         lenient().when(res.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(emptyMap));
 
-        assertNull(factory.createModel(res, RequestModel.class));
+        assertThrows(InvalidAdaptableException.class, () -> factory.createModel(res, RequestModel.class));
     }
 
     private class NonModel {}
