@@ -78,6 +78,7 @@ public class GenerateTestBundle {
             }
         });
 
+        // register sling models
         bundle.setHeader("Sling-Model-Classes", modelClassNames.stream().collect(Collectors.joining(",")));
 
         return bundle;
