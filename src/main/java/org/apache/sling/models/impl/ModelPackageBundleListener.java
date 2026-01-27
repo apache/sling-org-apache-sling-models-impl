@@ -157,7 +157,10 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
                 if (validateAdapterClasses(implType, adapterTypes)) {
                     if (adapterImplementations.addAll(implType, adapterTypes)) {
                         ServiceRegistration reg = registerAdapterFactory(
-                                adapterTypes, annotation.adaptables(), implType, annotation.condition());
+                                adapterTypes,
+                                LegacyAdaptablesExtender.getAdaptables(annotation),
+                                implType,
+                                annotation.condition());
                         regs.add(reg);
 
                         String[] resourceTypes = annotation.resourceType();
