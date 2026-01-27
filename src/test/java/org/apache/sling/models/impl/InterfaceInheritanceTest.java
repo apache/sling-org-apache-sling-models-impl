@@ -29,23 +29,23 @@ import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory;
 import org.apache.sling.models.testmodels.interfaces.SubClassModel;
 import org.apache.sling.models.testmodels.interfaces.SuperClassModel;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("deprecation")
-@RunWith(MockitoJUnitRunner.class)
-public class InterfaceInheritanceTest {
+@ExtendWith(MockitoExtension.class)
+class InterfaceInheritanceTest {
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
 
         factory = AdapterFactoryTest.createModelAdapterFactory();
         ValueMapInjector valueMapInjector = new ValueMapInjector();
@@ -57,7 +57,7 @@ public class InterfaceInheritanceTest {
     }
 
     @Test
-    public void testSimplePropertyModel() {
+    void testSimplePropertyModel() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("superClassString", "first-value");
         map.put("subClassString", "second-value");

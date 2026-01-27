@@ -25,27 +25,27 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.apache.sling.models.testmodels.interfaces.ModelWithDefaultMethods;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
-public class DefaultInterfaceMethodTest {
+class DefaultInterfaceMethodTest {
 
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.injectors = Collections.singletonList(new ValueMapInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(ModelWithDefaultMethods.class);
     }
 
     @Test
-    public void testDefaultInterfaceMethodsCanBeInjected() {
+    void testDefaultInterfaceMethodsCanBeInjected() {
         ValueMap vm = new ValueMapDecorator(Collections.singletonMap("prop", "the prop"));
         Resource res = mock(Resource.class);
         lenient().when(res.adaptTo(ValueMap.class)).thenReturn(vm);
@@ -56,7 +56,7 @@ public class DefaultInterfaceMethodTest {
     }
 
     @Test
-    public void testDefaultInterfaceMethodsDefaultImplementationsAreIgnored() {
+    void testDefaultInterfaceMethodsDefaultImplementationsAreIgnored() {
         ValueMap vm = new ValueMapDecorator(Collections.<String, Object>emptyMap());
         Resource res = mock(Resource.class);
         lenient().when(res.adaptTo(ValueMap.class)).thenReturn(vm);
