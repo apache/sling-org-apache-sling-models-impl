@@ -42,7 +42,7 @@ public class InjectorSpecificAnnotationIT {
     @SuppressWarnings("null")
     public void test() throws Exception {
         ResourceResolverFactory rrFactory = teleporter.getService(ResourceResolverFactory.class);
-        String value = RandomStringUtils.randomAlphanumeric(10);
+        String value = RandomStringUtils.secure().nextAlphanumeric(10);
 
         ResourceResolver resolver = null;
         Node createdNode = null;
@@ -50,7 +50,7 @@ public class InjectorSpecificAnnotationIT {
             resolver = rrFactory.getServiceResourceResolver(null);
             Session session = resolver.adaptTo(Session.class);
             Node rootNode = session.getRootNode();
-            createdNode = rootNode.addNode("test_" + RandomStringUtils.randomAlphanumeric(10));
+            createdNode = rootNode.addNode("test_" + RandomStringUtils.secure().nextAlphanumeric(10));
             createdNode.setProperty("testProperty", value);
             session.save();
 

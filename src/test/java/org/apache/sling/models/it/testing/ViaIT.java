@@ -46,7 +46,7 @@ public class ViaIT {
         ResourceResolverFactory rrFactory = teleporter.getService(ResourceResolverFactory.class);
         AdapterManager adapterManager = teleporter.getService(AdapterManager.class);
 
-        String value = RandomStringUtils.randomAlphanumeric(10);
+        String value = RandomStringUtils.secure().nextAlphanumeric(10);
 
         ResourceResolver resolver = null;
         Node createdNode = null;
@@ -54,7 +54,7 @@ public class ViaIT {
             resolver = rrFactory.getServiceResourceResolver(null);
             Session session = resolver.adaptTo(Session.class);
             Node rootNode = session.getRootNode();
-            createdNode = rootNode.addNode("test_" + RandomStringUtils.randomAlphanumeric(10));
+            createdNode = rootNode.addNode("test_" + RandomStringUtils.secure().nextAlphanumeric(10));
             createdNode.setProperty("testProperty", value);
             session.save();
 

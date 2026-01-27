@@ -53,13 +53,13 @@ public class SimpleIT {
     @SuppressWarnings("null")
     public void setUp() throws Exception {
         ResourceResolverFactory rrFactory = teleporter.getService(ResourceResolverFactory.class);
-        value = RandomStringUtils.randomAlphanumeric(10);
-        childValue = RandomStringUtils.randomAlphanumeric(10);
+        value = RandomStringUtils.secure().nextAlphanumeric(10);
+        childValue = RandomStringUtils.secure().nextAlphanumeric(10);
 
         resolver = rrFactory.getServiceResourceResolver(null);
         Session session = resolver.adaptTo(Session.class);
         Node rootNode = session.getRootNode();
-        createdNode = rootNode.addNode("test_" + RandomStringUtils.randomAlphanumeric(10));
+        createdNode = rootNode.addNode("test_" + RandomStringUtils.secure().nextAlphanumeric(10));
         createdNode.setProperty("testProperty", value);
         Node child = createdNode.addNode("child");
         child.setProperty("childProperty", childValue);

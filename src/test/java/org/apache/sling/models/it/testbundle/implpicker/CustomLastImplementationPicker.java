@@ -18,7 +18,7 @@
  */
 package org.apache.sling.models.it.testbundle.implpicker;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.spi.ImplementationPicker;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +36,7 @@ public class CustomLastImplementationPicker implements ImplementationPicker {
     public static final String CUSTOM_NAME = "custom";
 
     public Class<?> pick(@NotNull Class<?> adapterType, Class<?>[] implementationsTypes, @NotNull Object adaptable) {
-        if (adaptable instanceof Resource && StringUtils.equals(((Resource) adaptable).getName(), CUSTOM_NAME)) {
+        if (adaptable instanceof Resource && Strings.CS.equals(((Resource) adaptable).getName(), CUSTOM_NAME)) {
             return implementationsTypes[implementationsTypes.length - 1];
         }
         return null;

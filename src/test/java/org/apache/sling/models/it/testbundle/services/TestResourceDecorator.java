@@ -60,6 +60,7 @@ public class TestResourceDecorator implements ResourceDecorator {
     }
 
     @Override
+    @Deprecated
     public Resource decorate(@NotNull Resource resource, @NotNull HttpServletRequest request) {
         return decorate(resource);
     }
