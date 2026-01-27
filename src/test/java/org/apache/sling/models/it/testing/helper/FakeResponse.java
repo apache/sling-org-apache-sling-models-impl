@@ -28,6 +28,7 @@ import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Locale;
 
+@SuppressWarnings("java:S1186") // ignore empty method warnings
 public class FakeResponse implements HttpServletResponse {
 
     private StringWriter stringWriter = new StringWriter();

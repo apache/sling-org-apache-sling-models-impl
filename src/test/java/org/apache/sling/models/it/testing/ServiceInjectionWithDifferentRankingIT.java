@@ -21,7 +21,6 @@ package org.apache.sling.models.it.testing;
 import javax.jcr.Node;
 import javax.jcr.Session;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -108,7 +107,7 @@ public class ServiceInjectionWithDifferentRankingIT {
     }
 
     @Test
-    public void testServiceInjectionConsideringRankingWithResource() throws IOException {
+    public void testServiceInjectionConsideringRankingWithResource() {
 
         registerSimpleService(0);
         // cannot use adaptTo due to adaptersCache

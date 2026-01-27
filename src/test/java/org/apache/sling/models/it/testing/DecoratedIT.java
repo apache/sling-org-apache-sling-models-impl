@@ -56,13 +56,13 @@ public class DecoratedIT {
         resolver = rrFactory.getServiceResourceResolver(null);
         Session session = resolver.adaptTo(Session.class);
         Node rootNode = session.getRootNode();
-        Node createdNode = rootNode.addNode("test_" + RandomStringUtils.randomAlphanumeric(10));
+        Node createdNode = rootNode.addNode("test_" + RandomStringUtils.secure().nextAlphanumeric(10));
         createdNode.setProperty("decorate", true);
         session.save();
 
         resourceWithDefaultWrapperBehavior = resolver.getResource(createdNode.getPath());
 
-        createdNode = rootNode.addNode("test_" + RandomStringUtils.randomAlphanumeric(10));
+        createdNode = rootNode.addNode("test_" + RandomStringUtils.secure().nextAlphanumeric(10));
         createdNode.setProperty("decorate", "customAdaptTo");
         session.save();
 

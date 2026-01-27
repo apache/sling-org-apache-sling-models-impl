@@ -54,6 +54,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("java:S1186") // ignore empty method warnings
 public class FakeRequest implements SlingHttpServletRequest {
 
     private final Resource resource;

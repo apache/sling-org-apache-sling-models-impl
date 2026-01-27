@@ -38,7 +38,6 @@ public class PathBoundServletIT {
     private SlingRequestProcessor slingRequestProcessor;
 
     @Before
-    @SuppressWarnings("null")
     public void setup() {
         rrFactory = teleporter.getService(ResourceResolverFactory.class);
         slingRequestProcessor = teleporter.getService(SlingRequestProcessor.class);

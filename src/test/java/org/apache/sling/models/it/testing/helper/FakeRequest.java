@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+@SuppressWarnings("java:S1186") // ignore empty method warnings
 public class FakeRequest implements HttpServletRequest {
 
     private final String path;

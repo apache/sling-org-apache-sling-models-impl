@@ -163,7 +163,7 @@ public class OptionalObjectsTest {
         assertNotNull(model);
 
         assertEquals(4, model.getIntList().get().size());
-        assertEquals(new Integer(2), model.getIntList().get().get(1));
+        assertEquals(Integer.valueOf(2), model.getIntList().get().get(1));
 
         assertEquals(2, model.getStringList().get().size());
         assertEquals("hello", model.getStringList().get().get(0));
