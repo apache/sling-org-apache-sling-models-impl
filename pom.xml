@@ -409,6 +409,7 @@
                         <configuration>
                             <portNames>
                                 <portName>http.port</portName>
+                                <portName>jacoco.port</portName>
                             </portNames>
                         </configuration>
                     </execution>
@@ -425,6 +426,42 @@
                                     <classifier>it-testbundle</classifier>
                                 </artifact>
                             </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <!--
+                    Record integration test code coverage via jacoco, using TCP server
+                    We cannot rely on the default file-based approach as the sling JVM is stopped forcefully, preventing proper file write on shutdown.
+                    -->
+                    <execution>
+                        <id>prepare-agent-integration-launcher</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                        <configuration>
+                            <propertyName>jacoco.launcher.command</propertyName>
+                            <output>tcpserver</output>
+                            <address>localhost</address>
+                            <port>${jacoco.port}</port>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>dump-coverage-launcher</id>
+                        <goals>
+                            <goal>dump</goal>
+                        </goals>
+                        <phase>post-integration-test</phase>
+                        <configuration>
+                            <address>localhost</address>
+                            <port>${jacoco.port}</port>
+                            <destFile>${project.build.directory}/jacoco-it.exec</destFile>
+                            <append>true</append>
                         </configuration>
                     </execution>
                 </executions>
@@ -510,6 +547,7 @@
                             <launcherArguments>
                                 <vmOptions>
                                     <value>--add-opens java.base/java.lang=ALL-UNNAMED</value>
+                                    <value>${jacoco.launcher.command}</value>
                                 </vmOptions>
                                 <frameworkProperties>
                                     <org.osgi.service.http.port>${http.port}</org.osgi.service.http.port>
