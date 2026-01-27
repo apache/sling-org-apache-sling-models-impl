@@ -398,7 +398,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                 }
             }
 
-            Class<?>[] declaredAdaptable = modelAnnotation.adaptables();
+            Class<?>[] declaredAdaptable = LegacyAdaptablesExtender.getAdaptables(modelAnnotation);
             for (Class<?> clazz : declaredAdaptable) {
                 if (clazz.isInstance(adaptable)) {
                     isAdaptable = true;
