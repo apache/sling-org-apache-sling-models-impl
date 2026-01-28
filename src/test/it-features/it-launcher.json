@@ -1,0 +1,30 @@
+{
+    "bundles": [
+        {
+            "id": "org.apache.sling/org.apache.sling.models.api/${models.api.version}",
+            "start-order": 20
+        },
+        {
+            "id": "org.apache.sling/org.apache.sling.models.impl/${project.version}",
+            "start-order": 20
+        },
+        {
+            "id": "org.apache.sling/org.apache.sling.models.impl/${project.version}//it-testbundle",
+            "start-order": 20
+        }
+    ],
+    "configurations": {
+        "org.apache.sling.serviceusermapping.impl.ServiceUserMapperImpl.amended~integration-tests": {
+            "user.mapping": [
+                "org.apache.sling.junit.core=models-it"
+            ]
+        },
+        "org.apache.sling.commons.log.LogManager.factory.config~integration-tests": {
+            "org.apache.sling.commons.log.names": [
+                "org.apache.sling.models"
+            ],
+            "org.apache.sling.commons.log.level": "${it.models.log.level}"
+        }
+    },
+    "repoinit:TEXT|true": "@file"
+}
