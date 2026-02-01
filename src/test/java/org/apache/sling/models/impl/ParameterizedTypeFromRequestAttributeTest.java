@@ -27,25 +27,25 @@ import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ParameterizedTypeFromRequestAttributeTest {
+@ExtendWith(MockitoExtension.class)
+class ParameterizedTypeFromRequestAttributeTest {
     private ModelAdapterFactory factory;
 
     @Mock
     private SlingJakartaHttpServletRequest request;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
 
         RequestAttributeInjector injector = new RequestAttributeInjector();
@@ -54,7 +54,7 @@ public class ParameterizedTypeFromRequestAttributeTest {
     }
 
     @Test
-    public void test() {
+    void test() {
         Iterator<Resource> it = Collections.<Resource>emptySet().iterator();
 
         when(request.getAttribute("someResources")).thenReturn(it);
@@ -64,7 +64,7 @@ public class ParameterizedTypeFromRequestAttributeTest {
     }
 
     @Model(adaptables = SlingJakartaHttpServletRequest.class)
-    public static class TestModel {
+    static class TestModel {
 
         @Inject
         private Iterator<Resource> someResources;

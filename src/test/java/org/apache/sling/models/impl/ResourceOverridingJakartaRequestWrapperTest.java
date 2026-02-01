@@ -23,22 +23,24 @@ import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.Test.None;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 /**
  *
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ResourceOverridingJakartaRequestWrapperTest {
+@ExtendWith(MockitoExtension.class)
+class ResourceOverridingJakartaRequestWrapperTest {
 
     private ResourceOverridingJakartaRequestWrapper wrapper = null;
 
@@ -48,12 +50,14 @@ public class ResourceOverridingJakartaRequestWrapperTest {
     @Mock
     private Resource resource;
 
-    @Before
-    public void setup() {
-        Mockito.when(jakartaRequest.getAttribute("attr1")).thenReturn("value1");
+    @BeforeEach
+    void setup() {
+        lenient().when(jakartaRequest.getAttribute("attr1")).thenReturn("value1");
 
         SlingBindings mockSlingBindings = Mockito.mock(SlingBindings.class);
-        Mockito.when(jakartaRequest.getAttribute(SlingBindings.class.getName())).thenReturn(mockSlingBindings);
+        lenient()
+                .when(jakartaRequest.getAttribute(SlingBindings.class.getName()))
+                .thenReturn(mockSlingBindings);
 
         AdapterManager mockAdapterManager = Mockito.mock(AdapterManager.class);
         SlingModelsScriptEngineFactory mockScriptEngineFactory = Mockito.mock(SlingModelsScriptEngineFactory.class);
@@ -61,25 +65,27 @@ public class ResourceOverridingJakartaRequestWrapperTest {
         wrapper = new ResourceOverridingJakartaRequestWrapper(
                 jakartaRequest, resource, mockAdapterManager, mockScriptEngineFactory, mockProvidersByContext);
 
-        Mockito.when(mockAdapterManager.getAdapter(wrapper, String.class)).thenReturn("Adapted1");
+        lenient().when(mockAdapterManager.getAdapter(wrapper, String.class)).thenReturn("Adapted1");
     }
 
-    @Test(expected = None.class)
-    public void testCtorWithoutSlingBindings() {
-        Mockito.when(jakartaRequest.getAttribute(SlingBindings.class.getName())).thenReturn(null);
+    @Test
+    void testCtorWithoutSlingBindings() {
+        when(jakartaRequest.getAttribute(SlingBindings.class.getName())).thenReturn(null);
 
         AdapterManager mockAdapterManager = Mockito.mock(AdapterManager.class);
         SlingModelsScriptEngineFactory mockScriptEngineFactory = Mockito.mock(SlingModelsScriptEngineFactory.class);
         BindingsValuesProvidersByContext mockProvidersByContext = Mockito.mock(BindingsValuesProvidersByContext.class);
-        new ResourceOverridingJakartaRequestWrapper(
+        wrapper = new ResourceOverridingJakartaRequestWrapper(
                 jakartaRequest, resource, mockAdapterManager, mockScriptEngineFactory, mockProvidersByContext);
+        assertNotNull(wrapper);
+        assertNotNull(wrapper.getAttribute(SlingBindings.class.getName()));
     }
 
     /**
      * Test method for {@link org.apache.sling.models.impl.ResourceOverridingJakartaRequestWrapper#getAttribute(java.lang.String)}.
      */
     @Test
-    public void testGetAttributeString() {
+    void testGetAttributeString() {
         assertEquals("value1", wrapper.getAttribute("attr1"));
         assertTrue(wrapper.getAttribute(SlingBindings.class.getName()) instanceof SlingBindings);
     }
@@ -88,7 +94,7 @@ public class ResourceOverridingJakartaRequestWrapperTest {
      * Test method for {@link org.apache.sling.models.impl.ResourceOverridingJakartaRequestWrapper#getResource()}.
      */
     @Test
-    public void testGetResource() {
+    void testGetResource() {
         assertEquals(resource, wrapper.getResource());
     }
 
@@ -96,7 +102,7 @@ public class ResourceOverridingJakartaRequestWrapperTest {
      * Test method for {@link org.apache.sling.models.impl.ResourceOverridingJakartaRequestWrapper#adaptTo(java.lang.Class)}.
      */
     @Test
-    public void testAdaptToClassOfAdapterType() {
+    void testAdaptToClassOfAdapterType() {
         assertEquals("Adapted1", wrapper.adaptTo(String.class));
     }
 }

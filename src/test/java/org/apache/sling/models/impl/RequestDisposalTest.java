@@ -39,23 +39,22 @@ import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
-@RunWith(MockitoJUnitRunner.class)
-public class RequestDisposalTest {
+@ExtendWith(MockitoExtension.class)
+class RequestDisposalTest {
     @Mock
     private Resource resource;
 
@@ -69,15 +68,16 @@ public class RequestDisposalTest {
 
     private Set<TestDisposalCallback> callbacks;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.injectors = Arrays.asList(new DisposedInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(TestModel.class);
 
         final Map<String, Object> attributes = new HashMap<>();
 
-        doAnswer(new Answer<Void>() {
+        lenient()
+                .doAnswer(new Answer<Void>() {
 
                     @Override
                     public Void answer(InvocationOnMock invocation) {
@@ -90,7 +90,7 @@ public class RequestDisposalTest {
                 .when(request)
                 .setAttribute(any(String.class), any());
 
-        when(request.getAttribute(any(String.class))).then(new Answer<Object>() {
+        lenient().when(request.getAttribute(any(String.class))).then(new Answer<Object>() {
 
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -101,7 +101,7 @@ public class RequestDisposalTest {
     }
 
     @Test
-    public void testWithInitializedRequest() {
+    void testWithInitializedRequest() {
         // destroy a wrapper of the root request
         SlingJakartaHttpServletRequest destroyedRequest = new SlingJakartaHttpServletRequestWrapper(request);
         factory.requestInitialized(new ServletRequestEvent(servletContext, destroyedRequest));
@@ -121,7 +121,7 @@ public class RequestDisposalTest {
     }
 
     @Test
-    public void testTwoInstancesWithInitializedRequest() {
+    void testTwoInstancesWithInitializedRequest() {
         // destroy a wrapper of the root request
         SlingJakartaHttpServletRequest destroyedRequest = new SlingJakartaHttpServletRequestWrapper(request);
         factory.requestInitialized(new ServletRequestEvent(servletContext, destroyedRequest));
@@ -144,7 +144,7 @@ public class RequestDisposalTest {
     }
 
     @Test
-    public void testWithUnitializedRequest() {
+    void testWithUnitializedRequest() {
         // destroy a wrapper of the root request
         SlingJakartaHttpServletRequest destroyedRequest = new SlingJakartaHttpServletRequestWrapper(request);
 
