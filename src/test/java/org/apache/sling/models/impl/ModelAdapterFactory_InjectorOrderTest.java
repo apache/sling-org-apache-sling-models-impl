@@ -33,27 +33,26 @@ import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.apache.sling.models.spi.Injector;
 import org.apache.sling.models.testutil.ModelAdapterFactoryUtil;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
-import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.apache.sling.testing.mock.osgi.junit5.OsgiContext;
+import org.apache.sling.testing.mock.osgi.junit5.OsgiContextExtension;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.lenient;
 import static org.osgi.framework.Constants.SERVICE_RANKING;
 
 /**
  * Tests in which order the injectors are handled depending on service ranking.
  * For historic/backwards compatibility reasons, higher ranking value means lower priority (inverse to DS behavior).
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ModelAdapterFactory_InjectorOrderTest {
+@ExtendWith({OsgiContextExtension.class, MockitoExtension.class})
+class ModelAdapterFactory_InjectorOrderTest {
 
-    @Rule
-    public final OsgiContext context = new OsgiContext();
+    final OsgiContext context = new OsgiContext();
 
     @Mock
     private AdapterManager adapterManager;
@@ -70,21 +69,21 @@ public class ModelAdapterFactory_InjectorOrderTest {
     private ModelAdapterFactory factory;
 
     @SuppressWarnings("null")
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         context.registerService(BindingsValuesProvidersByContext.class, bindingsValuesProvidersByContext);
         context.registerService(AdapterManager.class, adapterManager);
         factory = context.registerInjectActivateService(ModelAdapterFactory.class);
 
         ModelAdapterFactoryUtil.addModelsForPackage(context.bundleContext(), TestModel.class);
 
-        when(request.getResource()).thenReturn(resource);
-        when(resource.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(Map.of("prop1", 1)));
-        when(request.getAttribute("prop1")).thenReturn(2);
+        lenient().when(request.getResource()).thenReturn(resource);
+        lenient().when(resource.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(Map.of("prop1", 1)));
+        lenient().when(request.getAttribute("prop1")).thenReturn(2);
     }
 
     @Test
-    public void testSingleInjector_ValueMap() {
+    void testSingleInjector_ValueMap() {
         context.registerService(Injector.class, new ValueMapInjector(), SERVICE_RANKING, 2000);
 
         TestModel model = factory.createModel(request, TestModel.class);
@@ -92,7 +91,7 @@ public class ModelAdapterFactory_InjectorOrderTest {
     }
 
     @Test
-    public void testSingleInjector_RequestAttribute() {
+    void testSingleInjector_RequestAttribute() {
         context.registerService(Injector.class, new RequestAttributeInjector(), SERVICE_RANKING, 4000);
 
         TestModel model = factory.createModel(request, TestModel.class);
@@ -100,7 +99,7 @@ public class ModelAdapterFactory_InjectorOrderTest {
     }
 
     @Test
-    public void testMultipleInjectors() {
+    void testMultipleInjectors() {
         // ValueMapInjector has higher priority
         context.registerService(Injector.class, new RequestAttributeInjector(), SERVICE_RANKING, 4000);
         context.registerService(Injector.class, new ValueMapInjector(), SERVICE_RANKING, 2000);

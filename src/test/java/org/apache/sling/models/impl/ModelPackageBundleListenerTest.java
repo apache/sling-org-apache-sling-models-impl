@@ -26,21 +26,24 @@ import java.util.Hashtable;
 import org.apache.sling.models.testmodels.classes.ChildModel;
 import org.apache.sling.models.testmodels.classes.SimpleModelWithInvalidSecondAnnotation;
 import org.apache.sling.models.testmodels.classes.annotations.Hidden;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.springframework.core.OverridingClassLoader;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ModelPackageBundleListenerTest {
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class ModelPackageBundleListenerTest {
 
     @Mock
     private BundleContext mockBundleContext;
@@ -79,25 +82,25 @@ public class ModelPackageBundleListenerTest {
     }
 
     @Test
-    public void testAddingBundleWithResolvableModelAnnotation() throws ClassNotFoundException {
-        Assert.assertFalse(
-                "Model should not yet have been registered but was",
-                adapterImplementations.isModelClass(ChildModel.class));
+    void testAddingBundleWithResolvableModelAnnotation() throws ClassNotFoundException {
+        assertFalse(
+                adapterImplementations.isModelClass(ChildModel.class),
+                "Model should not yet have been registered but was");
         ModelPackageBundleListener listener = createListenerForBundleWithClass(ChildModel.class);
         listener.addingBundle(mockBundle, new BundleEvent(BundleEvent.STARTED, mockBundle));
-        Assert.assertTrue(
-                "Model should have been registered but was not", adapterImplementations.isModelClass(ChildModel.class));
+        assertTrue(
+                adapterImplementations.isModelClass(ChildModel.class), "Model should have been registered but was not");
     }
 
     @Test
-    public void testAddingBundleWithNonResolvableNonModelAnnotation() throws ClassNotFoundException {
+    void testAddingBundleWithNonResolvableNonModelAnnotation() throws ClassNotFoundException {
         ClassLoader classLoader = new HideClassesClassLoader(this.getClass().getClassLoader(), Hidden.class.getName());
         ModelPackageBundleListener listener =
                 createListenerForBundleWithClass(classLoader, SimpleModelWithInvalidSecondAnnotation.class.getName());
         listener.addingBundle(mockBundle, new BundleEvent(BundleEvent.STARTED, mockBundle));
-        Assert.assertFalse(
-                "Model should not yet have been registered but was",
-                adapterImplementations.isModelClass(SimpleModelWithInvalidSecondAnnotation.class));
+        assertFalse(
+                adapterImplementations.isModelClass(SimpleModelWithInvalidSecondAnnotation.class),
+                "Model should not yet have been registered but was");
     }
 
     private ModelPackageBundleListener createListenerForBundleWithClass(Class<?> modelClass)
@@ -109,8 +112,8 @@ public class ModelPackageBundleListenerTest {
             throws ClassNotFoundException {
         Dictionary<String, String> headers = new Hashtable<>();
         headers.put(ModelPackageBundleListener.CLASSES_HEADER, className);
-        Mockito.when(mockBundle.getHeaders()).thenReturn(headers);
-        Mockito.when(mockBundle.loadClass(Mockito.anyString())).thenAnswer(new Answer<Class<?>>() {
+        when(mockBundle.getHeaders()).thenReturn(headers);
+        when(mockBundle.loadClass(anyString())).thenAnswer(new Answer<Class<?>>() {
             @Override
             public Class<?> answer(InvocationOnMock invocation) throws Throwable {
                 Object argument = invocation.getArguments()[0];

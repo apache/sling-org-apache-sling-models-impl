@@ -29,21 +29,21 @@ import org.apache.sling.models.annotations.Source;
 import org.apache.sling.models.factory.ModelClassException;
 import org.apache.sling.models.impl.injectors.BindingsInjector;
 import org.apache.sling.models.impl.injectors.RequestAttributeInjector;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MultipleInjectorTest {
+@ExtendWith(MockitoExtension.class)
+class MultipleInjectorTest {
 
     @Spy
     private BindingsInjector bindingsInjector;
@@ -58,8 +58,8 @@ public class MultipleInjectorTest {
 
     private SlingBindings bindings;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         bindings = new SlingBindings();
 
         factory = AdapterFactoryTest.createModelAdapterFactory();
@@ -67,13 +67,13 @@ public class MultipleInjectorTest {
         factory.injectors = Arrays.asList(bindingsInjector, attributesInjector);
         factory.bindStaticInjectAnnotationProcessorFactory(bindingsInjector, new ServicePropertiesMap(1, 1));
 
-        when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
+        lenient().when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
                 ForTwoInjectorsWithSource.class, ForTwoInjectors.class, ForTwoInjectorsWithInvalidSource.class);
     }
 
     @Test
-    public void testInjectorOrder() {
+    void testInjectorOrder() {
         String bindingsValue = "bindings value";
         bindings.put("firstAttribute", bindingsValue);
 
@@ -87,12 +87,12 @@ public class MultipleInjectorTest {
     }
 
     @Test
-    public void testInjectorOrderWithSource() {
+    void testInjectorOrderWithSource() {
         String bindingsValue = "bindings value";
         bindings.put("firstAttribute", bindingsValue);
 
         String attributeValue = "attribute value";
-        when(request.getAttribute("firstAttribute")).thenReturn(attributeValue);
+        lenient().when(request.getAttribute("firstAttribute")).thenReturn(attributeValue);
 
         ForTwoInjectorsWithSource obj = factory.getAdapter(request, ForTwoInjectorsWithSource.class);
 
@@ -101,14 +101,15 @@ public class MultipleInjectorTest {
     }
 
     @Test
-    public void testInjectorWithInvalidSource() {
+    void testInjectorWithInvalidSource() {
         ForTwoInjectorsWithInvalidSource obj = factory.getAdapter(request, ForTwoInjectorsWithInvalidSource.class);
         assertNull(obj);
     }
 
-    @Test(expected = ModelClassException.class)
-    public void testInjectorWithInvalidSourceWithException() {
-        factory.createModel(request, ForTwoInjectorsWithInvalidSource.class);
+    @Test
+    void testInjectorWithInvalidSourceWithException() {
+        assertThrows(
+                ModelClassException.class, () -> factory.createModel(request, ForTwoInjectorsWithInvalidSource.class));
     }
 
     @Model(adaptables = SlingJakartaHttpServletRequest.class)
