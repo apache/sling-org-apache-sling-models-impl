@@ -26,6 +26,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.junit.rules.TeleporterRule;
+import org.apache.sling.models.factory.ModelFactory;
 import org.apache.sling.models.it.testbundle.models.SlingPropertyAnnotationTestModel;
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,7 +57,9 @@ public class InjectorSpecificAnnotationIT {
 
             Resource resource = resolver.getResource(createdNode.getPath());
 
-            SlingPropertyAnnotationTestModel model = resource.adaptTo(SlingPropertyAnnotationTestModel.class);
+            ModelFactory modelFactory = teleporter.getService(ModelFactory.class);
+            SlingPropertyAnnotationTestModel model =
+                    modelFactory.createModel(resource, SlingPropertyAnnotationTestModel.class);
 
             assertNotNull("Model is null", model);
             assertEquals("Test Property is not set correctly", value, model.getTestProperty());
