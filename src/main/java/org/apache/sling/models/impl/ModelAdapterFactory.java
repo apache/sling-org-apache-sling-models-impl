@@ -48,6 +48,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletRequestEvent;
 import jakarta.servlet.ServletRequestListener;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.adapter.Adaptable;
 import org.apache.sling.api.adapter.AdapterFactory;
@@ -398,7 +399,7 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
                 }
             }
 
-            Class<?>[] declaredAdaptable = modelAnnotation.adaptables();
+            Class<?>[] declaredAdaptable = LegacyAdaptablesExtender.getAdaptables(modelAnnotation);
             for (Class<?> clazz : declaredAdaptable) {
                 if (clazz.isInstance(adaptable)) {
                     isAdaptable = true;
@@ -826,7 +827,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             final Class<?>[] paramTypes = constructor.getConstructor().getParameterTypes();
             if (paramTypes.length == 1) {
                 Class<?> paramType = constructor.getConstructor().getParameterTypes()[0];
-                if (paramType.isInstance(adaptable)) {
+                if (paramType.isInstance(adaptable)
+                        || (paramType == SlingHttpServletRequest.class
+                                && adaptable instanceof SlingJakartaHttpServletRequest)) {
                     return constructor;
                 }
             }
