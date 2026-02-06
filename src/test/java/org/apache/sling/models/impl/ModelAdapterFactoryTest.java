@@ -34,32 +34,32 @@ import org.apache.sling.models.factory.ModelClassException;
 import org.apache.sling.models.testutil.ModelAdapterFactoryUtil;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.apache.sling.testing.mock.osgi.junit5.OsgiContextExtension;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 /**
  *
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ModelAdapterFactoryTest {
+@ExtendWith({OsgiContextExtension.class, MockitoExtension.class})
+class ModelAdapterFactoryTest {
 
-    @Rule
-    public final OsgiContext context = new OsgiContext();
+    final OsgiContext context = new OsgiContext();
 
     @Mock
     private AdapterManager adapterManager;
@@ -87,9 +87,9 @@ public class ModelAdapterFactoryTest {
     private ModelAdapterFactory factory;
 
     @SuppressWarnings("deprecation")
-    @Before
-    public void setUp() {
-        when(resourceResolver.getSearchPath()).thenReturn(new String[] {"/apps/", "/libs/"});
+    @BeforeEach
+    void setUp() {
+        lenient().when(resourceResolver.getSearchPath()).thenReturn(new String[] {"/apps/", "/libs/"});
 
         context.registerService(BindingsValuesProvidersByContext.class, bindingsValuesProvidersByContext);
         context.registerService(AdapterManager.class, adapterManager);
@@ -97,10 +97,10 @@ public class ModelAdapterFactoryTest {
 
         ModelAdapterFactoryUtil.addModelsForPackage(context.bundleContext(), JakartaModel1.class, JavaxModel2.class);
 
-        Mockito.when(resource.getResourceType()).thenReturn("nt:unstructured");
-        Mockito.when(resource.getResourceResolver()).thenReturn(resourceResolver);
-        Mockito.when(jakartaRequest.getResource()).thenReturn(resource);
-        Mockito.when(javaxRequest.getResource()).thenReturn(resource);
+        lenient().when(resource.getResourceType()).thenReturn("nt:unstructured");
+        lenient().when(resource.getResourceResolver()).thenReturn(resourceResolver);
+        lenient().when(jakartaRequest.getResource()).thenReturn(resource);
+        lenient().when(javaxRequest.getResource()).thenReturn(resource);
     }
 
     protected void registerModel(final Class<?> adaptableType, final Class<?> clazz) {
@@ -114,7 +114,7 @@ public class ModelAdapterFactoryTest {
      */
     @Deprecated(since = "2.0.0")
     @Test
-    public void testCreateModelFromWrappedRequestSlingHttpServletRequestResourceClassOfT() {
+    void testCreateModelFromWrappedRequestSlingHttpServletRequestResourceClassOfT() {
         assertNotNull(factory.createModelFromWrappedRequest(javaxRequest, resource, JavaxModel2.class));
     }
 
@@ -122,7 +122,7 @@ public class ModelAdapterFactoryTest {
      * Test method for {@link org.apache.sling.models.impl.ModelAdapterFactory#createModelFromWrappedRequest(org.apache.sling.api.SlingJakartaHttpServletRequest, org.apache.sling.api.resource.Resource, java.lang.Class)}.
      */
     @Test
-    public void testCreateModelFromWrappedRequestSlingJakartaHttpServletRequestResourceClassOfT() {
+    void testCreateModelFromWrappedRequestSlingJakartaHttpServletRequestResourceClassOfT() {
         assertNotNull(factory.createModelFromWrappedRequest(jakartaRequest, resource, JakartaModel1.class));
     }
 
@@ -132,7 +132,7 @@ public class ModelAdapterFactoryTest {
      */
     @Deprecated(since = "2.0.0")
     @Test
-    public void testIsModelClassObjectClassOfQ() {
+    void testIsModelClassObjectClassOfQ() {
         assertTrue(factory.isModelClass(jakartaRequest, JakartaModel1.class));
         assertTrue(factory.isModelClass(jakartaRequest, JavaxModel2.class));
         assertFalse(factory.isModelClass(jakartaRequest, Object.class));
@@ -143,7 +143,7 @@ public class ModelAdapterFactoryTest {
      */
     @SuppressWarnings("deprecation")
     @Test
-    public void testIsModelClassClassOfQ() {
+    void testIsModelClassClassOfQ() {
         assertTrue(factory.isModelClass(JakartaModel1.class));
         assertTrue(factory.isModelClass(JavaxModel2.class));
         assertFalse(factory.isModelClass(Object.class));
@@ -155,7 +155,7 @@ public class ModelAdapterFactoryTest {
      */
     @Deprecated(since = "2.0.0")
     @Test
-    public void testIsModelAvailableForRequestSlingHttpServletRequest() {
+    void testIsModelAvailableForRequestSlingHttpServletRequest() {
         assertFalse(factory.isModelAvailableForRequest(javaxRequest));
 
         registerModel(org.apache.sling.api.SlingHttpServletRequest.class, JavaxModel2.class);
@@ -167,7 +167,7 @@ public class ModelAdapterFactoryTest {
      * Test method for {@link org.apache.sling.models.impl.ModelAdapterFactory#isModelAvailableForRequest(org.apache.sling.api.SlingJakartaHttpServletRequest)}.
      */
     @Test
-    public void testIsModelAvailableForRequestSlingJakartaHttpServletRequest() {
+    void testIsModelAvailableForRequestSlingJakartaHttpServletRequest() {
         assertFalse(factory.isModelAvailableForRequest(jakartaRequest));
 
         registerModel(SlingJakartaHttpServletRequest.class, JakartaModel1.class);
@@ -179,7 +179,7 @@ public class ModelAdapterFactoryTest {
      * Test method for {@link org.apache.sling.models.impl.ModelAdapterFactory#getModelFromResource(org.apache.sling.api.resource.Resource)}.
      */
     @Test
-    public void testGetModelFromResource() {
+    void testGetModelFromResource() {
         assertThrows(ModelClassException.class, () -> factory.getModelFromResource(resource));
 
         registerModel(Resource.class, JakartaModel1.class);
@@ -195,7 +195,7 @@ public class ModelAdapterFactoryTest {
     @SuppressWarnings("deprecation")
     @Deprecated(since = "2.0.0")
     @Test
-    public void testGetModelFromRequestSlingHttpServletRequest() {
+    void testGetModelFromRequestSlingHttpServletRequest() {
         assertThrows(ModelClassException.class, () -> factory.getModelFromRequest(javaxRequest));
 
         registerModel(org.apache.sling.api.SlingHttpServletRequest.class, JavaxModel2.class);
@@ -208,7 +208,7 @@ public class ModelAdapterFactoryTest {
      * Test method for {@link org.apache.sling.models.impl.ModelAdapterFactory#getModelFromRequest(org.apache.sling.api.SlingJakartaHttpServletRequest)}.
      */
     @Test
-    public void testGetModelFromRequestSlingJakartaHttpServletRequest() {
+    void testGetModelFromRequestSlingJakartaHttpServletRequest() {
         assertThrows(ModelClassException.class, () -> factory.getModelFromRequest(jakartaRequest));
 
         registerModel(SlingJakartaHttpServletRequest.class, JakartaModel1.class);
@@ -224,7 +224,7 @@ public class ModelAdapterFactoryTest {
     @Deprecated(since = "2.0.0")
     @SuppressWarnings({"unchecked", "deprecation"})
     @Test
-    public void testExportModelForRequestSlingHttpServletRequestStringClassOfTMapOfStringString()
+    void testExportModelForRequestSlingHttpServletRequestStringClassOfTMapOfStringString()
             throws ExportException, MissingExporterException {
         Map<String, String> options = Map.of();
         assertThrows(
@@ -232,9 +232,9 @@ public class ModelAdapterFactoryTest {
                 () -> factory.exportModelForRequest(javaxRequest, "exporter1", JavaxModel2.class, options));
 
         ModelExporter mockExporter = context.registerService(ModelExporter.class, Mockito.mock(ModelExporter.class));
-        Mockito.when(mockExporter.getName()).thenReturn("exporter1");
-        Mockito.when(mockExporter.isSupported(JavaxModel2.class)).thenReturn(true);
-        Mockito.when(mockExporter.export(any(), any(Class.class), anyMap())).thenAnswer(invocation -> {
+        when(mockExporter.getName()).thenReturn("exporter1");
+        when(mockExporter.isSupported(JavaxModel2.class)).thenReturn(true);
+        when(mockExporter.export(any(), any(Class.class), anyMap())).thenAnswer(invocation -> {
             return invocation.getArgument(0, JavaxModel2.class);
         });
 
@@ -250,7 +250,7 @@ public class ModelAdapterFactoryTest {
      */
     @SuppressWarnings("unchecked")
     @Test
-    public void testExportModelForRequestSlingJakartaHttpServletRequestStringClassOfTMapOfStringString()
+    void testExportModelForRequestSlingJakartaHttpServletRequestStringClassOfTMapOfStringString()
             throws ExportException, MissingExporterException {
         Map<String, String> options = Map.of();
         assertThrows(
@@ -258,9 +258,9 @@ public class ModelAdapterFactoryTest {
                 () -> factory.exportModelForRequest(jakartaRequest, "exporter1", JakartaModel1.class, options));
 
         ModelExporter mockExporter = context.registerService(ModelExporter.class, Mockito.mock(ModelExporter.class));
-        Mockito.when(mockExporter.getName()).thenReturn("exporter1");
-        Mockito.when(mockExporter.isSupported(JakartaModel1.class)).thenReturn(true);
-        Mockito.when(mockExporter.export(any(), any(Class.class), anyMap())).thenAnswer(invocation -> {
+        when(mockExporter.getName()).thenReturn("exporter1");
+        when(mockExporter.isSupported(JakartaModel1.class)).thenReturn(true);
+        when(mockExporter.export(any(), any(Class.class), anyMap())).thenAnswer(invocation -> {
             return invocation.getArgument(0, JakartaModel1.class);
         });
 
@@ -277,7 +277,7 @@ public class ModelAdapterFactoryTest {
      */
     @Deprecated(since = "2.0.0")
     @Test
-    public void testGetModelFromWrappedRequestSlingHttpServletRequestResourceClassOfT() {
+    void testGetModelFromWrappedRequestSlingHttpServletRequestResourceClassOfT() {
         JavaxModel2 modelFromWrappedRequest =
                 factory.getModelFromWrappedRequest(javaxRequest, resource, JavaxModel2.class);
         assertNull(modelFromWrappedRequest);
@@ -296,7 +296,7 @@ public class ModelAdapterFactoryTest {
      * Test method for {@link org.apache.sling.models.impl.ModelAdapterFactory#getModelFromWrappedRequest(org.apache.sling.api.SlingJakartaHttpServletRequest, org.apache.sling.api.resource.Resource, java.lang.Class)}.
      */
     @Test
-    public void testGetModelFromWrappedRequestSlingJakartaHttpServletRequestResourceClassOfT() {
+    void testGetModelFromWrappedRequestSlingJakartaHttpServletRequestResourceClassOfT() {
         assertNotNull(factory.createModelFromWrappedRequest(jakartaRequest, resource, JakartaModel1.class));
 
         JakartaModel1 target = new JakartaModel1();

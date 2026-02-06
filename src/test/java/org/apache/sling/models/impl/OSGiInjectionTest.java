@@ -36,29 +36,30 @@ import org.apache.sling.models.testmodels.classes.SetOSGiModel;
 import org.apache.sling.models.testmodels.classes.SimpleOSGiModel;
 import org.apache.sling.models.testmodels.interfaces.ServiceInterface;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.ServiceReference;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OSGiInjectionTest {
+@ExtendWith(MockitoExtension.class)
+class OSGiInjectionTest {
     private ModelAdapterFactory factory;
 
     @Mock
@@ -69,8 +70,8 @@ public class OSGiInjectionTest {
 
     private SlingBindings bindings = new SlingBindings();
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory(bundleContext);
 
         OSGiServiceInjector injectorFactory = new OSGiServiceInjector();
@@ -92,13 +93,13 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({"unchecked", "null"})
-    public void testSimpleOSGiModelField() throws Exception {
-        ServiceReference ref = mock(ServiceReference.class);
+    @SuppressWarnings({"null"})
+    void testSimpleOSGiModelField() throws Exception {
+        ServiceReference<?> ref = mock(ServiceReference.class);
         ServiceInterface service = mock(ServiceInterface.class);
         when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
                 .thenReturn(new ServiceReference[] {ref});
-        when(bundleContext.getService(ref)).thenReturn(service);
+        doReturn(service).when(bundleContext).getService(ref);
 
         Resource res = mock(Resource.class);
 
@@ -111,14 +112,14 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({"unchecked", "null"})
-    public void testListOSGiModelField() throws Exception {
-        ServiceReference ref1 = mock(ServiceReference.class);
+    @SuppressWarnings({"null"})
+    void testListOSGiModelField() throws Exception {
+        ServiceReference<?> ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
-        when(bundleContext.getService(ref1)).thenReturn(service1);
-        ServiceReference ref2 = mock(ServiceReference.class);
+        doReturn(service1).when(bundleContext).getService(ref1);
+        ServiceReference<?> ref2 = mock(ServiceReference.class);
         ServiceInterface service2 = mock(ServiceInterface.class);
-        when(bundleContext.getService(ref2)).thenReturn(service2);
+        doReturn(service2).when(bundleContext).getService(ref2);
 
         when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
                 .thenReturn(new ServiceReference[] {ref1, ref2});
@@ -136,14 +137,14 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({"unchecked", "null"})
-    public void testArrayOSGiModelField() throws Exception {
-        ServiceReference ref1 = mock(ServiceReference.class);
+    @SuppressWarnings({"null"})
+    void testArrayOSGiModelField() throws Exception {
+        ServiceReference<?> ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
-        when(bundleContext.getService(ref1)).thenReturn(service1);
-        ServiceReference ref2 = mock(ServiceReference.class);
+        doReturn(service1).when(bundleContext).getService(ref1);
+        ServiceReference<?> ref2 = mock(ServiceReference.class);
         ServiceInterface service2 = mock(ServiceInterface.class);
-        when(bundleContext.getService(ref2)).thenReturn(service2);
+        doReturn(service2).when(bundleContext).getService(ref2);
 
         when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
                 .thenReturn(new ServiceReference[] {ref1, ref2});
@@ -162,7 +163,7 @@ public class OSGiInjectionTest {
 
     @Test
     @SuppressWarnings("null")
-    public void testOptionalArrayOSGiModelField() throws Exception {
+    void testOptionalArrayOSGiModelField() {
 
         Resource res = mock(Resource.class);
 
@@ -175,7 +176,7 @@ public class OSGiInjectionTest {
 
     @Test
     @SuppressWarnings("null")
-    public void testOptionalListOSGiModelField() throws Exception {
+    void testOptionalListOSGiModelField() {
         Resource res = mock(Resource.class);
 
         OptionalListOSGiModel model = factory.getAdapter(res, OptionalListOSGiModel.class);
@@ -186,14 +187,14 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({"unchecked", "null"})
-    public void testCollectionOSGiModelField() throws Exception {
-        ServiceReference ref1 = mock(ServiceReference.class);
+    @SuppressWarnings({"null"})
+    void testCollectionOSGiModelField() throws Exception {
+        ServiceReference<?> ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
-        when(bundleContext.getService(ref1)).thenReturn(service1);
-        ServiceReference ref2 = mock(ServiceReference.class);
+        doReturn(service1).when(bundleContext).getService(ref1);
+        ServiceReference<?> ref2 = mock(ServiceReference.class);
         ServiceInterface service2 = mock(ServiceInterface.class);
-        when(bundleContext.getService(ref2)).thenReturn(service2);
+        doReturn(service2).when(bundleContext).getService(ref2);
 
         when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
                 .thenReturn(new ServiceReference[] {ref1, ref2});
@@ -211,14 +212,14 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({"unused", "unchecked", "null"})
-    public void testSetOSGiModelField() throws Exception {
-        ServiceReference ref1 = mock(ServiceReference.class);
+    @SuppressWarnings({"unused", "null"})
+    void testSetOSGiModelField() throws Exception {
+        ServiceReference<?> ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
-        lenient().when(bundleContext.getService(ref1)).thenReturn(service1);
-        ServiceReference ref2 = mock(ServiceReference.class);
+        lenient().doReturn(service1).when(bundleContext).getService(ref1);
+        ServiceReference<?> ref2 = mock(ServiceReference.class);
         ServiceInterface service2 = mock(ServiceInterface.class);
-        lenient().when(bundleContext.getService(ref2)).thenReturn(service2);
+        lenient().doReturn(service2).when(bundleContext).getService(ref2);
 
         lenient()
                 .when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
@@ -238,13 +239,13 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({"unchecked", "null"})
-    public void testSimpleOSGiModelConstructor() throws Exception {
-        ServiceReference ref = mock(ServiceReference.class);
+    @SuppressWarnings({"null"})
+    void testSimpleOSGiModelConstructor() throws Exception {
+        ServiceReference<?> ref = mock(ServiceReference.class);
         ServiceInterface service = mock(ServiceInterface.class);
         when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
                 .thenReturn(new ServiceReference[] {ref});
-        when(bundleContext.getService(ref)).thenReturn(service);
+        doReturn(service).when(bundleContext).getService(ref);
 
         Resource res = mock(Resource.class);
 
@@ -258,14 +259,14 @@ public class OSGiInjectionTest {
     }
 
     @Test
-    @SuppressWarnings({"unchecked", "null"})
-    public void testListOSGiModelConstructor() throws Exception {
-        ServiceReference ref1 = mock(ServiceReference.class);
+    @SuppressWarnings({"null"})
+    void testListOSGiModelConstructor() throws Exception {
+        ServiceReference<?> ref1 = mock(ServiceReference.class);
         ServiceInterface service1 = mock(ServiceInterface.class);
-        when(bundleContext.getService(ref1)).thenReturn(service1);
-        ServiceReference ref2 = mock(ServiceReference.class);
+        doReturn(service1).when(bundleContext).getService(ref1);
+        ServiceReference<?> ref2 = mock(ServiceReference.class);
         ServiceInterface service2 = mock(ServiceInterface.class);
-        when(bundleContext.getService(ref2)).thenReturn(service2);
+        doReturn(service2).when(bundleContext).getService(ref2);
 
         when(bundleContext.getServiceReferences(ServiceInterface.class.getName(), null))
                 .thenReturn(new ServiceReference[] {ref1, ref2});

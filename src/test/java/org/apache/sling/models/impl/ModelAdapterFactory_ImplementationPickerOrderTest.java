@@ -27,13 +27,13 @@ import org.apache.sling.models.spi.ImplementationPicker;
 import org.apache.sling.models.testutil.ModelAdapterFactoryUtil;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
+import org.apache.sling.testing.mock.osgi.junit5.OsgiContextExtension;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.Assert.assertEquals;
 import static org.osgi.framework.Constants.SERVICE_RANKING;
@@ -42,11 +42,10 @@ import static org.osgi.framework.Constants.SERVICE_RANKING;
  * Tests in which order the implementation pickers are handled depending on service ranking.
  * For historic/backwards compatibility reasons, higher ranking value means lower priority (inverse to DS behavior).
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ModelAdapterFactory_ImplementationPickerOrderTest {
+@ExtendWith({OsgiContextExtension.class, MockitoExtension.class})
+class ModelAdapterFactory_ImplementationPickerOrderTest {
 
-    @Rule
-    public final OsgiContext context = new OsgiContext();
+    final OsgiContext context = new OsgiContext();
 
     @Mock
     private AdapterManager adapterManager;
@@ -59,8 +58,8 @@ public class ModelAdapterFactory_ImplementationPickerOrderTest {
 
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         context.registerService(BindingsValuesProvidersByContext.class, bindingsValuesProvidersByContext);
         context.registerService(AdapterManager.class, adapterManager);
         factory = context.registerInjectActivateService(ModelAdapterFactory.class);
@@ -69,7 +68,7 @@ public class ModelAdapterFactory_ImplementationPickerOrderTest {
     }
 
     @Test
-    public void testFirstImplementationPicker() {
+    void testFirstImplementationPicker() {
         context.registerService(
                 ImplementationPicker.class, new FirstImplementationPicker(), SERVICE_RANKING, Integer.MAX_VALUE);
 
@@ -78,7 +77,7 @@ public class ModelAdapterFactory_ImplementationPickerOrderTest {
     }
 
     @Test
-    public void testMultipleImplementationPickers() {
+    void testMultipleImplementationPickers() {
         // LastImplementationPicker has higher priority
         context.registerService(
                 ImplementationPicker.class, new FirstImplementationPicker(), SERVICE_RANKING, Integer.MAX_VALUE);

@@ -24,14 +24,14 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.impl.injectors.ChildResourceInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -39,13 +39,13 @@ import static org.mockito.Mockito.when;
 /**
  * Validates that @Optional annotations works with primitive values which do not support null
  */
-@RunWith(MockitoJUnitRunner.class)
-public class OptionalPrimitivesTest {
+@ExtendWith(MockitoExtension.class)
+class OptionalPrimitivesTest {
 
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.injectors = Arrays.asList(new ChildResourceInjector(), new ValueMapInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
@@ -55,7 +55,7 @@ public class OptionalPrimitivesTest {
     }
 
     @Test
-    public void testFieldInjectionClass() {
+    void testFieldInjectionClass() {
         ValueMap vm = ValueMap.EMPTY;
 
         Resource res = mock(Resource.class);
@@ -87,7 +87,7 @@ public class OptionalPrimitivesTest {
     }
 
     @Test
-    public void testConstructorInjection() {
+    void testConstructorInjection() {
         ValueMap vm = ValueMap.EMPTY;
 
         Resource res = mock(Resource.class);
@@ -121,7 +121,7 @@ public class OptionalPrimitivesTest {
     }
 
     @Test
-    public void testFieldInjectionInterface() {
+    void testFieldInjectionInterface() {
         ValueMap vm = ValueMap.EMPTY;
 
         Resource res = mock(Resource.class);
