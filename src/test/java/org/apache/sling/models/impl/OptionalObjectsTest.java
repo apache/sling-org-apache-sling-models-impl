@@ -31,24 +31,26 @@ import org.apache.sling.models.impl.via.BeanPropertyViaProvider;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory2;
 import org.apache.sling.models.testmodels.classes.OptionalObjectsModel;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OptionalObjectsTest {
+@ExtendWith(MockitoExtension.class)
+class OptionalObjectsTest {
 
     private ModelAdapterFactory factory;
 
@@ -63,8 +65,8 @@ public class OptionalObjectsTest {
     @Mock
     private Logger log;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
 
         osgiInjector = new OSGiServiceInjector();
@@ -89,13 +91,13 @@ public class OptionalObjectsTest {
 
         SlingBindings bindings = new SlingBindings();
         bindings.setLog(log);
-        Mockito.when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
+        lenient().when(request.getAttribute(SlingBindings.class.getName())).thenReturn(bindings);
 
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(OptionalObjectsModel.class);
     }
 
     @Test
-    public void testFieldInjectionClass() {
+    void testFieldInjectionClass() {
         Map<String, Object> map = new HashMap<>();
         map.put("optionalString", "foo bar baz");
         map.put("optionalByte", Byte.valueOf("1"));
@@ -147,7 +149,7 @@ public class OptionalObjectsTest {
     }
 
     @Test
-    public void testFieldInjectionListsAndArrays() {
+    void testFieldInjectionListsAndArrays() {
         Map<String, Object> map = new HashMap<>();
 
         map.put("intList", new Integer[] {1, 2, 9, 8});
@@ -178,11 +180,11 @@ public class OptionalObjectsTest {
     }
 
     @Test
-    public void testFieldInjectionsChildResource() throws Exception {
+    void testFieldInjectionsChildResource() {
         Resource res = mock(Resource.class);
         Resource child = mock(Resource.class);
-        when(child.getName()).thenReturn("child");
-        when(res.getChild(eq("child"))).thenReturn(child);
+        lenient().when(child.getName()).thenReturn("child");
+        lenient().when(res.getChild("child")).thenReturn(child);
 
         OptionalObjectsModel model = factory.getAdapter(res, OptionalObjectsModel.class);
         assertNotNull(model);
@@ -192,7 +194,7 @@ public class OptionalObjectsTest {
     }
 
     @Test
-    public void testFieldInjectionsScriptVariable() throws Exception {
+    void testFieldInjectionsScriptVariable() {
         SlingBindings bindings = new SlingBindings();
         SlingScriptHelper helper = mock(SlingScriptHelper.class);
         bindings.setSling(helper);
@@ -205,21 +207,24 @@ public class OptionalObjectsTest {
     }
 
     @Test
-    public void testFieldInjectionsOSGiService() throws InvalidSyntaxException {
-        ServiceReference ref = mock(ServiceReference.class);
-        Logger log = mock(Logger.class);
-        when(bundleContext.getServiceReferences(Logger.class.getName(), null)).thenReturn(new ServiceReference[] {ref});
-        when(bundleContext.getService(ref)).thenReturn(log);
+    void testFieldInjectionsOSGiService() throws InvalidSyntaxException {
+        ServiceReference<?> ref = mock(ServiceReference.class);
+        Logger logger = mock(Logger.class);
+        lenient()
+                .when(bundleContext.getServiceReferences(Logger.class.getName(), null))
+                .thenReturn(new ServiceReference[] {ref});
+
+        doReturn(logger).when(bundleContext).getService(ref);
 
         OptionalObjectsModel model = factory.getAdapter(request, OptionalObjectsModel.class);
         assertNotNull(model);
-        assertEquals(log, model.getLog().get());
+        assertEquals(logger, model.getLog().get());
     }
 
     @Test
-    public void testFieldInjectionsRequestAttribute() throws InvalidSyntaxException {
+    void testFieldInjectionsRequestAttribute() {
         Object attribute = new Object();
-        when(request.getAttribute("attribute")).thenReturn(attribute);
+        lenient().when(request.getAttribute("attribute")).thenReturn(attribute);
 
         OptionalObjectsModel model = factory.getAdapter(request, OptionalObjectsModel.class);
         assertNotNull(model);
