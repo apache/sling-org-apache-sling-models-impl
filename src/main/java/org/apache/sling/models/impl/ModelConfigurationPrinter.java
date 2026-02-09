@@ -19,6 +19,7 @@
 package org.apache.sling.models.impl;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,27 @@ public class ModelConfigurationPrinter {
         this.modelAdapterFactory = modelAdapterFactory;
         this.bundleContext = bundleContext;
         this.adapterImplementations = adapterImplementations;
+    }
+
+    /**
+     * Converts an arbitrary property value to its string representation.
+     * Properly handles arrays, nulls, and various types.
+     *
+     * @param value the property value to convert (can be null, array, or any object)
+     * @return a string representation of the value, or "null" if value is null
+     */
+    private String propertyToString(Object value) {
+        if (value == null) {
+            return "null";
+        }
+
+        // Handle arrays
+        if (value.getClass().isArray()) {
+            return Arrays.toString((Object[]) value);
+        }
+
+        // Handle all other types
+        return value.toString();
     }
 
     public void printConfiguration(PrintWriter printWriter) {
@@ -153,15 +175,17 @@ public class ModelConfigurationPrinter {
                     bundleContext.getServiceReferences(Servlet.class.getName(), EXPORT_SERVLET_FILTER);
             if (servlets != null) {
                 for (ServiceReference ref : servlets) {
-                    printWriter.print(ref.getProperty(ModelPackageBundleListener.PROP_EXPORTER_SERVLET_CLASS));
+                    printWriter.print(
+                            propertyToString(ref.getProperty(ModelPackageBundleListener.PROP_EXPORTER_SERVLET_CLASS)));
                     printWriter.print(" exports '");
-                    printWriter.print(ref.getProperty("sling.servlet.resourceTypes"));
+                    printWriter.print(propertyToString(ref.getProperty("sling.servlet.resourceTypes")));
                     printWriter.print("' with selector '");
-                    printWriter.print(ref.getProperty("sling.servlet.selectors"));
+                    printWriter.print(propertyToString(ref.getProperty("sling.servlet.selectors")));
                     printWriter.print("' and extension '");
-                    printWriter.print(ref.getProperty("sling.servlet.extensions"));
+                    printWriter.print(propertyToString(ref.getProperty("sling.servlet.extensions")));
                     printWriter.print("' with exporter '");
-                    printWriter.print(ref.getProperty(ModelPackageBundleListener.PROP_EXPORTER_SERVLET_NAME));
+                    printWriter.print(
+                            propertyToString(ref.getProperty(ModelPackageBundleListener.PROP_EXPORTER_SERVLET_NAME)));
                     printWriter.println("'");
                 }
             }
