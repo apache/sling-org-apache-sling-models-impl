@@ -30,7 +30,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.sling.api.SlingJakartaHttpServletRequest;
 import org.apache.sling.api.SlingJakartaHttpServletResponse;
-import org.apache.sling.api.scripting.LazyBindings;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.api.servlets.SlingJakartaSafeMethodsServlet;
@@ -48,6 +47,7 @@ import static org.apache.sling.api.scripting.SlingBindings.JAKARTA_RESPONSE;
 import static org.apache.sling.api.scripting.SlingBindings.LOG;
 import static org.apache.sling.api.scripting.SlingBindings.OUT;
 import static org.apache.sling.api.scripting.SlingBindings.READER;
+import static org.apache.sling.api.scripting.SlingBindings.RESOLVER;
 import static org.apache.sling.api.scripting.SlingBindings.RESOURCE;
 import static org.apache.sling.api.scripting.SlingBindings.SLING;
 
@@ -135,11 +135,10 @@ class ExportServlet extends SlingJakartaSafeMethodsServlet {
             SlingJakartaHttpServletRequest request,
             SlingJakartaHttpServletResponse response)
             throws IOException {
-        Bindings bindings = new LazyBindings();
+        Bindings bindings = new SlingBindings();
         bindings.put(SLING, scriptHelper);
         bindings.put(RESOURCE, request.getResource());
-        bindings.put(
-                SlingModelsScriptEngineFactory.RESOLVER, request.getResource().getResourceResolver());
+        bindings.put(RESOLVER, request.getResource().getResourceResolver());
         bindings.put(JAKARTA_REQUEST, request);
         bindings.put(JAKARTA_RESPONSE, response);
         try {
@@ -152,10 +151,7 @@ class ExportServlet extends SlingJakartaSafeMethodsServlet {
 
         scriptEngineFactory.invokeBindingsValuesProviders(bindingsValuesProvidersByContext, bindings);
 
-        SlingBindings slingBindings = new SlingBindings();
-        slingBindings.putAll(bindings);
-
-        request.setAttribute(SlingBindings.class.getName(), slingBindings);
+        request.setAttribute(SlingBindings.class.getName(), bindings);
     }
 
     private Map<String, String> createOptionMap(SlingJakartaHttpServletRequest request) {
