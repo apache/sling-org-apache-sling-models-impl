@@ -20,10 +20,10 @@ package org.apache.sling.models.impl;
 
 import java.lang.reflect.Constructor;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({
     "PackageVisibleInnerClass",
@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
     "InstanceVariableMayNotBeInitialized",
     "PublicConstructorInNonPublicClass"
 })
-public class ReflectionUtilTest {
+class ReflectionUtilTest {
 
     static class TestClassOne {
         private final int field1;
@@ -104,49 +104,49 @@ public class ReflectionUtilTest {
     }
 
     @Test
-    public void testBalancedConstructor() throws NoSuchMethodException {
+    void testBalancedConstructor() throws NoSuchMethodException {
         Constructor<?> constructor = TestClassOne.class.getConstructor(int.class, String.class);
         assertTrue(ReflectionUtil.areBalancedCtorParamsAndFields(constructor));
     }
 
     @Test
-    public void testMoreFieldsThanParams() throws NoSuchMethodException {
+    void testMoreFieldsThanParams() throws NoSuchMethodException {
         Constructor<?> constructor = TestClassTwo.class.getConstructor(int.class, String.class);
         assertFalse(ReflectionUtil.areBalancedCtorParamsAndFields(constructor));
     }
 
     @Test
-    public void testMoreParamsThanFields() throws NoSuchMethodException {
+    void testMoreParamsThanFields() throws NoSuchMethodException {
         Constructor<?> constructor = TestClassThree.class.getConstructor(int.class, String.class);
         assertFalse(ReflectionUtil.areBalancedCtorParamsAndFields(constructor));
     }
 
     @Test
-    public void testNoFields() throws NoSuchMethodException {
+    void testNoFields() throws NoSuchMethodException {
         Constructor<?> constructor = TestClassFour.class.getConstructor(int.class, String.class, boolean.class);
         assertFalse(ReflectionUtil.areBalancedCtorParamsAndFields(constructor));
     }
 
     @Test
-    public void testOneFieldOneParam() throws NoSuchMethodException {
+    void testOneFieldOneParam() throws NoSuchMethodException {
         Constructor<?> constructor = TestClassFive.class.getConstructor(int.class);
         assertTrue(ReflectionUtil.areBalancedCtorParamsAndFields(constructor));
     }
 
     @Test
-    public void testNoParams() throws NoSuchMethodException {
+    void testNoParams() throws NoSuchMethodException {
         Constructor<?> constructor = TestClassSix.class.getConstructor();
         assertFalse(ReflectionUtil.areBalancedCtorParamsAndFields(constructor));
     }
 
     @Test
-    public void testBalancedRepeatableTypes() throws NoSuchMethodException {
+    void testBalancedRepeatableTypes() throws NoSuchMethodException {
         Constructor<?> constructor = TestClassSeven.class.getConstructor(String.class, String.class);
         assertTrue(ReflectionUtil.areBalancedCtorParamsAndFields(constructor));
     }
 
     @Test
-    public void testUnbalancedRepeatableTypes() throws NoSuchMethodException {
+    void testUnbalancedRepeatableTypes() throws NoSuchMethodException {
         Constructor<?> constructor = TestClassEight.class.getConstructor(String.class, String.class);
         assertFalse(ReflectionUtil.areBalancedCtorParamsAndFields(constructor));
     }

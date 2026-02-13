@@ -44,17 +44,17 @@ import org.apache.sling.models.testmodels.classes.ParentModel;
 import org.apache.sling.models.testmodels.classes.ResourceModelWithRequiredField;
 import org.apache.sling.models.testmodels.classes.ResourceModelWithRequiredFieldOptionalStrategy;
 import org.apache.sling.models.testmodels.classes.SimplePropertyModel;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -63,13 +63,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("deprecation")
-@RunWith(MockitoJUnitRunner.class)
-public class ResourceModelClassesTest {
+@ExtendWith(MockitoExtension.class)
+class ResourceModelClassesTest {
 
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         ValueMapInjector valueMapInjector = new ValueMapInjector();
         factory.injectors = Arrays.asList(new ChildResourceInjector(), valueMapInjector);
@@ -92,11 +92,11 @@ public class ResourceModelClassesTest {
     }
 
     @Test
-    public void testSimplePropertyModel() {
+    void testSimplePropertyModel() {
         Map<String, Object> map = new HashMap<>();
         map.put("first", "first-value");
         map.put("third", "third-value");
-        map.put("intProperty", new Integer(3));
+        map.put("intProperty", Integer.valueOf(3));
         map.put("arrayProperty", new String[] {"three", "four"});
         ValueMap vm = new ValueMapDecorator(map);
 
@@ -120,7 +120,7 @@ public class ResourceModelClassesTest {
     }
 
     @Test
-    public void testArrayPrimitivesModel() {
+    void testArrayPrimitivesModel() {
         Map<String, Object> map = new HashMap<>();
         map.put("intArray", new int[] {1, 2, 9, 8});
         map.put("secondIntArray", new Integer[] {1, 2, 9, 8});
@@ -142,7 +142,7 @@ public class ResourceModelClassesTest {
     }
 
     @Test
-    public void testArrayWrappersModel() {
+    void testArrayWrappersModel() {
         Map<String, Object> map = new HashMap<>();
         map.put("intArray", new Integer[] {1, 2, 9, 8});
         map.put("secondIntArray", new int[] {1, 2, 9, 8});
@@ -156,15 +156,15 @@ public class ResourceModelClassesTest {
 
         Integer[] intArray = model.getIntArray();
         assertEquals(4, intArray.length);
-        assertEquals(new Integer(2), intArray[1]);
+        assertEquals(Integer.valueOf(2), intArray[1]);
 
         Integer[] secondIntArray = model.getSecondIntArray();
         assertEquals(4, secondIntArray.length);
-        assertEquals(new Integer(2), secondIntArray[1]);
+        assertEquals(Integer.valueOf(2), secondIntArray[1]);
     }
 
     @Test
-    public void testListModel() {
+    void testListModel() {
         Map<String, Object> map = new HashMap<>();
         map.put("intList", new Integer[] {1, 2, 9, 8});
         map.put("stringList", new String[] {"hello", "world"});
@@ -177,7 +177,7 @@ public class ResourceModelClassesTest {
         assertNotNull(model);
 
         assertEquals(4, model.getIntList().size());
-        assertEquals(new Integer(2), model.getIntList().get(1));
+        assertEquals(Integer.valueOf(2), model.getIntList().get(1));
 
         assertEquals(2, model.getStringList().size());
         assertEquals("hello", model.getStringList().get(0));
@@ -186,7 +186,7 @@ public class ResourceModelClassesTest {
     }
 
     @Test
-    public void testListDefaultsModel() {
+    void testListDefaultsModel() {
         Map<String, Object> map = new HashMap<>();
 
         ValueMap vm = new ValueMapDecorator(map);
@@ -206,7 +206,7 @@ public class ResourceModelClassesTest {
     }
 
     @Test
-    public void testCollectionDefaultsModel() {
+    void testCollectionDefaultsModel() {
         Map<String, Object> map = new HashMap<>();
 
         ValueMap vm = new ValueMapDecorator(map);
@@ -222,7 +222,7 @@ public class ResourceModelClassesTest {
 
     @SuppressWarnings({"unused", "null"})
     @Test
-    public void testRequiredPropertyModel() {
+    void testRequiredPropertyModel() {
         Map<String, Object> map = new HashMap<>();
         map.put("first", "first-value");
         map.put("third", "third-value");
@@ -238,7 +238,7 @@ public class ResourceModelClassesTest {
     }
 
     @Test
-    public void testRequiredPropertyModelWithException() {
+    void testRequiredPropertyModelWithException() {
         Map<String, Object> map = new HashMap<>();
         map.put("first", "first-value");
         map.put("third", "third-value");
@@ -263,7 +263,7 @@ public class ResourceModelClassesTest {
 
     @SuppressWarnings({"unused", "null"})
     @Test
-    public void testRequiredPropertyMissingModelOptionalStrategy() {
+    void testRequiredPropertyMissingModelOptionalStrategy() {
         Map<String, Object> map = new HashMap<>();
         map.put("first", "first-value");
         ValueMap vm = spy(new ValueMapDecorator(map));
@@ -280,7 +280,7 @@ public class ResourceModelClassesTest {
     }
 
     @Test
-    public void testRequiredPropertyModelOptionalStrategy() {
+    void testRequiredPropertyModelOptionalStrategy() {
         Map<String, Object> map = new HashMap<>();
         map.put("required1", "required value");
         map.put("required2", "required value");
@@ -301,7 +301,7 @@ public class ResourceModelClassesTest {
     }
 
     @Test
-    public void testChildResource() {
+    void testChildResource() {
         Resource child = mock(Resource.class);
         Resource secondChild = mock(Resource.class);
         Resource emptyChild = mock(Resource.class);
@@ -328,7 +328,7 @@ public class ResourceModelClassesTest {
     }
 
     @Test
-    public void testChildValueMap() {
+    void testChildValueMap() {
         ValueMap map = ValueMapDecorator.EMPTY;
 
         Resource child = mock(Resource.class);
@@ -343,7 +343,7 @@ public class ResourceModelClassesTest {
     }
 
     @Test
-    public void testChildModel() {
+    void testChildModel() {
         Object firstValue = RandomStringUtils.randomAlphabetic(10);
         ValueMap firstMap = new ValueMapDecorator(Collections.singletonMap("property", firstValue));
 

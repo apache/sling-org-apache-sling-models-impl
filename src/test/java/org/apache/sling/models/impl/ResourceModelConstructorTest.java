@@ -29,11 +29,11 @@ import org.apache.sling.models.impl.injectors.ChildResourceInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.apache.sling.models.testmodels.classes.ChildModel;
 import org.apache.sling.models.testmodels.classes.constructorinjection.ParentModel;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import static org.junit.Assert.assertEquals;
@@ -41,30 +41,30 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ResourceModelConstructorTest {
+@ExtendWith(MockitoExtension.class)
+class ResourceModelConstructorTest {
 
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.injectors = Arrays.asList(new ChildResourceInjector(), new ValueMapInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(ParentModel.class, ChildModel.class);
     }
 
     @Test
-    public void testChildModel() {
-        Object firstValue = RandomStringUtils.randomAlphabetic(10);
+    void testChildModel() {
+        Object firstValue = RandomStringUtils.secureStrong().nextAlphabetic(10);
         ValueMap firstMap = new ValueMapDecorator(Collections.singletonMap("property", firstValue));
 
         final Resource firstChild = mock(Resource.class);
         lenient().when(firstChild.adaptTo(ValueMap.class)).thenReturn(firstMap);
         lenient().when(firstChild.adaptTo(ChildModel.class)).thenAnswer(new AdaptToChildModel());
 
-        Object firstGrandChildValue = RandomStringUtils.randomAlphabetic(10);
+        Object firstGrandChildValue = RandomStringUtils.secureStrong().nextAlphabetic(10);
         ValueMap firstGrandChildMap = new ValueMapDecorator(Collections.singletonMap("property", firstGrandChildValue));
-        Object secondGrandChildValue = RandomStringUtils.randomAlphabetic(10);
+        Object secondGrandChildValue = RandomStringUtils.secureStrong().nextAlphabetic(10);
         ValueMap secondGrandChildMap =
                 new ValueMapDecorator(Collections.singletonMap("property", secondGrandChildValue));
 

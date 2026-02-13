@@ -29,24 +29,25 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.scripting.api.BindingsValuesProvider;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class RequestWrapperTest {
+@ExtendWith(MockitoExtension.class)
+class RequestWrapperTest {
 
     @Mock
     private AdapterManager adapterManager;
@@ -66,18 +67,19 @@ public class RequestWrapperTest {
     @InjectMocks
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.bindingsValuesProvidersByContext = bindingsValuesProvidersByContext;
         factory.adapterManager = adapterManager;
-        when(bindingsValuesProvidersByContext.getBindingsValuesProviders(
+        lenient()
+                .when(bindingsValuesProvidersByContext.getBindingsValuesProviders(
                         any(ScriptEngineFactory.class), eq(BindingsValuesProvider.DEFAULT_CONTEXT)))
                 .thenReturn(Collections.singleton(bindingsValuesProvider));
     }
 
     @Test
-    public void testWrapper() {
+    void testWrapper() {
         Target expected = new Target();
         when(adapterManager.getAdapter(any(SlingJakartaHttpServletRequest.class), eq(Target.class)))
                 .thenReturn(expected);

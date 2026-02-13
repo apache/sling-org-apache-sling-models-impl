@@ -35,17 +35,17 @@ import org.apache.sling.models.testmodels.interfaces.ChildResourceModel;
 import org.apache.sling.models.testmodels.interfaces.ChildValueMapModel;
 import org.apache.sling.models.testmodels.interfaces.ParentModel;
 import org.apache.sling.models.testmodels.interfaces.SimplePropertyModel;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -53,13 +53,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ResourceModelInterfacesTest {
+@ExtendWith(MockitoExtension.class)
+class ResourceModelInterfacesTest {
 
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.injectors = Arrays.asList(new ChildResourceInjector(), new ValueMapInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
@@ -72,7 +72,7 @@ public class ResourceModelInterfacesTest {
     }
 
     @Test
-    public void testSimplePropertyModel() {
+    void testSimplePropertyModel() {
         Map<String, Object> map = new HashMap<>();
         map.put("first", "first-value");
         map.put("third", "third-value");
@@ -94,7 +94,7 @@ public class ResourceModelInterfacesTest {
 
     @Test
     @SuppressWarnings({"unused", "null"})
-    public void testRequiredPropertyModel() {
+    void testRequiredPropertyModel() {
         Map<String, Object> map = new HashMap<>();
         map.put("first", "first-value");
         map.put("third", "third-value");
@@ -110,7 +110,7 @@ public class ResourceModelInterfacesTest {
     }
 
     @Test
-    public void testChildResource() {
+    void testChildResource() {
         Resource child = mock(Resource.class);
 
         Resource res = mock(Resource.class);
@@ -122,7 +122,7 @@ public class ResourceModelInterfacesTest {
     }
 
     @Test
-    public void testChildValueMap() {
+    void testChildValueMap() {
         ValueMap map = ValueMapDecorator.EMPTY;
 
         Resource child = mock(Resource.class);
@@ -137,8 +137,8 @@ public class ResourceModelInterfacesTest {
     }
 
     @Test
-    public void testChildModel() {
-        Object value = RandomStringUtils.randomAlphabetic(10);
+    void testChildModel() {
+        Object value = RandomStringUtils.secureStrong().nextAlphabetic(10);
         Map<String, Object> props = Collections.singletonMap("property", value);
         ValueMap map = new ValueMapDecorator(props);
 
@@ -146,9 +146,9 @@ public class ResourceModelInterfacesTest {
         lenient().when(firstChild.adaptTo(ValueMap.class)).thenReturn(map);
         lenient().when(firstChild.adaptTo(ChildModel.class)).thenAnswer(new AdaptToChildModel());
 
-        Object firstGrandChildValue = RandomStringUtils.randomAlphabetic(10);
+        Object firstGrandChildValue = RandomStringUtils.secureStrong().nextAlphabetic(10);
         ValueMap firstGrandChildMap = new ValueMapDecorator(Collections.singletonMap("property", firstGrandChildValue));
-        Object secondGrandChildValue = RandomStringUtils.randomAlphabetic(10);
+        Object secondGrandChildValue = RandomStringUtils.secureStrong().nextAlphabetic(10);
         ValueMap secondGrandChildMap =
                 new ValueMapDecorator(Collections.singletonMap("property", secondGrandChildValue));
 
