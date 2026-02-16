@@ -27,22 +27,22 @@ import org.apache.sling.models.testmodels.classes.IndirectCyclicSelfDependencyMo
 import org.apache.sling.models.testmodels.classes.IndirectCyclicSelfDependencyModelB;
 import org.apache.sling.models.testmodels.classes.SelfDependencyModelA;
 import org.apache.sling.models.testmodels.classes.SelfDependencyModelB;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SelfDependencyTest {
+@ExtendWith(MockitoExtension.class)
+class SelfDependencyTest {
 
     private ModelAdapterFactory factory;
 
@@ -50,8 +50,8 @@ public class SelfDependencyTest {
     private SlingJakartaHttpServletRequest request;
 
     @SuppressWarnings("unchecked")
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         lenient().when(request.adaptTo(any(Class.class))).then(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -71,7 +71,7 @@ public class SelfDependencyTest {
     }
 
     @Test
-    public void testChainedSelfDependency() {
+    void testChainedSelfDependency() {
         SelfDependencyModelA objectA = factory.getAdapter(request, SelfDependencyModelA.class);
         assertNotNull(objectA);
         SelfDependencyModelB objectB = objectA.getDependencyB();
@@ -80,13 +80,13 @@ public class SelfDependencyTest {
     }
 
     @Test
-    public void testDirectCyclicSelfDependency() {
+    void testDirectCyclicSelfDependency() {
         DirectCyclicSelfDependencyModel object = factory.getAdapter(request, DirectCyclicSelfDependencyModel.class);
         assertNull(object);
     }
 
     @Test
-    public void testInddirectCyclicSelfDependency() {
+    void testInddirectCyclicSelfDependency() {
         IndirectCyclicSelfDependencyModelA object =
                 factory.getAdapter(request, IndirectCyclicSelfDependencyModelA.class);
         assertNull(object);

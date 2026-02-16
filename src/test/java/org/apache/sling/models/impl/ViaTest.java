@@ -30,18 +30,19 @@ import org.apache.sling.models.impl.via.BeanPropertyViaProvider;
 import org.apache.sling.models.impl.via.ChildResourceViaProvider;
 import org.apache.sling.models.testmodels.classes.ChildResourceViaModel;
 import org.apache.sling.models.testmodels.classes.ViaModel;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ViaTest {
+@ExtendWith(MockitoExtension.class)
+class ViaTest {
 
     @Mock
     private Resource resource;
@@ -54,10 +55,10 @@ public class ViaTest {
 
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setup() {
-        when(request.getResource()).thenReturn(resource);
-        when(resource.getChild("jcr:content")).thenReturn(childResource);
+    @BeforeEach
+    void setup() {
+        lenient().when(request.getResource()).thenReturn(resource);
+        lenient().when(resource.getChild("jcr:content")).thenReturn(childResource);
         factory = AdapterFactoryTest.createModelAdapterFactory();
         factory.injectors = Collections.singletonList(new ValueMapInjector());
         factory.bindViaProvider(new BeanPropertyViaProvider(), null);
@@ -67,7 +68,7 @@ public class ViaTest {
     }
 
     @Test
-    public void testProjectionToResource() {
+    void testProjectionToResource() {
         String value = RandomStringUtils.secure().nextAlphanumeric(10);
         ValueMap map = new ValueMapDecorator(Collections.<String, Object>singletonMap("firstProperty", value));
         when(resource.adaptTo(ValueMap.class)).thenReturn(map);
@@ -78,7 +79,7 @@ public class ViaTest {
     }
 
     @Test
-    public void testProjectionToChildResource() {
+    void testProjectionToChildResource() {
         String value = RandomStringUtils.secure().nextAlphanumeric(10);
         ValueMap map = new ValueMapDecorator(Collections.<String, Object>singletonMap("firstProperty", value));
         when(childResource.adaptTo(ValueMap.class)).thenReturn(map);

@@ -28,25 +28,24 @@ import org.apache.sling.models.impl.injectors.SlingObjectInjector;
 import org.apache.sling.models.testutil.ModelAdapterFactoryUtil;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.apache.sling.testing.mock.osgi.junit5.OsgiContextExtension;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
  * Test load order behavior of StaticInjectionAnnotationProcesssorFactory instances (SLING-5010).
  */
-@RunWith(MockitoJUnitRunner.class)
-public class StaticInjectionAPFLoadOrderTest {
+@ExtendWith({OsgiContextExtension.class, MockitoExtension.class})
+class StaticInjectionAPFLoadOrderTest {
 
-    @Rule
-    public OsgiContext context = new OsgiContext();
+    final OsgiContext context = new OsgiContext();
 
     @Mock
     private SlingJakartaHttpServletRequest request;
@@ -62,8 +61,8 @@ public class StaticInjectionAPFLoadOrderTest {
 
     private ModelAdapterFactory factory;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         registerServices();
     }
 
@@ -71,7 +70,7 @@ public class StaticInjectionAPFLoadOrderTest {
      * Registration order: 1. ModelFactory, 2. custom injector, 3. model
      */
     @Test
-    public void testFactory_Injector_Model() {
+    void testFactory_Injector_Model() {
         when(request.getResourceResolver()).thenReturn(null);
 
         registerCustomInjector();
@@ -85,7 +84,7 @@ public class StaticInjectionAPFLoadOrderTest {
      * Registration order: 1. ModelFactory, 2. custom injector, 3. model
      */
     @Test
-    public void testFactory_Injector_Model_WithResourceResolver() {
+    void testFactory_Injector_Model_WithResourceResolver() {
         when(request.getResourceResolver()).thenReturn(resourceResolver);
 
         registerCustomInjector();
@@ -98,7 +97,7 @@ public class StaticInjectionAPFLoadOrderTest {
      * Registration order: 1. ModelFactory, 2. model, 3. custom injector
      */
     @Test
-    public void testFactory_Model_Injector() {
+    void testFactory_Model_Injector() {
         when(request.getResourceResolver()).thenReturn(null);
 
         registerModel();
@@ -112,7 +111,7 @@ public class StaticInjectionAPFLoadOrderTest {
      * Registration order: 1. ModelFactory, 2. model, 3. custom injector
      */
     @Test
-    public void testFactory_Model_Injector_WithResourceResolver() {
+    void testFactory_Model_Injector_WithResourceResolver() {
         when(request.getResourceResolver()).thenReturn(resourceResolver);
 
         registerModel();
