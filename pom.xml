@@ -495,7 +495,7 @@
             <plugin>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>slingfeature-maven-plugin</artifactId>
-                <version>1.9.2</version>
+                <version>1.9.4</version>
                 <extensions>true</extensions>
                 <configuration>
                     <features>src/test/it-features</features>
@@ -557,7 +557,7 @@
             <plugin>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>feature-launcher-maven-plugin</artifactId>
-                <version>1.0.3-SNAPSHOT</version>
+                <version>1.0.4</version>
                 <configuration>
                     <launches>
                         <launch>
