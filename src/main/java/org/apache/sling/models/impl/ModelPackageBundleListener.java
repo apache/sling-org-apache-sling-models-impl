@@ -193,7 +193,7 @@ public class ModelPackageBundleListener implements BundleTrackerCustomizer<Servi
                     }
                 }
             }
-        } catch (ClassNotFoundException | AnnotationFormatError e) {
+        } catch (NoClassDefFoundError | ClassNotFoundException | AnnotationFormatError e) {
             log.warn(
                     "Unable to load class '{}' from bundle '{}': {}",
                     className,

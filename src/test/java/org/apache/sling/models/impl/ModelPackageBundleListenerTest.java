@@ -103,6 +103,22 @@ class ModelPackageBundleListenerTest {
                 "Model should not yet have been registered but was");
     }
 
+    @Test
+    void testAddingBundleWithLinkageError() throws ClassNotFoundException {
+        ClassLoader classLoader = new HideClassesClassLoader(
+                this.getClass().getClassLoader(),
+                org.apache.sling.models.testmodels.classes.MissingClass.class.getName());
+
+        ModelPackageBundleListener listener = createListenerForBundleWithClass(
+                classLoader, org.apache.sling.models.testmodels.classes.ClassWithMissingClass.class.getName());
+
+        listener.addingBundle(mockBundle, new BundleEvent(BundleEvent.STARTED, mockBundle));
+        assertFalse(
+                adapterImplementations.isModelClass(
+                        org.apache.sling.models.testmodels.classes.ClassWithMissingClass.class),
+                "Model should not yet have been registered but was");
+    }
+
     private ModelPackageBundleListener createListenerForBundleWithClass(Class<?> modelClass)
             throws ClassNotFoundException {
         return createListenerForBundleWithClass(modelClass.getClassLoader(), modelClass.getName());
