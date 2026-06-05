@@ -23,7 +23,6 @@ import javax.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.ClassUtils;
@@ -33,18 +32,6 @@ import org.apache.sling.models.spi.injectorspecific.InjectAnnotation;
  * Helper methods for inspecting classes via reflection.
  */
 public final class ReflectionUtil {
-
-    static Class<?> recordType;
-
-    static {
-        try {
-            recordType = Class.forName("java.lang.Record");
-        } catch (ClassNotFoundException e) {
-            // this happens when running with Java11, which is supported, but
-            // of course does not have support for Record types
-            recordType = null;
-        }
-    }
 
     private ReflectionUtil() {
         // static methods only
@@ -132,30 +119,5 @@ public final class ReflectionUtil {
         } else {
             return type;
         }
-    }
-
-    public static boolean isRecord(Class<?> checkedType) {
-        if (recordType == null) {
-            return false;
-        }
-        return recordType.isAssignableFrom(checkedType);
-    }
-
-    /**
-     * Checks if the number of parameters in the specified constructor matches the number of fields in the class
-     * that declares the constructor. Can be useful for detection of canonical constructors in records.
-     * Synthetic fields are ignored.
-     *
-     * @param constructor the constructor to check
-     * @return {@code true} if the number of constructor parameters equals the number of fields in the declaring class,
-     *         {@code false} otherwise
-     */
-    public static boolean areBalancedCtorParamsAndFields(Constructor<?> constructor) {
-        int numOfCtorParams = constructor.getParameterCount();
-        Class<?> declaringClass = constructor.getDeclaringClass();
-        Field[] fields = declaringClass.getDeclaredFields();
-        long numOfFields =
-                Arrays.stream(fields).filter(field -> !field.isSynthetic()).count();
-        return numOfCtorParams == numOfFields;
     }
 }
