@@ -23,10 +23,11 @@ import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.RecordComponent;
+import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
-import org.apache.sling.models.impl.ReflectionUtil;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 
 public class ModelClassConstructor<M> {
@@ -86,8 +87,12 @@ public class ModelClassConstructor<M> {
 
     public boolean isCanonicalRecordConstructor() {
         Class<M> declaringClass = constructor.getDeclaringClass();
-        boolean areBalancedCtorParamsAndFields = ReflectionUtil.areBalancedCtorParamsAndFields(constructor);
-        boolean isRecordDeclaringClass = ReflectionUtil.isRecord(declaringClass);
-        return areBalancedCtorParamsAndFields && isRecordDeclaringClass;
+        if (!declaringClass.isRecord()) {
+            return false;
+        }
+        Class<?>[] componentTypes = Arrays.stream(declaringClass.getRecordComponents())
+                .map(RecordComponent::getType)
+                .toArray(Class<?>[]::new);
+        return Arrays.equals(componentTypes, constructor.getParameterTypes());
     }
 }

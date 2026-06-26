@@ -84,7 +84,7 @@ public class ModelClass<ModelType> {
             Class<?> type,
             StaticInjectAnnotationProcessorFactory[] processorFactories,
             DefaultInjectionStrategy defaultInjectionStrategy) {
-        if (type.isInterface() || ReflectionUtil.isRecord(type)) {
+        if (type.isInterface() || type.isRecord()) {
             return new InjectableField[0];
         }
         List<Field> injectableFields = ReflectionUtil.collectInjectableFields(type);
