@@ -47,6 +47,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -67,8 +70,15 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
+// run with the implementation-lookup cache (SLING-12217) both enabled and disabled - resolving the alternate
+// implementation class via the picker is exactly the path that gets cached, so its result must not change
+@ParameterizedClass
+@ValueSource(booleans = {true, false})
 @ExtendWith(MockitoExtension.class)
 class ImplementsExtendsTest {
+
+    @Parameter
+    private boolean cacheImplementationLookups;
 
     @Mock
     private BundleContext bundleContext;
@@ -109,7 +119,7 @@ class ImplementsExtendsTest {
                     }
                 });
 
-        factory = AdapterFactoryTest.createModelAdapterFactory(bundleContext);
+        factory = AdapterFactoryTest.createModelAdapterFactory(bundleContext, cacheImplementationLookups);
         factory.injectors = Collections.singletonList(new ValueMapInjector());
         factory.implementationPickers = Collections.singletonList(firstImplementationPicker);
 

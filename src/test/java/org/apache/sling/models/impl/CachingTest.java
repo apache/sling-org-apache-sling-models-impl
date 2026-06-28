@@ -39,6 +39,9 @@ import org.apache.sling.servlethelpers.MockSlingJakartaHttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,8 +53,15 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+// run with the implementation-lookup cache (SLING-12217) both enabled and disabled - the model instance caching
+// behavior asserted here must be identical regardless of that optimization
+@ParameterizedClass
+@ValueSource(booleans = {true, false})
 @ExtendWith(MockitoExtension.class)
 class CachingTest {
+
+    @Parameter
+    private boolean cacheImplementationLookups;
 
     @Spy
     private MockSlingJakartaHttpServletRequest request = new MockSlingJakartaHttpServletRequest(null);
@@ -65,7 +75,7 @@ class CachingTest {
 
     @BeforeEach
     void setup() {
-        factory = AdapterFactoryTest.createModelAdapterFactory();
+        factory = AdapterFactoryTest.createModelAdapterFactory(cacheImplementationLookups);
         factory.injectors = Arrays.asList(new RequestAttributeInjector(), new ValueMapInjector());
         factory.adapterImplementations.addClassesAsAdapterAndImplementation(
                 CachedModel.class,

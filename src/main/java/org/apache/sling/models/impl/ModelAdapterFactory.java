@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,6 +55,7 @@ import org.apache.sling.api.adapter.Adaptable;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.ValidationStrategy;
 import org.apache.sling.models.annotations.ViaProviderType;
@@ -128,6 +130,30 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     private static final String REQUEST_MARKER_ATTRIBUTE = ModelAdapterFactory.class.getName() + ".RealRequest";
 
     private static final String REQUEST_CACHE_ATTRIBUTE = ModelAdapterFactory.class.getName() + ".AdapterCache";
+
+    // Implementation lookup cache:
+    // Resolving the implementation class for an adapter type is purely a function of the requested adapter type, the
+    // type of the adaptable and the resource type of the (possibly wrapped) resource. Only the picker-based path walks
+    // the resource super type hierarchy (repository access), so caching is limited to that path (see
+    // AdapterImplementations#requiresImplementationPickerLookup) and is scoped per ResourceResolver via its property
+    // map. This removes redundant lookups for the canCreateFromAdaptable/createModel pair and across components sharing
+    // a resource type, while leaving the cheap fast path untouched. The cache is a bounded LRU map (see
+    // implementationLookupCacheSize) so it cannot grow unbounded for long-lived resolvers or large numbers of distinct
+    // resource types. The cache key is "adaptableClass|adapterType|resourceType"; the concrete adaptable type is
+    // included so custom adaptables (e.g. request wrappers) do not share entries with unrelated ones.
+
+    /**
+     * Key under which the (bounded) implementation lookup cache is stored in the backing
+     * {@link ResourceResolver#getPropertyMap()} (see {@link #getImplementationTypeForAdapterType(Class, Object)}).
+     */
+    private static final String IMPLEMENTATION_LOOKUP_CACHE_KEY =
+            ModelAdapterFactory.class.getName() + ".ImplementationLookup";
+
+    /**
+     * Sentinel stored in the implementation lookup cache to memoize a negative result (no model implementation found
+     * for the given adaptable and resource type), so that repeated probing does not trigger the lookup again.
+     */
+    private static final Object NO_MODEL_IMPLEMENTATION = new Object();
 
     private final Logger log = LoggerFactory.getLogger(ModelAdapterFactory.class);
 
@@ -211,6 +237,12 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
     private ThreadLocal<ThreadInvocationCounter> invocationCountThreadLocal;
 
     private Map<Object, Map<Class<?>, SoftReference<Object>>> adapterCache;
+
+    /** Whether to cache model implementation class lookups per ResourceResolver, see SLING-12217. */
+    private boolean cacheImplementationLookups;
+
+    /** Maximum number of entries in the per-ResourceResolver implementation lookup cache, see SLING-12217. */
+    private int implementationLookupCacheSize;
 
     private SlingModelsScriptEngineFactory scriptEngineFactory;
 
@@ -324,20 +356,109 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
      *      href="http://sling.apache.org/documentation/bundles/models.html#specifying-an-alternate-adapter-class-since-sling-models-110">Specifying
      *      an Alternate Adapter Class</a>
      */
+    @SuppressWarnings("unchecked")
     private <ModelType> ModelClass<ModelType> getImplementationTypeForAdapterType(
             Class<ModelType> requestedType, Object adaptable) {
+        // only the (repository-accessing) picker-based path is cached
+        final boolean cacheable =
+                cacheImplementationLookups && adapterImplementations.requiresImplementationPickerLookup(requestedType);
+        final Map<String, Object> cache = cacheable ? getImplementationLookupCache(adaptable) : null;
+        final String cacheKey = cache != null ? getImplementationLookupCacheKey(requestedType, adaptable) : null;
+        if (cache != null && cacheKey != null) {
+            final Object cached = cache.get(cacheKey);
+            if (cached == NO_MODEL_IMPLEMENTATION) {
+                throw newNoImplementationException(requestedType, adaptable);
+            } else if (cached != null) {
+                return (ModelClass<ModelType>) cached;
+            }
+        }
+
         // lookup ModelClass wrapper for implementation type
         // additionally check if a different implementation class was registered for this adapter type
         // the adapter implementation is initially filled by the ModelPackageBundleList
         ModelClass<ModelType> modelClass =
                 this.adapterImplementations.lookup(requestedType, adaptable, this.implementationPickers);
+
+        if (cache != null && cacheKey != null) {
+            cache.put(cacheKey, modelClass != null ? modelClass : NO_MODEL_IMPLEMENTATION);
+        }
+
         if (modelClass != null) {
             log.debug("Using implementation type {} for requested adapter type {}", modelClass, requestedType);
             return modelClass;
         }
         // throw exception here
-        throw new ModelClassException("Could not yet find an adapter factory for the model " + requestedType
+        throw newNoImplementationException(requestedType, adaptable);
+    }
+
+    private ModelClassException newNoImplementationException(Class<?> requestedType, Object adaptable) {
+        return new ModelClassException("Could not yet find an adapter factory for the model " + requestedType
                 + " from adaptable " + adaptable.getClass());
+    }
+
+    /**
+     * Returns the (resolver scoped) cache for implementation lookups, lazily creating it in the
+     * {@link ResourceResolver#getPropertyMap() property map} of the resolver backing the given adaptable. Returns
+     * {@code null} if no resource (and hence no resolver) can be derived from the adaptable.
+     *
+     * <p>The cache is a bounded LRU map: even for long-lived (e.g. service) resolvers or pathological numbers of
+     * distinct resource types, it never holds more than {@link #implementationLookupCacheSize} entries, evicting the
+     * least recently used ones.
+     */
+    @SuppressWarnings("unchecked")
+    private @Nullable Map<String, Object> getImplementationLookupCache(Object adaptable) {
+        final Resource resource = getResourceFromAdaptable(adaptable);
+        if (resource == null) {
+            return null;
+        }
+        final ResourceResolver resolver = resource.getResourceResolver();
+        if (resolver == null) {
+            return null;
+        }
+        final Map<String, Object> propertyMap = resolver.getPropertyMap();
+        Map<String, Object> cache = (Map<String, Object>) propertyMap.get(IMPLEMENTATION_LOOKUP_CACHE_KEY);
+        if (cache == null) {
+            cache = createBoundedLookupCache(implementationLookupCacheSize);
+            propertyMap.put(IMPLEMENTATION_LOOKUP_CACHE_KEY, cache);
+        }
+        return cache;
+    }
+
+    private static Map<String, Object> createBoundedLookupCache(final int maxSize) {
+        return Collections.synchronizedMap(new LinkedHashMap<String, Object>(16, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<String, Object> eldest) {
+                return size() > maxSize;
+            }
+        });
+    }
+
+    /**
+     * Builds the cache key for an implementation lookup, or {@code null} if no resource type is available, in which case
+     * the lookup must not be cached.
+     */
+    private @Nullable String getImplementationLookupCacheKey(Class<?> requestedType, Object adaptable) {
+        final Resource resource = getResourceFromAdaptable(adaptable);
+        if (resource == null) {
+            return null;
+        }
+        final String resourceType = resource.getResourceType();
+        if (resourceType == null) {
+            return null;
+        }
+        return adaptable.getClass().getName() + '|' + requestedType.getName() + '|' + resourceType;
+    }
+
+    @SuppressWarnings("deprecation")
+    private @Nullable Resource getResourceFromAdaptable(Object adaptable) {
+        if (adaptable instanceof Resource resource) {
+            return resource;
+        } else if (adaptable instanceof SlingJakartaHttpServletRequest jakartaRequest) {
+            return jakartaRequest.getResource();
+        } else if (adaptable instanceof SlingHttpServletRequest javaxRequest) {
+            return javaxRequest.getResource();
+        }
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -1185,6 +1306,9 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
 
         this.adapterCache =
                 Collections.synchronizedMap(new WeakHashMap<Object, Map<Class<?>, SoftReference<Object>>>());
+
+        this.cacheImplementationLookups = configuration.cache_implementation_lookups();
+        this.implementationLookupCacheSize = Math.max(1, configuration.implementation_lookup_cache_size());
 
         BundleContext bundleContext = ctx.getBundleContext();
         this.queue = new ReferenceQueue<>();
