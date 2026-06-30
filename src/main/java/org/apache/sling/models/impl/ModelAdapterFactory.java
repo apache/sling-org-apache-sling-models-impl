@@ -412,15 +412,10 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             return null;
         }
         final ResourceResolver resolver = resource.getResourceResolver();
-        if (resolver == null) {
-            return null;
-        }
         final Map<String, Object> propertyMap = resolver.getPropertyMap();
-        Map<String, Object> cache = (Map<String, Object>) propertyMap.get(IMPLEMENTATION_LOOKUP_CACHE_KEY);
-        if (cache == null) {
-            cache = createBoundedLookupCache(implementationLookupCacheSize);
-            propertyMap.put(IMPLEMENTATION_LOOKUP_CACHE_KEY, cache);
-        }
+
+        Map<String, Object> cache = (Map<String, Object>) propertyMap.computeIfAbsent(
+                IMPLEMENTATION_LOOKUP_CACHE_KEY, v -> createBoundedLookupCache(implementationLookupCacheSize));
         return cache;
     }
 

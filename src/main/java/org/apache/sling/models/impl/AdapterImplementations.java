@@ -338,9 +338,6 @@ final class AdapterImplementations {
             return null;
         }
         ResourceResolver resolver = resource.getResourceResolver();
-        if (resolver == null) {
-            return null;
-        }
         final String originalResourceType = resource.getResourceType();
         Class<?> modelClass = getClassFromResourceTypeMap(originalResourceType, map, resolver);
         if (modelClass != null) {

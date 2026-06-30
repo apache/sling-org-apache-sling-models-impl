@@ -30,6 +30,7 @@ import java.util.Vector;
 
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.factory.ModelClassException;
@@ -276,6 +277,13 @@ class ImplementsExtendsTest {
 
         Resource res = mock(Resource.class);
         lenient().when(res.adaptTo(ValueMap.class)).thenReturn(vm);
+
+        ResourceResolver resolver = mock(ResourceResolver.class);
+        lenient().when(res.getResourceResolver()).thenReturn(resolver);
+        Map<String, Object> propertyMap = new HashMap<>();
+        lenient().when(resolver.getPropertyMap()).thenReturn(propertyMap);
+        lenient().when(res.getResourceType()).thenReturn("some/resourceType");
+
         return res;
     }
 }
