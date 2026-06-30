@@ -80,13 +80,23 @@ public class AdapterFactoryTest {
         return createModelAdapterFactory(bundleContext);
     }
 
+    public static ModelAdapterFactory createModelAdapterFactory(boolean cacheImplementationLookups) {
+        return createModelAdapterFactory(Mockito.mock(BundleContext.class), cacheImplementationLookups);
+    }
+
     public static ModelAdapterFactory createModelAdapterFactory(BundleContext bundleContext) {
+        return createModelAdapterFactory(bundleContext, true);
+    }
+
+    public static ModelAdapterFactory createModelAdapterFactory(
+            BundleContext bundleContext, boolean cacheImplementationLookups) {
         ComponentContext componentCtx = Mockito.mock(ComponentContext.class);
         when(componentCtx.getBundleContext()).thenReturn(bundleContext);
 
         ModelAdapterFactory factory = new ModelAdapterFactory();
         Converter c = Converters.standardConverter();
         Map<String, String> map = new HashMap<>();
+        map.put("cache.implementation.lookups", Boolean.toString(cacheImplementationLookups));
         ModelAdapterFactoryConfiguration config = c.convert(map).to(ModelAdapterFactoryConfiguration.class);
         factory.activate(componentCtx, config);
         factory.injectAnnotationProcessorFactories = Collections.emptyList();

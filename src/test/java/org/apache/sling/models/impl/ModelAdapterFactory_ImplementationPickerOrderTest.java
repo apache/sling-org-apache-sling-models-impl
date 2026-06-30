@@ -18,6 +18,7 @@
  */
 package org.apache.sling.models.impl;
 
+import java.util.Map;
 import java.util.function.IntSupplier;
 
 import org.apache.sling.api.SlingJakartaHttpServletRequest;
@@ -32,6 +33,9 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -41,9 +45,17 @@ import static org.osgi.framework.Constants.SERVICE_RANKING;
 /**
  * Tests in which order the implementation pickers are handled depending on service ranking.
  * For historic/backwards compatibility reasons, higher ranking value means lower priority (inverse to DS behavior).
+ *
+ * <p>Run with the implementation-lookup cache (SLING-12217) both enabled and disabled, as consulting the pickers is
+ * exactly the operation that gets cached - the picked implementation must be the same in both cases.
  */
+@ParameterizedClass
+@ValueSource(booleans = {true, false})
 @ExtendWith({OsgiContextExtension.class, MockitoExtension.class})
 class ModelAdapterFactory_ImplementationPickerOrderTest {
+
+    @Parameter
+    boolean cacheImplementationLookups;
 
     final OsgiContext context = new OsgiContext();
 
@@ -62,7 +74,8 @@ class ModelAdapterFactory_ImplementationPickerOrderTest {
     void setUp() {
         context.registerService(BindingsValuesProvidersByContext.class, bindingsValuesProvidersByContext);
         context.registerService(AdapterManager.class, adapterManager);
-        factory = context.registerInjectActivateService(ModelAdapterFactory.class);
+        factory = context.registerInjectActivateService(
+                ModelAdapterFactory.class, Map.of("cache.implementation.lookups", cacheImplementationLookups));
 
         ModelAdapterFactoryUtil.addModelsForPackage(context.bundleContext(), Model1.class, Model2.class);
     }

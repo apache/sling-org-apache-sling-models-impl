@@ -30,4 +30,21 @@ public @interface ModelAdapterFactoryConfiguration {
             name = "Cleanup Job Period",
             description = "Period in seconds at which OSGi service references from ThreadLocals will be cleaned up.")
     long cleanup_job_period() default 30l;
+
+    @AttributeDefinition(
+            name = "Cache Implementation Lookups",
+            description = "Cache the resolution of a model implementation class per adaptable type and resource type "
+                    + "within a ResourceResolver. This avoids redundant repository lookups when the same model is "
+                    + "resolved repeatedly (e.g. once for canCreateFromAdaptable and once for createModel, or across "
+                    + "many components sharing a resource type). Disable this if a custom ImplementationPicker selects "
+                    + "an implementation based on more than the resource type (e.g. selectors or request attributes).")
+    boolean cache_implementation_lookups() default true;
+
+    @AttributeDefinition(
+            name = "Implementation Lookup Cache Size",
+            description = "Maximum number of entries in the per-ResourceResolver implementation lookup cache (see "
+                    + "'Cache Implementation Lookups'). Once exceeded, the least recently used entries are evicted, so "
+                    + "that the cache cannot grow unbounded for long-lived resolvers or large numbers of distinct "
+                    + "resource types. Must be greater than 0.")
+    int implementation_lookup_cache_size() default 100;
 }

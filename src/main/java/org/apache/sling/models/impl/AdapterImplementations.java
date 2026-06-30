@@ -228,6 +228,25 @@ final class AdapterImplementations {
     }
 
     /**
+     * Checks whether resolving the implementation for the given adapter type requires consulting the
+     * {@link ImplementationPicker}s. This is only the case when the adapter type is not directly registered as its own
+     * model (the cheap, deterministic fast path in {@link #lookup}) but has one or more implementations registered with
+     * a different adapter class. Only that path can cause repository access (resource-type based picking) and is
+     * therefore worth caching, see SLING-12217.
+     *
+     * @param adapterType the adapter type to check
+     * @return {@code true} if a picker has to be consulted to resolve the implementation
+     */
+    public boolean requiresImplementationPickerLookup(Class<?> adapterType) {
+        String key = adapterType.getName();
+        if (modelClasses.containsKey(key)) {
+            return false;
+        }
+        ConcurrentNavigableMap<String, ModelClass<?>> implementations = adapterImplementations.get(key);
+        return implementations != null && !implementations.isEmpty();
+    }
+
+    /**
      * @param adapterType the type to check
      * @return {@code true} in case the given type is a model (may be with a different adapter class)
      */
