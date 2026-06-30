@@ -414,9 +414,8 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
         final ResourceResolver resolver = resource.getResourceResolver();
         final Map<String, Object> propertyMap = resolver.getPropertyMap();
 
-        Map<String, Object> cache = (Map<String, Object>) propertyMap.computeIfAbsent(
+        return (Map<String, Object>) propertyMap.computeIfAbsent(
                 IMPLEMENTATION_LOOKUP_CACHE_KEY, v -> createBoundedLookupCache(implementationLookupCacheSize));
-        return cache;
     }
 
     private static Map<String, Object> createBoundedLookupCache(final int maxSize) {
@@ -438,9 +437,6 @@ public class ModelAdapterFactory implements AdapterFactory, Runnable, ModelFacto
             return null;
         }
         final String resourceType = resource.getResourceType();
-        if (resourceType == null) {
-            return null;
-        }
         return adaptable.getClass().getName() + '|' + requestedType.getName() + '|' + resourceType;
     }
 
